@@ -3,13 +3,19 @@
 import React, { useState } from "react";
 import PlaceMapCard from "./PlaceMapCard";
 
-export interface Place {
+interface Place {
   id: number;
   name: string;
   image: string;
   lat: number;
   lng: number;
+  rating: number;
+  reviews: number;
+  type: string;
+  open: string;
+  close: string;
 }
+
 
 interface Props {
   places: Place[];
@@ -20,7 +26,6 @@ export default function PlacesSelector({ places }: Props) {
 
   return (
     <div className="flex flex-col lg:flex-row items-center justify-center gap-12 px-6 md:px-20 py-16">
-
       {/* Place List */}
       <div className="space-y-4 text-left w-full lg:w-1/3">
         <h2 className="text-2xl md:text-3xl font-bold mb-6">

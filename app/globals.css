@@ -1,2 +1,15 @@
+/* globals.css */
+
+/* Tailwind base import */
 @import "tailwindcss";
 
+/* Slick Carousel styles */
+@import "slick-carousel/slick/slick.css";
+@import "slick-carousel/slick/slick-theme.css";
+
+/* Add any of your custom global styles below */
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: white;
+}

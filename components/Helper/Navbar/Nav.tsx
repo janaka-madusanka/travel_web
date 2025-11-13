@@ -23,7 +23,7 @@ const Nav = ({ openNav }: Props) => {
   }, []);
 
   return (
-    <div className={`${navBg ? 'bg-blue-950 shadow-md' : 'bg-transparent'} transition-all duration-200 fixed top-0 w-full z-[1000]`}>
+    <div className={`${navBg ? 'bg-[#204e05] shadow-md' : 'bg-transparent'} transition-all duration-200 fixed top-0 w-full z-[1000]`}>
       <div className='flex items-center justify-between h-[10vh] sm:h-[12vh] w-[92%] md:w-[88%] xl:w-[80%] mx-auto'>
 
         {/* ✅ Logo – responsive text size */}
