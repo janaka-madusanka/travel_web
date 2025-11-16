@@ -23,26 +23,34 @@ export interface Props {
   place: Place;
 }
 
-
-const ChangeView: React.FC<{ center: [number, number]; zoom: number }> = ({ center, zoom }) => {
+/** Smooth map transition and vertical offset */
+const ChangeView: React.FC<{ center: [number, number]; zoom: number; offsetY?: number }> = ({ center, zoom, offsetY = 0 }) => {
   const map = useMap();
+
   useEffect(() => {
-    map.flyTo(center, zoom, { animate: true, duration: 1.2 });
-  }, [center, zoom, map]);
+    if (!map) return;
+
+    map.whenReady(() => {
+      map.setView(center, zoom, { animate: false });
+      if (offsetY !== 0) {
+        map.panBy([0, offsetY], { animate: true }); // shift map vertically
+      }
+    });
+  }, [center, zoom, offsetY, map]);
+
   return null;
 };
 
 const PlaceMap: React.FC<Props> = ({ place }) => {
-const customMarker = L.icon({
-  iconUrl: "/images/pin.png",    // your custom image
-  iconSize: [60, 60],            // width, height
-  iconAnchor: [20, 40],          // the point corresponding to marker position
-  popupAnchor: [0, -40],         // popup relative to icon
-});
+  const customMarker = L.icon({
+    iconUrl: "/images/pin.png",    
+    iconSize: [60, 60],            
+    iconAnchor: [20, 40],          
+    popupAnchor: [0, -40],         
+  });
 
   const googleMapsUrl = `https://www.google.com/maps?q=${place.lat},${place.lng}`;
-
-  const markerRef = useRef<L.Marker>(null);
+  const markerRef = useRef<L.Marker | null>(null);
 
   // Always keep popup open
   useEffect(() => {
@@ -62,7 +70,8 @@ const customMarker = L.icon({
       scrollWheelZoom={false}
       className="w-full h-full z-500"
     >
-      <ChangeView center={[place.lat, place.lng]} zoom={11} />
+      {/* Shift map down by 100px so marker appears lower in card */}
+      <ChangeView center={[place.lat, place.lng]} zoom={11} offsetY={-100} />
 
       <TileLayer
         url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"
@@ -85,15 +94,15 @@ const customMarker = L.icon({
             </div>
 
             <div style={{ padding: "10px 12px" }}>
-             <h3 style={{ fontSize: "15px", fontWeight: 600, marginBottom: 4 }}>
-              {place.name}
-            </h3>
-            <p style={{ fontSize: "12px", color: "#555" }}>
-              {place.rating} ★ ({place.reviews}) · {place.type}
-            </p>
-            <p style={{ fontSize: "12px", color: "#16a34a", marginBottom: "8px" }}>
-              Open: {place.open} · Closes: {place.close}
-            </p>
+              <h3 style={{ fontSize: "15px", fontWeight: 600, marginBottom: 4 }}>
+                {place.name}
+              </h3>
+              <p style={{ fontSize: "12px", color: "#555" }}>
+                {place.rating} ★ ({place.reviews}) · {place.type}
+              </p>
+              <p style={{ fontSize: "12px", color: "#16a34a", marginBottom: "8px" }}>
+                Open: {place.open} · Closes: {place.close}
+              </p>
 
               <a
                 href={googleMapsUrl}

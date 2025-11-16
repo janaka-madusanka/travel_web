@@ -13,3 +13,7 @@ body {
   font-family: 'Inter', sans-serif;
   background-color: white;
 }
+
+@import 'react-date-range/dist/styles.css';
+@import 'react-date-range/dist/theme/default.css';
+@import "flag-icons/css/flag-icons.min.css";
