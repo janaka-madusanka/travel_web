@@ -1,4 +1,4 @@
-import { navLinks } from '@/constant/constant'
+import { navLinks } from '@/constant/navLinks'
 import Link from 'next/link'
 import React from 'react'
 import { CgClose } from 'react-icons/cg'

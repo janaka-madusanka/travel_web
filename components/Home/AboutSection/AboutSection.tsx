@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import React from "react";
-import { aboutImages } from "@/data/data"; // ✅ Import your dataset
+import { aboutImages } from "@/data/imageGrid"; // ✅ Import your dataset
 
 // TypeScript interface for image card props
 interface ImageCardProps {
