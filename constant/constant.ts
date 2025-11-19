@@ -16,7 +16,7 @@ export const navLinks = [
    },
    {
      id:4,
-     url:'#',
+     url:'components/Places',
      label :'Places'
    },
    {
