@@ -75,21 +75,21 @@ export const roomsData = [
     capacity: 2,
   },
 
-  {
-    id: 5,
-    image: [
-      "/images/Rooms/R5.png",
-      "/images/Rooms/R2.png",
-      "/images/Rooms/R3.png",
-    ],
-    name: "Hilton Roma Luxury ",
-    location: "Vaticano Prati, Rome",
-    rating: 4.5,
-    reviews: "2,876",
-    price: "68",
+  // {
+  //   id: 5,
+  //   image: [
+  //     "/images/Rooms/R5.png",
+  //     "/images/Rooms/R2.png",
+  //     "/images/Rooms/R3.png",
+  //   ],
+  //   name: "Hilton Roma Luxury ",
+  //   location: "Vaticano Prati, Rome",
+  //   rating: 4.5,
+  //   reviews: "2,876",
+  //   price: "68",
 
-    beds: "2 Twin Beds",
-    features: ["Free WiFi", "Garden View", "A/C", "Room Heater"],
-    capacity: 2,
-  },
+  //   beds: "2 Twin Beds",
+  //   features: ["Free WiFi", "Garden View", "A/C", "Room Heater"],
+  //   capacity: 2,
+  // },
 ];
