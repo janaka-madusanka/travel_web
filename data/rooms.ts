@@ -5,11 +5,11 @@ export const roomsData = [
   {
     id: 1,
     image: [
-      "/images/Rooms/R1.png",
-      "/images/Rooms/R2.png",
-      "/images/Rooms/R3.png",
+      "/images/Rooms/IMG_9872.JPG",
+      "/images/Rooms/IMG_9891.JPG",
+      "/images/Rooms/IMG_9887.JPG",
     ],
-    name: "The Grand London ",
+    name: "Deluxe Double Room",
     location: "Westminster, London",
     rating: 4.6,
     reviews: "2,345",
@@ -24,11 +24,11 @@ export const roomsData = [
   {
     id: 2,
     image: [
-      "/images/Rooms/R2.png",
-      "/images/Rooms/R3.png",
-      "/images/Rooms/R4.png",
+      "/images/Rooms/IMG_9916.JPG",
+      "/images/Rooms/IMG_9911.JPG",
+      "/images/Rooms/IMG_9934.JPG",
     ],
-    name: "Barcelona Deluxe Room",
+    name: "Deluxe Triple Room",
     location: "Ciutat Vella, Barcelona",
     rating: 4.7,
     reviews: "1,912",
@@ -42,11 +42,11 @@ export const roomsData = [
   {
     id: 3,
     image: [
-      "/images/Rooms/R3.png",
-      "/images/Rooms/R4.png",
-      "/images/Rooms/R5.png",
+      "/images/Rooms/IMG_9896.JPG",
+      "/images/Rooms/IMG_9898.JPG",
+      "/images/Rooms/IMG_9899.JPG",
     ],
-    name: "Times Square Premium",
+    name: "Deluxe Family Room",
     location: "Manhattan, New York",
     rating: 4.9,
     reviews: "3,420",
@@ -60,11 +60,11 @@ export const roomsData = [
   {
     id: 4,
     image: [
-      "/images/Rooms/R4.png",
-      "/images/Rooms/R5.png",
-      "/images/Rooms/R1.png",
+      "/images/Rooms/IMG_9985.JPG",
+      "/images/Rooms/IMG_9976.JPG",
+      "/images/Rooms/IMG_9978.JPG",
     ],
-    name: "Hilton Roma Luxury ",
+    name: "Triple Room with Garden View",
     location: "Vaticano Prati, Rome",
     rating: 4.5,
     reviews: "2,876",

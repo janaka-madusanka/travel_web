@@ -1,20 +1,21 @@
 import React from 'react';
 import RoomList from '@/components/Rooms/RoomList';
-import ResponsiveNav from '@/components/Helper/Navbar/ResponsiveNav'; 
+//import ResponsiveNav from '@/components/Helper/Navbar/ResponsiveNav'; 
+import NewsletterSignup from '@/components/Home/NewsletterSignup/NewsletterSignup';
 
 const RoomsPage = () => {
   return (
     <div className="overflow-hidden">
       
       {/* Navigation */}
-      <ResponsiveNav />
+      {/* <ResponsiveNav /> */}
 
       {/* ============ HERO SECTION ============ */}
       <div className="relative h-[60vh] lg:h-[70vh] flex items-center justify-center">
         {/* Background Image */}
         <div 
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url('/images/Rooms/R3.png')" }}
+          style={{ backgroundImage: "url('/images/Rooms/IMG_0004.JPG')" }}
         >
           {/* Dark Overlay - Increased opacity for better text readablity */}
           <div className="absolute inset-0 bg-black/60"></div>
@@ -33,6 +34,8 @@ const RoomsPage = () => {
 
       {/* ============ ROOM LIST SECTION ============ */}
       <RoomList />
+
+      <NewsletterSignup />
 
     </div>
   );
