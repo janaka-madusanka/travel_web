@@ -233,6 +233,56 @@ export default function BookingSystem() {
           </div>
         </div>
 
+        {/* Tab Navigation */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+          {/* Contact Information Tab */}
+          <button
+            className={`${
+              isContactComplete 
+                ? 'bg-green-500 text-white' 
+                : 'bg-white text-gray-700 border-2 border-green-500'
+            } rounded-xl py-4 px-6 flex items-center gap-3 transition shadow-md hover:shadow-lg`}
+          >
+            <div className={`w-7 h-7 rounded-full ${
+              isContactComplete ? 'bg-white' : 'border-2 border-green-500'
+            } flex items-center justify-center flex-shrink-0`}>
+              <span className={`${
+                isContactComplete ? 'text-green-500' : 'text-gray-400'
+              } font-bold text-sm`}>
+                {isContactComplete ? '✓' : ''}
+              </span>
+            </div>
+            <span className="text-base font-semibold">Contact Information</span>
+          </button>
+
+          {/* Booking Information Tab */}
+          <button
+            className={`${
+              isBookingComplete 
+                ? 'bg-green-500 text-white' 
+                : 'bg-white text-gray-700 border-2 border-green-500'
+            } rounded-xl py-4 px-6 flex items-center gap-3 transition shadow-md hover:shadow-lg`}
+          >
+            <div className={`w-7 h-7 rounded-full ${
+              isBookingComplete ? 'bg-white' : 'border-2 border-green-500'
+            } flex items-center justify-center flex-shrink-0`}>
+              <span className={`${
+                isBookingComplete ? 'text-green-500' : 'text-gray-400'
+              } font-bold text-sm`}>
+                {isBookingComplete ? '✓' : ''}
+              </span>
+            </div>
+            <span className="text-base font-semibold">Booking Information</span>
+          </button>
+
+          {/* Summary Tab */}
+          <button
+            className="bg-green-500 text-white rounded-xl py-4 px-6 flex items-center justify-center gap-3 transition shadow-md hover:shadow-lg"
+          >
+            <span className="text-base font-semibold">Summary</span>
+          </button>
+        </div>
+
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Form */}
@@ -241,35 +291,38 @@ export default function BookingSystem() {
             {/* Contact Information Section */}
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
               {/* Contact Header */}
-              <div className={`${isContactComplete ? 'bg-green-500' : 'bg-green-500'} text-white py-3 px-6 flex items-center gap-3`}>
-                <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center">
-                  <span className="text-green-500 font-bold text-lg">✓</span>
-                </div>
-                <span className="text-lg font-semibold">Contact Information</span>
+              <div className="bg-white py-3 px-6 border-b">
+                <h3 className="text-base font-bold text-gray-800">Contact Details</h3>
               </div>
 
               {/* Contact Form */}
               <div className="p-6 space-y-4">
-                <h3 className="text-lg font-bold text-gray-800 mb-4">Contact Details</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <select
-                    value={formData.title}
-                    onChange={(e) => handleChange("title", e.target.value)}
-                    className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  >
-                    <option>Mr</option>
-                    <option>Mrs</option>
-                    <option>Ms</option>
-                    <option>Dr</option>
-                  </select>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="relative">
+                    <select
+                      value={formData.title}
+                      onChange={(e) => handleChange("title", e.target.value)}
+                      className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent appearance-none bg-white"
+                    >
+                      <option>Title</option>
+                      <option>Mr</option>
+                      <option>Mrs</option>
+                      <option>Ms</option>
+                      <option>Dr</option>
+                    </select>
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                      <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
 
                   <input
                     type="text"
                     placeholder="First Name"
                     value={formData.firstName}
                     onChange={(e) => handleChange("firstName", e.target.value)}
-                    className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   />
 
                   <input
@@ -277,49 +330,71 @@ export default function BookingSystem() {
                     placeholder="Last Name"
                     value={formData.lastName}
                     onChange={(e) => handleChange("lastName", e.target.value)}
-                    className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <input
-                    type="date"
-                    placeholder="Date Of Birth"
-                    value={formData.dateOfBirth}
-                    onChange={(e) => handleChange("dateOfBirth", e.target.value)}
-                    className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="relative">
+                    <input
+                      type="date"
+                      placeholder="Date Of Birth"
+                      value={formData.dateOfBirth}
+                      onChange={(e) => handleChange("dateOfBirth", e.target.value)}
+                      className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    />
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                      <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                  </div>
 
-                  <select
-                    value={formData.country}
-                    onChange={(e) => handleChange("country", e.target.value)}
-                    className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  >
-                    <option value="">Select Country</option>
-                    {countries.map(c => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <select
+                      value={formData.country}
+                      onChange={(e) => handleChange("country", e.target.value)}
+                      className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent appearance-none bg-white"
+                    >
+                      <option value="">Select Country</option>
+                      {countries.map(c => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                      <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <select
-                    value={formData.countryCode}
-                    onChange={(e) => handleChange("countryCode", e.target.value)}
-                    className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  >
-                    <option>+1</option>
-                    <option>+44</option>
-                    <option>+91</option>
-                    <option>+94</option>
-                  </select>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="relative">
+                    <select
+                      value={formData.countryCode}
+                      onChange={(e) => handleChange("countryCode", e.target.value)}
+                      className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent appearance-none bg-white"
+                    >
+                      <option>Country Code</option>
+                      <option>+1</option>
+                      <option>+44</option>
+                      <option>+91</option>
+                      <option>+94</option>
+                    </select>
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                      <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
 
                   <input
                     type="tel"
                     placeholder="Contact Number"
                     value={formData.contactNumber}
                     onChange={(e) => handleChange("contactNumber", e.target.value)}
-                    className="md:col-span-2 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="md:col-span-2 px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   />
                 </div>
 
@@ -328,25 +403,32 @@ export default function BookingSystem() {
                   placeholder="Email Address"
                   value={formData.email}
                   onChange={(e) => handleChange("email", e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 />
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <select
-                    value={formData.passportType}
-                    onChange={(e) => handleChange("passportType", e.target.value)}
-                    className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  >
-                    <option>Passport</option>
-                    <option>NIC</option>
-                  </select>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="relative">
+                    <select
+                      value={formData.passportType}
+                      onChange={(e) => handleChange("passportType", e.target.value)}
+                      className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent appearance-none bg-white"
+                    >
+                      <option>Passport</option>
+                      <option>NIC</option>
+                    </select>
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                      <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
 
                   <input
                     type="text"
                     placeholder="NIC Or Passport Number"
                     value={formData.passportNumber}
                     onChange={(e) => handleChange("passportNumber", e.target.value)}
-                    className="md:col-span-2 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="md:col-span-2 px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   />
                 </div>
               </div>
@@ -355,81 +437,113 @@ export default function BookingSystem() {
             {/* Booking Information Section */}
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
               {/* Booking Header */}
-              <div className={`${isBookingComplete ? 'bg-green-500' : 'bg-white border-2 border-green-500'} ${isBookingComplete ? 'text-white' : 'text-gray-700'} py-3 px-6 flex items-center gap-3`}>
-                <div className={`w-8 h-8 rounded-full ${isBookingComplete ? 'bg-white' : 'border-2 border-green-500'} flex items-center justify-center`}>
-                  <span className={`${isBookingComplete ? 'text-green-500' : 'text-gray-400'} font-bold text-lg`}>
-                    {isBookingComplete ? '✓' : '○'}
-                  </span>
-                </div>
-                <span className="text-lg font-semibold">Booking Information</span>
+              <div className="bg-white py-3 px-6 border-b">
+                <h3 className="text-base font-bold text-gray-800">Booking Details</h3>
               </div>
 
               {/* Booking Form */}
-              <div className="p-6 space-y-6">
-                <h3 className="text-lg font-bold text-gray-800 mb-4">Booking Details</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex items-center gap-2 px-4 py-3 border border-gray-300 rounded-lg bg-gray-50">
+              <div className="p-6 space-y-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="flex items-center px-3 py-2.5 text-sm border border-gray-300 rounded-md bg-gray-50">
                     <span className="text-gray-600">Room</span>
                   </div>
-                  <select
-                    value={formData.room}
-                    onChange={(e) => handleChange("room", e.target.value)}
-                    className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  >
-                    <option value="">The Grand London</option>
-                    {roomsData.map(room => (
-                      <option key={room.id} value={room.id}>{room.name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">From</label>
-                    <input
-                      type="date"
-                      value={formData.checkInDate}
-                      onChange={(e) => handleChange("checkInDate", e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">To</label>
-                    <input
-                      type="date"
-                      value={formData.checkOutDate}
-                      onChange={(e) => handleChange("checkOutDate", e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    />
+                  <div className="relative">
+                    <select
+                      value={formData.room}
+                      onChange={(e) => handleChange("room", e.target.value)}
+                      className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent appearance-none bg-white"
+                    >
+                      <option value="">The Grand London</option>
+                      {roomsData.map(room => (
+                        <option key={room.id} value={room.id}>{room.name}</option>
+                      ))}
+                    </select>
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                      <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Check-In</label>
-                    <input
-                      type="time"
-                      value={formData.checkInTime}
-                      onChange={(e) => handleChange("checkInTime", e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    />
+                    <label className="block text-xs font-medium text-gray-600 mb-1.5">From</label>
+                    <div className="relative">
+                      <input
+                        type="date"
+                        value={formData.checkInDate}
+                        onChange={(e) => handleChange("checkInDate", e.target.value)}
+                        className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        placeholder="Select Date"
+                      />
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                        <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                    </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Check-Out</label>
-                    <input
-                      type="time"
-                      value={formData.checkOutTime}
-                      onChange={(e) => handleChange("checkOutTime", e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    />
+                    <label className="block text-xs font-medium text-gray-600 mb-1.5">To</label>
+                    <div className="relative">
+                      <input
+                        type="date"
+                        value={formData.checkOutDate}
+                        onChange={(e) => handleChange("checkOutDate", e.target.value)}
+                        className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        placeholder="Select Date"
+                      />
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                        <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1.5">Check-In</label>
+                    <div className="relative">
+                      <input
+                        type="time"
+                        value={formData.checkInTime}
+                        onChange={(e) => handleChange("checkInTime", e.target.value)}
+                        className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        placeholder="Select Time"
+                      />
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                        <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1.5">Check-Out</label>
+                    <div className="relative">
+                      <input
+                        type="time"
+                        value={formData.checkOutTime}
+                        onChange={(e) => handleChange("checkOutTime", e.target.value)}
+                        className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        placeholder="Select Time"
+                      />
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                        <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
                 {/* Vehicle Section */}
-                <div className="border-t pt-6">
+                <div className="border-t pt-5">
                   <div className="flex items-center gap-3 mb-4">
-                    <span className="text-lg font-bold text-gray-800">Vehicle</span>
+                    <span className="text-base font-bold text-gray-800">Vehicle</span>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
                         type="checkbox"
@@ -438,7 +552,7 @@ export default function BookingSystem() {
                         className="sr-only peer"
                       />
                       <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
-                      <span className="ml-2 text-sm font-medium text-gray-700">
+                      <span className="ml-2 text-sm font-medium text-gray-700 bg-green-100 px-2 py-0.5 rounded">
                         {formData.vehicleNeeded ? "Yes" : "No"}
                       </span>
                     </label>
@@ -447,25 +561,32 @@ export default function BookingSystem() {
                   {formData.vehicleNeeded && (
                     <div className="space-y-4">
                       {formData.vehicles.map((vehicle, index) => (
-                        <div key={index} className="border border-gray-200 rounded-lg p-4">
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                            <select
-                              value={vehicle.type}
-                              onChange={(e) => updateVehicle(index, "type", e.target.value)}
-                              className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                            >
-                              <option value="">Select Vehicle</option>
-                              {vehicleData.map(v => (
-                                <option key={v.id} value={v.id}>{v.type}</option>
-                              ))}
-                            </select>
+                        <div key={index} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                            <div className="relative">
+                              <select
+                                value={vehicle.type}
+                                onChange={(e) => updateVehicle(index, "type", e.target.value)}
+                                className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent appearance-none bg-white"
+                              >
+                                <option value="">Select Vehicle</option>
+                                {vehicleData.map(v => (
+                                  <option key={v.id} value={v.id}>{v.type}</option>
+                                ))}
+                              </select>
+                              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                                <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                              </div>
+                            </div>
 
                             <input
                               type="text"
                               placeholder="Car"
                               value={vehicleData.find(v => v.id === Number(vehicle.type))?.type.split(' - ')[0] || ""}
                               readOnly
-                              className="px-4 py-3 border border-gray-300 rounded-lg bg-gray-50"
+                              className="px-3 py-2.5 text-sm border border-gray-300 rounded-md bg-white"
                             />
 
                             <div className="flex items-center gap-2">
@@ -474,35 +595,51 @@ export default function BookingSystem() {
                                 min="1"
                                 value={vehicle.quantity}
                                 onChange={(e) => updateVehicle(index, "quantity", Number(e.target.value))}
-                                className="w-16 px-3 py-3 border border-gray-300 rounded-lg text-center focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                className="w-20 px-3 py-2.5 text-sm border border-gray-300 rounded-md text-center focus:ring-2 focus:ring-green-500 focus:border-transparent"
                               />
                               <button
                                 onClick={() => removeVehicle(index)}
-                                className="text-red-500 hover:text-red-700 text-xl font-bold"
+                                className="text-gray-400 hover:text-red-500 text-xl font-bold ml-auto"
                               >
                                 ×
                               </button>
                             </div>
                           </div>
 
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">From</label>
-                              <input
-                                type="date"
-                                value={vehicle.startDate}
-                                onChange={(e) => updateVehicle(index, "startDate", e.target.value)}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                              />
+                              <label className="block text-xs font-medium text-gray-600 mb-1.5">From</label>
+                              <div className="relative">
+                                <input
+                                  type="date"
+                                  value={vehicle.startDate}
+                                  onChange={(e) => updateVehicle(index, "startDate", e.target.value)}
+                                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                  placeholder="Select Date"
+                                />
+                                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                                  <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                  </svg>
+                                </div>
+                              </div>
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">To</label>
-                              <input
-                                type="date"
-                                value={vehicle.endDate}
-                                onChange={(e) => updateVehicle(index, "endDate", e.target.value)}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                              />
+                              <label className="block text-xs font-medium text-gray-600 mb-1.5">To</label>
+                              <div className="relative">
+                                <input
+                                  type="date"
+                                  value={vehicle.endDate}
+                                  onChange={(e) => updateVehicle(index, "endDate", e.target.value)}
+                                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                  placeholder="Select Date"
+                                />
+                                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                                  <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                  </svg>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -510,7 +647,7 @@ export default function BookingSystem() {
 
                       <button
                         onClick={addVehicle}
-                        className="text-green-600 font-medium hover:text-green-700"
+                        className="text-gray-600 font-medium hover:text-green-600 text-sm"
                       >
                         + Add another Vehicle
                       </button>
@@ -526,7 +663,7 @@ export default function BookingSystem() {
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden sticky top-4">
               {/* Summary Header */}
               <div className="bg-green-500 text-white text-center py-4">
-                <h2 className="text-2xl font-bold">Summary</h2>
+                <h2 className="text-xl font-semibold">Summary</h2>
               </div>
 
               <div className="p-6 space-y-4">
