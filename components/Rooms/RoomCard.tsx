@@ -1,7 +1,7 @@
 "use client";
 import React from 'react';
 import Image from 'next/image';
-import { FaArrowRight, FaStar, FaMapMarkerAlt, FaBed, FaUserFriends, FaCheck } from 'react-icons/fa';
+import { FaArrowRight, FaStar, FaMapMarkerAlt, FaBed, FaUserFriends, FaCheck, FaVectorSquare } from 'react-icons/fa';
 
 // ✅ IMPORT FIX: Since you have 'export interface HotelRoom' in 'data/rooms.ts', 
 // we can import it directly here.
@@ -65,7 +65,7 @@ const RoomCard = ({ room, index }: Props) => {
             {room.location}
           </div>
 
-          {/* Capacity & Bed Info */}
+          {/* Capacity, Beds & Size Info*/}
           <div className="flex items-center gap-6 py-6 border-t border-b border-gray-100 mb-8">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-orange-50 rounded-full text-orange-600">
@@ -84,6 +84,16 @@ const RoomCard = ({ room, index }: Props) => {
               <div>
                 <p className="text-xs text-gray-400 uppercase">Bedding</p>
                 <p className="text-sm font-bold text-gray-800">{room.beds}</p>
+              </div>
+            </div>
+            <div className="w-[1px] h-10 bg-gray-100"></div>
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-50 rounded-full text-blue-600">
+                <FaVectorSquare />
+              </div>
+              <div>
+                <p className="text-xs text-gray-400 uppercase">Size</p>
+                <p className="text-sm font-bold text-gray-800">{room.size}</p>
               </div>
             </div>
           </div>

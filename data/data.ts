@@ -9,6 +9,7 @@ export interface HotelRoom {
   reviews: string;
   price: string;
   beds: string;
+  size: string;
   features: string[];
   capacity: number;
 }
