@@ -24,22 +24,31 @@ export interface Props {
 }
 
 /** Smooth map transition and vertical offset */
-const ChangeView: React.FC<{ center: [number, number]; zoom: number; offsetY?: number }> = ({ center, zoom, offsetY = 0 }) => {
+const ChangeView: React.FC<{ center: [number, number]; zoom: number; offsetY?: number }> = ({
+  center,
+  zoom,
+  offsetY = 0,
+}) => {
   const map = useMap();
 
   useEffect(() => {
     if (!map) return;
 
-    map.whenReady(() => {
+    // If offsetY is 0, just set view normally
+    if (offsetY === 0) {
       map.setView(center, zoom, { animate: false });
-      if (offsetY !== 0) {
-        map.panBy([0, offsetY], { animate: true }); // shift map vertically
-      }
-    });
+    } else {
+      // Compute pixel offset and set view instantly
+      const targetPoint = map.project(center, zoom).subtract([0, offsetY]);
+      const targetLatLng = map.unproject(targetPoint, zoom);
+      map.setView(targetLatLng, zoom, { animate: false });
+    }
   }, [center, zoom, offsetY, map]);
 
   return null;
 };
+
+
 
 const PlaceMap: React.FC<Props> = ({ place }) => {
   const customMarker = L.icon({
@@ -71,7 +80,7 @@ const PlaceMap: React.FC<Props> = ({ place }) => {
       className="w-full h-full z-500"
     >
       {/* Shift map down by 100px so marker appears lower in card */}
-      <ChangeView center={[place.lat, place.lng]} zoom={11} offsetY={-100} />
+      <ChangeView center={[place.lat, place.lng]} zoom={11} offsetY={100} />
 
       <TileLayer
         url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"
