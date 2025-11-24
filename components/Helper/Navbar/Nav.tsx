@@ -19,6 +19,11 @@ const Nav = ({ openNav }: Props) => {
   const bookingLink =
     navLinks.find((link) => link.url === "/booking")?.url || "/booking";
 
+const navBackground = windowWidth < 1023 && scrolled ? "bg-white" : "bg-transparent";
+
+
+  
+
   // Detect scroll
   useEffect(() => {
     const handleScroll = () => {
@@ -49,18 +54,24 @@ const Nav = ({ openNav }: Props) => {
   };
 
   const linkTextClass = scrolled ? "text-[#003b14]" : "text-white";
+
   const linkHoverClass = scrolled
     ? "border-[#003b14] text-[#003b14] hover:bg-[#003b14] hover:text-white"
     : "border-white text-white hover:bg-white hover:text-black";
 
   return (
     <motion.div
-      className="fixed top-0 left-0 w-full z-[1000] transition-all duration-300"
+      className={`fixed top-0 left-0 w-full z-[1000] transition-all duration-300 ${navBackground}`}
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      transition={{ duration: 0.6 }}
+      transition={{ duration: 0.8 }}
+
+      
     >
+ 
+      
       <div className="relative z-10 flex items-center justify-between h-[10vh] sm:h-[12vh] w-[92%] md:w-[88%] xl:w-[80%] mx-auto transition-colors duration-300">
+        
 
         {/* Logo */}
         <motion.div
@@ -149,6 +160,8 @@ const Nav = ({ openNav }: Props) => {
           />
         </svg>
       </div>
+
+      
     </motion.div>
   );
 };
