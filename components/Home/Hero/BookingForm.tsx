@@ -15,15 +15,16 @@ const InputField: React.FC<InputFieldProps> = ({
   icon: Icon,
 }) => {
   return (
-    <div className="flex items-center gap-3 px-4 py-3 bg-white/5 rounded-lg w-full sm:flex-1 min-w-0">
-      {Icon && <Icon className="w-5 h-5 text-gray-400 flex-shrink-0" />}
-      <div className="flex flex-col flex-1 min-w-0 ">
-        <label className="text-xs text-gray-400 mb-1">{label}</label>
+    <div className="flex items-center gap-3 px-4 py-3 bg-white/10 backdrop-blur-lg rounded-xl w-full">
+      {Icon && <Icon className="w-5 h-5 text-gray-200" />}
+
+      <div className="flex flex-col flex-1 min-w-0">
+        <label className="text-xs text-gray-300 mb-1">{label}</label>
 
         {type === "select" ? (
           <select className="bg-transparent text-white outline-none text-sm cursor-pointer w-full">
             {options.map((opt, i) => (
-              <option key={i} value={opt} className="bg-gray-800">
+              <option key={i} value={opt} className="bg-gray-900">
                 {opt}
               </option>
             ))}
@@ -43,32 +44,39 @@ const BookingForm: React.FC = () => {
   return (
     <div className="flex items-center justify-center px-4 w-full">
       <div
-className="
-    w-full max-w-4xl
-    bg-white/10 backdrop-blur-lg rounded-2xl
-    p-3 sm:p-4 md:p-6 lg:p-8
-    flex flex-col 
-    gap-2
-    xl:flex-row xl:items-center xl:gap-6
-  "
-
+        className="
+          w-full max-w-5xl
+          bg-white/10 backdrop-blur-xl rounded-2xl
+          p-4
+          
+          flex flex-col gap-4
+          lg:flex-row lg:flex-wrap lg:items-center 
+        "
       >
-        <InputField label="Check in" type="date" icon={Calendar} />
-        <InputField label="Checkout" type="date" icon={Calendar} />
-        <InputField
-          label="Guests"
-          type="select"
-          options={["1 Guest", "2 Guests", "3 Guests", "4 Guests"]}
-          icon={Users}
-        />
+        {/* Inputs */}
+        <div className="flex-1 min-w-[200px] ">
+          <InputField label="Check in" type="date" icon={Calendar} />
+        </div>
 
-        {/* Button responsive behavior */}
+        <div className="flex-1 min-w-[200px]">
+          <InputField label="Checkout" type="date" icon={Calendar} />
+        </div>
+
+        <div className="flex-1 min-w-[200px]">
+          <InputField
+            label="Guests"
+            type="select"
+            icon={Users}
+            options={["1 Guest", "2 Guests", "3 Guests", "4 Guests"]}
+          />
+        </div>
+
+        {/* Button */}
         <button
           className="
             bg-green-400 hover:bg-green-500 text-gray-900 font-semibold
-            px-8 py-3 rounded-lg transition
-            whitespace-nowrap 
-            w-full sm:w-auto
+            px-8 py-3 rounded-xl transition
+            w-full lg:w-auto
           "
         >
           Checkout

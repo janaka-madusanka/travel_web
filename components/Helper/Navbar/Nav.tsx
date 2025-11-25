@@ -89,7 +89,7 @@ const navBackground = windowWidth < 1023 && scrolled ? "bg-white" : "bg-transpar
         {/* Desktop Nav Links */}
         <div
           className="hidden lg:flex 
-    items-center justify-center absolute left-1/2 -translate-x-[45%]"
+    items-center justify-center absolute left-1/2 -translate-x-[50%]"
           style={{
             gap: scrolled ? "3rem" : "1.5rem",
           }}
