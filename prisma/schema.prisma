@@ -9,6 +9,7 @@ datasource db {
 }
 
 // ------------------ ENUMS ------------------
+
 enum ACType {
   AC
   NonAC
@@ -26,7 +27,20 @@ enum VehicleType {
   SUV
 }
 
+// Bedroom types
+enum BedType {
+  SINGLE
+  DOUBLE
+  QUEEN
+  KING
+  TWIN
+  DOUBLE_ROOM
+  TRIPLE
+  FAMILY
+}
+
 // ------------------ TABLES ------------------
+
 model Admin {
   id        Int      @id @default(autoincrement())
   username  String   @unique
@@ -38,19 +52,76 @@ model Admin {
 model Room {
   id        Int       @id @default(autoincrement())
   name      String
-  beds      Int
-  adults    Int
-  ac        ACType
-  wifi      YesNo
+  cost      Float
+  offer     Float?         // optional discount
   size      String
+
+  // basic amenities
+  ac           ACType
+  wifi         YesNo
+  fan          YesNo
+  balcony      YesNo
+  gardenView   YesNo
+  tv           YesNo
+  iron         YesNo
+  locker       YesNo
+  parking      YesNo
+  sittingArea  YesNo
+  dryingRack   YesNo
+  clothRack    YesNo
+
+  // media
   img1      Bytes?
   img2      Bytes?
   img3      Bytes?
   img4      Bytes?
   video     Bytes?     // <15MB
+
   createdAt DateTime   @default(now())
 
-  bookings  Booking[]
+  // relations
+  bedrooms   Bedroom[]
+  bathrooms  Bathroom[]
+  kitchen    Kitchen?
+  bookings   Booking[]
+}
+
+model Bedroom {
+  id        Int      @id @default(autoincrement())
+  room      Room     @relation(fields: [roomId], references: [id])
+  roomId    Int
+
+  bedType   BedType
+  count     Int      // how many beds of this type
+}
+
+model Bathroom {
+  id            Int      @id @default(autoincrement())
+  room          Room     @relation(fields: [roomId], references: [id])
+  roomId        Int
+
+  shower        YesNo
+  slipper       YesNo
+  soap          YesNo
+  bidet         YesNo
+  towels        YesNo
+  toiletPaper   YesNo
+  hotWater      YesNo
+  privateBathroom YesNo
+}
+
+model Kitchen {
+  id            Int      @id @default(autoincrement())
+  room          Room     @relation(fields: [roomId], references: [id])
+  roomId        Int      @unique
+
+  diningTable    YesNo
+  gasCooker      YesNo
+  riceCooker     YesNo
+  woodStove      YesNo
+  fridge         YesNo
+  electricKettle YesNo
+  waterBottle    YesNo
 }
 
 model Customer {
