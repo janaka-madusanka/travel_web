@@ -6,12 +6,12 @@ export const navLinks = [
    },
    {
      id:2,
-     url:'/rooms',
+     url:'#',
      label :'Rooms'
    },
    {
      id:3,
-     url:'/services',
+     url:'#',
      label :'Services'
    },
    {
