@@ -5,6 +5,7 @@ import Image from "next/image";
 import Slider from "react-slick";
 import { FaBed, FaUsers } from "react-icons/fa";
 import { motion } from "framer-motion";
+import Link from "next/link"; // ✅ Import Link
 import svgpath from "@/components/Helper/Navbar/svgpath";
 
 interface RoomCardProps {
@@ -13,7 +14,7 @@ interface RoomCardProps {
     image: string[];
     name: string;
     beds: string;
-    capacity: string | number; // Accept both
+    capacity: string | number;
     price: string;
   };
   index: number;
@@ -102,12 +103,13 @@ const RoomImageSection: React.FC<{
 
 // ==================== DATA SECTION ====================
 const RoomDataSection: React.FC<{
+  id: number; // ✅ Added ID to props
   name: string;
   beds: string;
   capacity: string | number;
   price: string;
-}> = ({ name, beds, capacity, price }) => {
-  // Format capacity to handle both string and number
+}> = ({ id, name, beds, capacity, price }) => {
+  
   const formattedCapacity = typeof capacity === 'number' 
     ? `${capacity} Adult${capacity > 1 ? 's' : ''}` 
     : capacity;
@@ -116,7 +118,13 @@ const RoomDataSection: React.FC<{
     <div className="mt-4 flex gap-4 bg-transparent">
       {/* Left Column - Room Name and Details */}
       <div className="flex-1 flex flex-col gap-2.5">
-        <h3 className="text-lg font-semibold text-gray-800">{name}</h3>
+        
+        {/* ✅ Room Name wrapped in Link */}
+        <Link href={`/rooms#room-${id}`} scroll={true}>
+          <h3 className="text-lg font-semibold text-gray-800 hover:text-orange-600 transition-colors cursor-pointer">
+            {name}
+          </h3>
+        </Link>
         
         {/* Bed & Capacity Info */}
         <div className="flex flex-col gap-1.5 text-sm text-gray-500">
@@ -145,7 +153,6 @@ const RoomCard: React.FC<RoomCardProps> = ({ room, index }) => {
   const [isFavorited, setIsFavorited] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
 
-  // Safety check
   if (!room || !room.image || room.image.length === 0) {
     return null;
   }
@@ -158,7 +165,7 @@ const RoomCard: React.FC<RoomCardProps> = ({ room, index }) => {
       transition={{ duration: 0.6, delay: index * 0.1 }}
       className="w-[320px] shrink-0 relative"
     >
-      {/* Image Section - Box with curved edges and shadow */}
+      {/* Image Section */}
       <RoomImageSection
         images={room.image}
         name={room.name}
@@ -168,8 +175,9 @@ const RoomCard: React.FC<RoomCardProps> = ({ room, index }) => {
         setActiveSlide={setActiveSlide}
       />
 
-      {/* Data Section - Transparent background */}
+      {/* Data Section */}
       <RoomDataSection
+        id={room.id} // ✅ Passing ID to the data section
         name={room.name}
         beds={room.beds}
         capacity={room.capacity}

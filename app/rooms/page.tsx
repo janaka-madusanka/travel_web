@@ -27,7 +27,7 @@ const RoomsPage = () => {
         {/* Optional: You can remove 'pt-[10vh]' if you want the text perfectly centered in the screen. 
             I kept it here to ensure it doesn't clash with your top Navbar. */}
         <div className="relative z-10 text-center px-4 max-w-4xl mx-auto pt-[10vh]">
-          <p className="text-white/90 text-sm sm:text-base font-bold uppercase tracking-[0.3em] mb-6">
+          <p className="text-white/90 text-sm sm:text-base font-sfpro font-bold uppercase tracking-[0.3em] mb-6">
             The Ultimate Escape
           </p>
           <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-serif text-white font-medium mb-8 leading-tight drop-shadow-lg">
