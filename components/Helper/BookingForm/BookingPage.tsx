@@ -5,6 +5,9 @@ import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 import Select from "react-select";
 import { getData } from "country-list";
+import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
+
 
 interface Vehicle {
   type: string;
@@ -133,20 +136,24 @@ export default function BookingSystem() {
   });
 
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [detectedCountry, setDetectedCountry] = useState<string>("GB");
 
-  useEffect(() => {
-    fetch("https://ipapi.co/json/")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.country_code) {
-          setFormData((prev) => ({
-            ...prev,
-            country: data.country_name || "",
-          }));
-        }
-      })
-      .catch((err) => console.log("Could not detect country:", err));
-  }, []);
+
+useEffect(() => {
+  fetch("https://ipapi.co/json/")
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.country_code) {
+        setFormData((prev) => ({
+          ...prev,
+          country: data.country_name || "",
+        }));
+        // Set the detected country code for PhoneInput
+        setDetectedCountry(data.country_code || "GB");
+      }
+    })
+    .catch((err) => console.log("Could not detect country:", err));
+}, []);
 
   const selectedRoom = roomsData.find((r) => r.id === Number(formData.room));
 
@@ -256,38 +263,25 @@ export default function BookingSystem() {
     label: country.name,
   }));
 
-  // Update the useEffect for auto-detecting country
-  useEffect(() => {
-    fetch("https://ipapi.co/json/")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.country_code) {
-          setFormData((prev) => ({
-            ...prev,
-            country: data.country_name || "",
-          }));
-        }
-      })
-      .catch((err) => console.log("Could not detect country:", err));
-  }, []);
+  
 
   return (
-    <div className="min-h-screen w-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen w-full overflow-x-hidden bg-gray-50 py-4 px-2 md:px-4">
+      <div className="max-w-5xl mx-auto">
         {/* Header */}
-        <h1 className="text-4xl font-bold text-center mt-9 mb-8">
+        <h1 className="text-2xl md:text-3xl font-semibold text-center mt-8 mb-4">
           Booking Details
         </h1>
 
         {/* Room Description Section */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-[400px]">
+        <div className="bg-white rounded-xl shadow-lg p-4 mb-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-[300px]">
             {/* Room Image */}
             <div className="relative">
               <img
                 src={selectedRoom ? selectedRoom.image : hotelInfo.image}
                 alt={selectedRoom ? selectedRoom.name : "Hotel"}
-                className="w-full h-96 object-cover rounded-xl"
+                className="w-full h-64 md:h-80 object-cover rounded-lg"
               />
               {selectedRoom && (
                 <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
@@ -307,22 +301,26 @@ export default function BookingSystem() {
 
             {/* Room Details */}
             <div>
-              <h2 className="text-3xl font-bold text-green-600 mb-2">
+              <h2 className="text-xl md:text-2xl font-bold text-green-700 mb-1">
                 Room Description
               </h2>
-              <h3 className="text-2xl font-semibold text-green-500 mb-6">
+              <h3 className="text-lg md:text-xl text-green-500 mb-3">
                 {selectedRoom ? selectedRoom.name : "The Grand London"}
               </h3>
 
               {selectedRoom ? (
-                <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-4 border-b pb-2 mb-2">
-                    <span className="font-semibold text-gray-700">Feature</span>
-                    <span className="font-semibold text-gray-700">Detail</span>
+                <div className="space-y-2 pl-3 pr-4">
+                  <div className="grid grid-cols-2 gap-6 border-b pb-1 mb-1">
+                    <span className="font-semibold text-gray-700 text-sm">
+                      Feature
+                    </span>
+                    <span className="font-semibold text-gray-700 text-sm">
+                      Detail
+                    </span>
                   </div>
-                  <div className="min-h-60">
+                  <div className="min-h-40">
                     {selectedRoom.features.map((feature, idx) => (
-                      <div key={idx} className="grid grid-cols-2 gap-4">
+                      <div key={idx} className="grid grid-cols-2 gap-6 text-sm">
                         <span className="text-gray-600">{feature.name}</span>
                         <span className="text-gray-800">{feature.detail}</span>
                       </div>
@@ -337,29 +335,29 @@ export default function BookingSystem() {
         </div>
 
         {/* Tab Navigation */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-4">
           {/* Contact Information Tab */}
           <button
             className={`${
               isContactComplete
                 ? "bg-green-500 text-white"
                 : "bg-white text-gray-700 border-2 border-green-500"
-            } rounded-xl py-4 px-6 flex items-center gap-3 transition shadow-md hover:shadow-lg`}
+            } rounded-lg py-3 px-4 flex items-center gap-2 transition shadow-md hover:shadow-lg`}
           >
             <div
-              className={`w-7 h-7 rounded-full ${
+              className={`w-6 h-6 rounded-full ${
                 isContactComplete ? "bg-white" : "border-2 border-green-500"
               } flex items-center justify-center flex-shrink-0`}
             >
               <span
                 className={`${
                   isContactComplete ? "text-green-500" : "text-gray-400"
-                } font-bold text-sm`}
+                } font-bold text-xs`}
               >
-                {isContactComplete ? "✓" : ""}
+                {isContactComplete ? <CheckIcon fontSize="small" /> : null}
               </span>
             </div>
-            <span className="text-base font-semibold">Contact Information</span>
+            <span className="text-sm font-semibold">Contact Information</span>
           </button>
 
           {/* Booking Information Tab */}
@@ -368,24 +366,23 @@ export default function BookingSystem() {
               isBookingComplete
                 ? "bg-green-500 text-white"
                 : "bg-white text-gray-700 border-2 border-green-500"
-            } rounded-xl py-4 px-6 flex items-center gap-3 transition shadow-md hover:shadow-lg`}
+            } rounded-lg py-3 px-4 flex items-center gap-2 transition shadow-md hover:shadow-lg`}
           >
             <div
-              className={`w-7 h-7 rounded-full ${
+              className={`w-6 h-6 rounded-full ${
                 isBookingComplete ? "bg-white" : "border-2 border-green-500"
               } flex items-center justify-center flex-shrink-0`}
             >
               <span
                 className={`${
                   isBookingComplete ? "text-green-500" : "text-gray-400"
-                } font-bold text-sm`}
+                } font-bold text-xs`}
               >
-                {isBookingComplete ? "✓" : ""}
+                {isBookingComplete ? <CheckIcon fontSize="small" /> : null}
               </span>
             </div>
-            <span className="text-base font-semibold">Booking Information</span>
+            <span className="text-sm font-semibold">Booking Information</span>
           </button>
-
           {/* Summary Tab */}
           {/*  <button className="bg-green-500 text-white rounded-xl py-4 px-6 flex items-center justify-center gap-3 transition shadow-md hover:shadow-lg">
             <span className="text-base font-semibold">Summary</span>
@@ -397,16 +394,16 @@ export default function BookingSystem() {
           {/* Left Column - Form */}
           <div className="lg:col-span-2 space-y-6">
             {/* Contact Information Section */}
-            <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
               {/* Contact Header */}
-              <div className="bg-white py-3 px-6 border-b">
-                <h3 className="text-base font-bold text-gray-800">
+              <div className="bg-white py-2 px-4 border-b">
+                <h3 className="text-sm font-bold text-gray-800">
                   Contact Details
                 </h3>
               </div>
 
               {/* Contact Form */}
-              <div className="p-6 space-y-4">
+              <div className="p-4 space-y-3">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <div className="relative">
                     <select
@@ -442,7 +439,7 @@ export default function BookingSystem() {
                     placeholder="First Name"
                     value={formData.firstName}
                     onChange={(e) => handleChange("firstName", e.target.value)}
-                    className="px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="px-2.5 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   />
 
                   <input
@@ -571,16 +568,16 @@ export default function BookingSystem() {
                   />
                 </div> */}
                 <div className="flex">
-                  <PhoneInput
-                    international
-                    defaultCountry="GB"
-                    value={phoneNumber}
-                    onChange={(value) => {
-                      setPhoneNumber(value || "");
-                      handleChange("contactNumber", value || "");
-                    }}
-                    className="flex w-full [&_.PhoneInputCountry]:px-3 [&_.PhoneInputCountry]:py-2.5 [&_.PhoneInputCountry]:border [&_.PhoneInputCountry]:border-r-0 [&_.PhoneInputCountry]:border-gray-300 [&_.PhoneInputCountry]:rounded-l-md [&_.PhoneInputCountry]:bg-white [&_.PhoneInputInput]:flex-1 [&_.PhoneInputInput]:px-3 [&_.PhoneInputInput]:py-2.5 [&_.PhoneInputInput]:text-sm [&_.PhoneInputInput]:border [&_.PhoneInputInput]:border-gray-300 [&_.PhoneInputInput]:rounded-r-md [&_.PhoneInputInput:focus]:ring-2 [&_.PhoneInputInput:focus]:ring-green-500 [&_.PhoneInputInput:focus]:border-transparent [&_.PhoneInputInput]:outline-none"
-                  />
+<PhoneInput
+  international
+  defaultCountry={detectedCountry}
+  value={phoneNumber}
+  onChange={(value) => {
+    setPhoneNumber(value || "");
+    handleChange("contactNumber", value || "");
+  }}
+  className="flex w-full [&_.PhoneInputCountry]:px-3 [&_.PhoneInputCountry]:py-2.5 [&_.PhoneInputCountry]:border [&_.PhoneInputCountry]:border-gray-300 [&_.PhoneInputCountry]:rounded-l-md [&_.PhoneInputCountry]:bg-white [&_.PhoneInputInput]:flex-1 [&_.PhoneInputInput]:px-3 [&_.PhoneInputInput]:py-2.5 [&_.PhoneInputInput]:text-sm [&_.PhoneInputInput]:border [&_.PhoneInputInput]:border-gray-300 [&_.PhoneInputInput]:rounded-r-md [&_.PhoneInputInput:focus]:ring-2 [&_.PhoneInputInput:focus]:ring-green-500 [&_.PhoneInputInput:focus]:border-transparent [&_.PhoneInputInput]:outline-none"
+/>
                 </div>
 
                 <input
@@ -634,16 +631,16 @@ export default function BookingSystem() {
             </div>
 
             {/* Booking Information Section */}
-            <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
               {/* Booking Header */}
-              <div className="bg-white py-3 px-6 border-b">
-                <h3 className="text-base font-bold text-gray-800">
+              <div className="bg-white py-2 px-4 border-b">
+                <h3 className="text-sm font-bold text-gray-800">
                   Booking Details
                 </h3>
               </div>
 
               {/* Booking Form */}
-              <div className="p-6 space-y-5">
+              <div className="p-4 space-y-3">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div className="flex items-center px-3 py-2.5 text-sm border border-gray-300 rounded-md bg-gray-50">
                     <span className="text-gray-600">Room</span>
@@ -756,7 +753,7 @@ export default function BookingSystem() {
                         onChange={(e) =>
                           handleChange("checkInTime", e.target.value)
                         }
-                        className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        className="w-full px-3 py-2.5 mb-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
                         placeholder="Select Time"
                       />
                       {/*  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
@@ -787,7 +784,7 @@ export default function BookingSystem() {
                         onChange={(e) =>
                           handleChange("checkOutTime", e.target.value)
                         }
-                        className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        className="w-full px-3 py-2.5 mb-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
                         placeholder="Select Time"
                       />
                       {/*  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
@@ -812,9 +809,9 @@ export default function BookingSystem() {
                 {/* Vehicle Section */}
                 <div className="border-t pt-5">
                   <div className="flex items-center gap-3 mb-4">
-                    <span className="text-base font-bold text-gray-800">
+                    <h3 className="text-sm font-bold text-gray-800">
                       Vehicle
-                    </span>
+                    </h3>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
                         type="checkbox"
@@ -901,7 +898,7 @@ export default function BookingSystem() {
                                 onClick={() => removeVehicle(index)}
                                 className="text-gray-400 hover:text-red-500 text-xl font-bold ml-auto"
                               >
-                                ×
+                                  <CloseIcon fontSize="small" />
                               </button>
                             </div>
                           </div>
@@ -995,137 +992,138 @@ export default function BookingSystem() {
           </div>
 
           {/* Right Column - Summary */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl shadow-lg overflow-hidden sticky top-4">
-              {/* Summary Header */}
-              <div className="bg-green-500 text-white text-center py-4">
-                <h2 className="text-xl font-semibold">Summary</h2>
-              </div>
+  {/* Right Column - Summary */}
+<div className="lg:col-span-1">
+  <div className="bg-white rounded-xl shadow-lg overflow-hidden sticky top-4">
+    {/* Summary Header */}
+    <div className="bg-green-500 text-white text-center py-3">
+      <h2 className="text-lg font-semibold">Summary</h2>
+    </div>
 
-              <div className="p-6 space-y-4">
-                {/* Room Name */}
-                <div className="bg-gray-100 rounded-lg p-3 text-center">
-                  <p className="text-gray-700 font-medium text-sm">
-                    {selectedRoom
-                      ? `Scenic Cottage - ${selectedRoom.name} Room`
-                      : "Scenic Cottage - The Grand London Room"}
-                  </p>
-                </div>
+    <div className="p-4 space-y-3">
+      {/* Room Name */}
+      <div className="bg-gray-100 rounded-lg p-2.5 text-center">
+        <p className="text-gray-700 font-medium text-sm truncate">
+          {selectedRoom
+            ? `Scenic Cottage - ${selectedRoom.name} Room`
+            : "Scenic Cottage - The Grand London Room"}
+        </p>
+      </div>
 
-                {/* Guest Details */}
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">
-                      {formData.title}. {formData.firstName} {formData.lastName}
-                    </span>
-                    <span className="text-gray-800 font-medium">
-                      {formData.country}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Contact :</span>
-                    <span className="text-gray-800">
-                      {formData.countryCode} {formData.contactNumber}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Email Address :</span>
-                    <span className="text-gray-800 text-xs break-all">
-                      {formData.email}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Passport Number :</span>
-                    <span className="text-gray-800">
-                      {formData.passportNumber}
-                    </span>
-                  </div>
-                </div>
+      {/* Guest Details */}
+      <div className="space-y-2 text-sm">
+        <div className="flex justify-between gap-2">
+          <span className="text-gray-600 truncate">
+            {formData.title}. {formData.firstName} {formData.lastName}
+          </span>
+          <span className="text-gray-800 font-medium truncate flex-shrink-0">
+            {formData.country}
+          </span>
+        </div>
+        <div className="flex justify-between gap-2">
+          <span className="text-gray-600 flex-shrink-0">Contact:</span>
+          <span className="text-gray-800 truncate text-right">
+         {formData.contactNumber}
+          </span>
+        </div>
+        <div className="flex justify-between gap-2">
+          <span className="text-gray-600 flex-shrink-0">Email:</span>
+          <span className="text-gray-800 truncate text-right">
+            {formData.email}
+          </span>
+        </div>
+        <div className="flex justify-between gap-2">
+          <span className="text-gray-600 flex-shrink-0">Passport:</span>
+          <span className="text-gray-800 truncate text-right">
+            {formData.passportNumber}
+          </span>
+        </div>
+      </div>
 
-                <div className="border-t-2 border-green-500 my-4"></div>
+      <div className="border-t-2 border-green-500 my-3"></div>
 
-                {/* Pricing */}
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                      <span className="text-gray-700">Room Charge</span>
-                      {roomCost > 0 && (
-                        <span className="bg-gray-300 text-gray-700 text-xs px-2 py-1 rounded-full">
-                          {Math.ceil(
-                            (new Date(formData.checkOutDate) -
-                              new Date(formData.checkInDate)) /
-                              (1000 * 60 * 60 * 24)
-                          )}{" "}
-                          days
-                        </span>
-                      )}
-                    </div>
-                    <span className="text-gray-800 font-medium">
-                      USD {roomCost}
-                    </span>
-                  </div>
-
-                  {formData.vehicleNeeded && vehicleCosts.length > 0 && (
-                    <>
-                      <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-2">
-                          <span className="text-gray-700">Vehicle Charge</span>
-                          {vehicleCosts[0] && (
-                            <span className="bg-gray-300 text-gray-700 text-xs px-2 py-1 rounded-full">
-                              {vehicleCosts[0].days} Days
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      {vehicleCosts.map((v, idx) => (
-                        <div key={idx} className="pl-4 space-y-1">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">{v.name}</span>
-                            <span className="text-gray-800">USD {v.cost}</span>
-                          </div>
-                        </div>
-                      ))}
-                      <div className="flex justify-between border-t pt-2">
-                        <span className="text-gray-700"></span>
-                        <span className="text-gray-800 font-medium">
-                          USD {totalVehicleCost}
-                        </span>
-                      </div>
-                    </>
-                  )}
-
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                      <span className="text-gray-700">Service Charge</span>
-                      <span className="bg-gray-300 text-gray-700 text-xs px-2 py-1 rounded-full">
-                        5%
-                      </span>
-                    </div>
-                    <span className="text-gray-800 font-medium">
-                      USD {serviceCharge.toFixed(0)}
-                    </span>
-                  </div>
-
-                  <div className="border-t-2 border-gray-300 pt-3 flex justify-between items-center">
-                    <span className="text-xl font-bold text-gray-800">
-                      TOTAL
-                    </span>
-                    <span className="text-xl font-bold text-gray-800">
-                      USD {grandTotal.toFixed(0)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Complete Booking Button */}
-              <button
-                onClick={handleSubmit}
-                className="w-full bg-green-500 text-white py-4 font-bold text-lg hover:bg-green-600 transition"
-              >
-                COMPLETE BOOKING
-              </button>
-            </div>
+      {/* Pricing */}
+      <div className="space-y-2.5">
+        <div className="flex justify-between items-center gap-2">
+          <div className="flex items-center gap-1.5 flex-1 min-w-0">
+            <span className="text-gray-700 text-sm truncate">Room Charge</span>
+            {roomCost > 0 && (
+              <span className="bg-gray-300 text-gray-700 text-xs px-2 py-0.5 rounded-full flex-shrink-0">
+                {Math.ceil(
+                  (new Date(formData.checkOutDate) -
+                    new Date(formData.checkInDate)) /
+                    (1000 * 60 * 60 * 24)
+                )}{" "}
+                days
+              </span>
+            )}
           </div>
+          <span className="text-gray-800 font-medium text-sm flex-shrink-0">
+            USD {roomCost}
+          </span>
+        </div>
+
+        {formData.vehicleNeeded && vehicleCosts.length > 0 && (
+          <>
+            <div className="flex justify-between items-center gap-2">
+              <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                <span className="text-gray-700 text-sm truncate">Vehicle Charge</span>
+                {vehicleCosts[0] && (
+                  <span className="bg-gray-300 text-gray-700 text-xs px-2 py-0.5 rounded-full flex-shrink-0">
+                    {vehicleCosts[0].days} Days
+                  </span>
+                )}
+              </div>
+            </div>
+            {vehicleCosts.map((v, idx) => (
+              <div key={idx} className="pl-4 space-y-1">
+                <div className="flex justify-between text-sm gap-2">
+                  <span className="text-gray-600 truncate">{v.name}</span>
+                  <span className="text-gray-800 flex-shrink-0">USD {v.cost}</span>
+                </div>
+              </div>
+            ))}
+            <div className="flex justify-between border-t pt-2 gap-2">
+              <span className="text-gray-700 text-sm"></span>
+              <span className="text-gray-800 font-medium text-sm flex-shrink-0">
+                USD {totalVehicleCost}
+              </span>
+            </div>
+          </>
+        )}
+
+        <div className="flex justify-between items-center gap-2">
+          <div className="flex items-center gap-1.5 flex-1 min-w-0">
+            <span className="text-gray-700 text-sm truncate">Service Charge</span>
+            <span className="bg-gray-300 text-gray-700 text-xs px-2 py-0.5 rounded-full flex-shrink-0">
+              5%
+            </span>
+          </div>
+          <span className="text-gray-800 font-medium text-sm flex-shrink-0">
+            USD {serviceCharge.toFixed(0)}
+          </span>
+        </div>
+
+        <div className="border-t-2 border-gray-300 pt-2.5 flex justify-between items-center gap-2">
+          <span className="text-lg font-bold text-gray-800">
+            TOTAL
+          </span>
+          <span className="text-lg font-bold text-gray-800 flex-shrink-0">
+            USD {grandTotal.toFixed(0)}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    {/* Complete Booking Button */}
+    <button
+      onClick={handleSubmit}
+      className="w-full bg-green-500 text-white py-3.5 font-bold text-base hover:bg-green-600 transition"
+    >
+      COMPLETE BOOKING
+    </button>
+  </div>
+</div>
         </div>
       </div>
     </div>
