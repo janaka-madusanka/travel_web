@@ -10,7 +10,7 @@ export interface Service {
 export const servicesData: Service[] = [
   {
     id: 1,
-    title: "Comfortable Accommodations",
+    title: "Comfortable Accomodations",
     description: "Scenic Cottage Sigiriya in Sigiriya offers family rooms with air-conditioning, balconies, and private bathrooms. Each room includes a tea and coffee maker, free toiletries, and a work desk.",
     image: "/images/Services/accomadation.jpg", 
     icon: "spa",
