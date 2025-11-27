@@ -1,95 +1,170 @@
 "use client";
 
-import React, { useState } from "react";
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import React, { useRef, useState, useEffect } from "react";
 import RoomCard from "@/components/Home/RoomCarousel/RoomCard";
-import { hotelsData } from "@/data/data";
+import { roomsData } from "@/data/rooms";
+import svgPaths from "../../Helper/Navbar/svgpath";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const RoomCarousel: React.FC = () => {
-  const [current, setCurrent] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+  const [isHovered, setIsHovered] = useState(false);
 
-  const prevSlide = () =>
-    setCurrent((prev) => (prev === 0 ? hotelsData.length - 1 : prev - 1));
+  // Update arrow visibility
+  const updateArrows = () => {
+    if (!scrollRef.current) return;
+    const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+    setCanScrollLeft(scrollLeft > 0);
+    setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 1); // -1 to fix rounding issues
+  };
 
-  const nextSlide = () =>
-    setCurrent((prev) => (prev === hotelsData.length - 1 ? 0 : prev + 1));
+  // Scroll by card width dynamically
+  const scroll = (direction: "left" | "right") => {
+    if (!scrollRef.current) return;
+    const card = scrollRef.current.querySelector<HTMLDivElement>(".carousel-card");
+    if (!card) return;
+
+    const scrollAmount =
+      card.offsetWidth + parseInt(getComputedStyle(card).marginRight || "0", 10);
+    scrollRef.current.scrollBy({
+      left: direction === "left" ? -scrollAmount : scrollAmount,
+      behavior: "smooth",
+    });
+  };
+
+  // Auto-slide one card every 3 seconds
+  useEffect(() => {
+    if (isHovered) return; // pause on hover
+    const interval = setInterval(() => {
+      if (!scrollRef.current) return;
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+      const card = scrollRef.current.querySelector<HTMLDivElement>(".carousel-card");
+      if (!card) return;
+
+      const scrollAmount =
+        card.offsetWidth + parseInt(getComputedStyle(card).marginRight || "0", 10);
+
+      // If at the end, loop back to start
+      if (scrollLeft + clientWidth >= scrollWidth - 1) {
+        scrollRef.current.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        scrollRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+      }
+    }, 3000); // 3 seconds per slide
+
+    return () => clearInterval(interval);
+  }, [isHovered]);
+
+  // Update arrows on resize
+  useEffect(() => {
+    updateArrows();
+    window.addEventListener("resize", updateArrows);
+    return () => window.removeEventListener("resize", updateArrows);
+  }, []);
 
   return (
-    <div className="bg-[#f9f7f4] pt-16 pb-0 rounded-t-[50px] relative overflow-hidden">
-      {/* Pagination Dots */}
-      <div className="flex justify-center space-x-2 mb-6">
-        {hotelsData.map((_, idx) => (
-          <span
-            key={idx}
-            className={`w-3 h-3 rounded-full transition-colors ${
-              idx === current ? "bg-green-600" : "bg-gray-300"
-            }`}
-          />
-        ))}
-      </div>
-
+    <div className="bg-[#f9f7f4] pt-12 md:pt-16 pb-0 rounded-t-[50px] relative overflow-hidden">
       {/* Title */}
-      <h2 className="text-center text-3xl font-bold mb-10 px-5">
-        Experience Nature’s Comfort in Every Room
+      <h2 className="text-center text-2xl md:text-3xl font-bold mb-8 md:mb-10 px-5 md:px-10">
+        Experience Nature's Comfort in Every Room
       </h2>
 
       {/* Carousel */}
-      <div className="relative flex items-center justify-center px-5 md:px-12">
-        {/* Left Button */}
-        <button
-          onClick={prevSlide}
-          className="absolute left-2 md:left-4 bg-white shadow-lg rounded-full p-3 hover:bg-gray-100 transition z-10 hidden sm:block"
-        >
-          <FaChevronLeft />
-        </button>
+      <div
+        className="relative flex items-center justify-center px-4 md:px-12"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        {/* Left Arrow */}
+        {canScrollLeft && (
+          <button
+            onClick={() => scroll("left")}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 md:p-3 rounded-full bg-white/80 hover:bg-white shadow-md"
+            aria-label="Scroll left"
+          >
+            <ChevronLeft className="w-6 h-6 text-[#007326]" />
+          </button>
+        )}
 
         {/* Scrollable list */}
-        <div className="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar py-4 w-full">
-          {hotelsData.map((room) => (
-            <div key={room.id} className="snap-center flex-shrink-0">
-              <RoomCard room={room} />
+        <div
+          ref={scrollRef}
+          onScroll={updateArrows}
+          className="flex gap-4 sm:gap-6 md:gap-10 overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar py-4 w-full"
+        >
+          {roomsData.map((room, idx) => (
+            <div
+              key={room.id}
+              className="carousel-card snap-center shrink-0 w-[75vw] sm:w-[260px] md:w-[300px] lg:w-[320px]"
+            >
+              <RoomCard room={room} index={idx} />
             </div>
           ))}
         </div>
 
-        {/* Right Button */}
-        <button
-          onClick={nextSlide}
-          className="absolute right-2 md:right-4 bg-white shadow-lg rounded-full p-3 hover:bg-gray-100 transition z-10 hidden sm:block"
-        >
-          <FaChevronRight />
-        </button>
+        {/* Right Arrow */}
+        {canScrollRight && (
+          <button
+            onClick={() => scroll("right")}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 md:p-3 rounded-full bg-white/80 hover:bg-white shadow-md"
+            aria-label="Scroll right"
+          >
+            <ChevronRight className="w-6 h-6 text-[#007326]" />
+          </button>
+        )}
       </div>
 
       {/* Bottom Section */}
-      <div className="bg-[#003B14] text-white mt-16 py-16 px-8 md:px-20 
-                      text-center grid md:grid-cols-3 gap-10 md:h-[320px] items-center">
-        <div>
-          <h3 className="font-bold text-[28px] md:text-[32px] mb-2">
-            Experience It All
-          </h3>
-          <p className="font-semibold text-[16px] md:text-[18px] text-gray-300 leading-relaxed mt-5">
-            From peaceful cabanas to scenic nature views, discover Sigiriya’s beauty.
-          </p>
+      <div className="relative bg-[#003B14] text-white mt-12 md:mt-16 px-4 sm:px-8 md:px-20 pt-12 md:pt-16 pb-28 md:pb-32 text-center">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10 md:h-[260px] items-start md:items-center text-left md:text-center">
+          <div>
+            <h3 className="font-bold text-xl md:text-[28px] lg:text-[32px] mb-2">
+              Experience It All
+            </h3>
+            <p className="font-semibold text-[14px] sm:text-[16px] md:text-[18px] text-gray-300 leading-relaxed mt-4 md:mt-5">
+              From peaceful cabanas to scenic nature views, discover Sigiriya's beauty.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="font-bold text-xl md:text-[28px] lg:text-[32px] mb-2">
+              Everything You Need
+            </h3>
+            <p className="font-semibold text-[14px] sm:text-[16px] md:text-[18px] text-gray-300 leading-relaxed mt-4 md:mt-5">
+              Relax, dine, explore — all with warmth from our friendly team.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="font-bold text-xl md:text-[28px] lg:text-[32px] mb-2">
+              Exclusive Offers
+            </h3>
+            <p className="font-semibold text-[14px] sm:text-[16px] md:text-[18px] text-gray-300 leading-relaxed mt-4 md:mt-5">
+              Book direct for great rates and local experiences.
+            </p>
+          </div>
         </div>
 
-        <div>
-          <h3 className="font-bold text-[28px] md:text-[32px] mb-2">
-            Everything You Need
-          </h3>
-          <p className="font-semibold text-[16px] md:text-[18px] text-gray-300 leading-relaxed mt-5">
-            Relax, dine, explore — all with warmth from our friendly team.
-          </p>
-        </div>
+      
+        {/* Bottom Curve SVG */}
 
-        <div>
-          <h3 className="font-bold text-[28px] md:text-[32px] mb-2">
-            Exclusive Offers
-          </h3>
-          <p className="font-semibold text-[16px] md:text-[18px] text-gray-300 leading-relaxed mt-5">
-            Book direct for great rates and local experiences.
-          </p>
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 h-[60px] w-full flex justify-center items-center overflow-visible">
+        <div className="flex-none rotate-[180deg] overflow-visible">
+          <div className="relative h-[60px] w-full max-w-[1057px] flex justify-center items-center overflow-visible">
+            <svg
+              className="block w-full h-full overflow-visible"
+              viewBox="0 0 1057 49"
+              fill="none"
+              preserveAspectRatio="none"
+            >
+              <path d={svgPaths.p3e25ed70} fill="#FFFFFF" />
+            </svg>
+          </div>
         </div>
+      </div>
+
       </div>
     </div>
   );
