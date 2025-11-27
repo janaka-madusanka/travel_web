@@ -12,7 +12,7 @@ const NewsletterSignup: React.FC = () => {
   return (
     <section className="relative bg-[#001106] text-white w-full overflow-hidden py-60 px-6 md:px-16 lg:px-24">
       {/* Top Curve SVG */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 h-[60px] w-full flex justify-center items-center overflow-visible">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 h-[60px] w-full flex justify-center items-center overflow-visible z-20">
         <div className="flex-none overflow-visible">
           <div className="relative h-[60px] w-full max-w-[1057px] flex justify-center items-center overflow-visible">
             <svg
