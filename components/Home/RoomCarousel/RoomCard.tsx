@@ -51,7 +51,7 @@ const RoomImageSection: React.FC<{
   {images.map((img, idx) => (
     <div
       key={idx}
-      className="relative w-full h-[220px] sm:h-[250px] md:h-[350px]"
+      className="relative w-full h-[220px] sm:h-[260px] md:h-[340px]"
     >
       <Image
         src={img}
@@ -62,6 +62,7 @@ const RoomImageSection: React.FC<{
     </div>
   ))}
 </Slider>
+
 
       {/* Favorite Icon */}
       <motion.div

@@ -3,6 +3,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import RoomCard from "@/components/Home/RoomCarousel/RoomCard";
 import { roomsData } from "@/data/rooms";
+import svgPaths from "../../Helper/Navbar/svgpath";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const RoomCarousel: React.FC = () => {
@@ -33,27 +34,28 @@ const RoomCarousel: React.FC = () => {
     });
   };
 
-  // Optional: Auto-scroll (every 3s)
+  // Auto-slide one card every 3 seconds
   useEffect(() => {
-  let animationFrame: number;
+    if (isHovered) return; // pause on hover
+    const interval = setInterval(() => {
+      if (!scrollRef.current) return;
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+      const card = scrollRef.current.querySelector<HTMLDivElement>(".carousel-card");
+      if (!card) return;
 
-  const smoothScroll = () => {
-    if (!scrollRef.current || isHovered) return;
+      const scrollAmount =
+        card.offsetWidth + parseInt(getComputedStyle(card).marginRight || "0", 10);
 
-    scrollRef.current.scrollLeft += 1; // smooth 1px movement
+      // If at the end, loop back to start
+      if (scrollLeft + clientWidth >= scrollWidth - 1) {
+        scrollRef.current.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        scrollRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+      }
+    }, 3000); // 3 seconds per slide
 
-    const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-    if (scrollLeft + clientWidth >= scrollWidth - 1) {
-      scrollRef.current.scrollTo({ left: 0 });
-    }
-
-    animationFrame = requestAnimationFrame(smoothScroll);
-  };
-
-  animationFrame = requestAnimationFrame(smoothScroll);
-
-  return () => cancelAnimationFrame(animationFrame);
-}, [isHovered]);
+    return () => clearInterval(interval);
+  }, [isHovered]);
 
   // Update arrows on resize
   useEffect(() => {
@@ -95,7 +97,7 @@ const RoomCarousel: React.FC = () => {
           {roomsData.map((room, idx) => (
             <div
               key={room.id}
-              className="carousel-card snap-center shrink-0 w-[85vw] sm:w-[260px] md:w-[300px] lg:w-[320px]"
+              className="carousel-card snap-center shrink-0 w-[75vw] sm:w-[260px] md:w-[300px] lg:w-[320px]"
             >
               <RoomCard room={room} index={idx} />
             </div>
@@ -145,21 +147,24 @@ const RoomCarousel: React.FC = () => {
           </div>
         </div>
 
+      
         {/* Bottom Curve SVG */}
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 h-[50px] sm:h-[60px] w-full flex justify-center items-center overflow-visible">
-          <div className="flex-none rotate-[180deg] overflow-visible">
-            <div className="relative h-full w-full max-w-[1057px] flex justify-center items-center overflow-visible">
-              <svg
-                className="block w-full h-full overflow-visible"
-                viewBox="0 0 1057 49"
-                fill="none"
-                preserveAspectRatio="none"
-              >
-                <path d="M0 0H1057V49H0V0Z" fill="#FFFFFF" />
-              </svg>
-            </div>
+
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 h-[60px] w-full flex justify-center items-center overflow-visible">
+        <div className="flex-none rotate-[180deg] overflow-visible">
+          <div className="relative h-[60px] w-full max-w-[1057px] flex justify-center items-center overflow-visible">
+            <svg
+              className="block w-full h-full overflow-visible"
+              viewBox="0 0 1057 49"
+              fill="none"
+              preserveAspectRatio="none"
+            >
+              <path d={svgPaths.p3e25ed70} fill="#FFFFFF" />
+            </svg>
           </div>
         </div>
+      </div>
+
       </div>
     </div>
   );

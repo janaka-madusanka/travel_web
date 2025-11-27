@@ -2,19 +2,17 @@
 import React from "react";
 import { placesToVisit } from "@/data/destination";
 
-
 interface ImageCardProps {
   src: string;
   alt: string;
-  className?: string; // Optional prop
-  index?: number;     // Optional prop, typically a number
+  className?: string;
+  index?: number;
 }
 
-
-const ImageCard: React.FC<ImageCardProps> = ({ src, alt, className, index }) => {
+const ImageCard: React.FC<ImageCardProps> = ({ src, alt, className = "", index }) => {
   return (
     <div
-      className={`relative w-full overflow-hidden rounded-xl shadow-lg transition-transform duration-300 hover:scale-105 ${className}`}
+      className={`relative w-full h-full overflow-hidden rounded-xl shadow-lg transition-transform duration-300 hover:scale-105 ${className}`}
       style={{
         animation: `fadeInUp 0.6s ease-out ${index ? index * 0.1 : 0}s backwards`,
       }}
@@ -25,10 +23,8 @@ const ImageCard: React.FC<ImageCardProps> = ({ src, alt, className, index }) => 
 };
 
 const AboutSection = () => {
-  // Ensure we always have 8 images
   const images = [...placesToVisit];
   while (images.length < 8) {
-    // repeat images from the start to fill 8
     images.push(placesToVisit[images.length % placesToVisit.length]);
   }
 
@@ -64,7 +60,9 @@ const AboutSection = () => {
           {/* Mobile */}
           <div className="grid grid-cols-2 gap-3 sm:hidden">
             {images.map((item, index) => (
-              <ImageCard key={index} src={item.image} alt={item.name} className="h-40" index={index} />
+              <div key={index} className="h-40">
+                <ImageCard src={item.image} alt={item.name} index={index} />
+              </div>
             ))}
           </div>
 
@@ -80,16 +78,72 @@ const AboutSection = () => {
             <ImageCard src={images[7].image} alt={images[7].name} className="col-span-2 h-40" index={7} />
           </div>
 
-          {/* Desktop */}
-          <div className="hidden md:grid lg:grid-cols-7 lg:grid-rows-3 gap-4 h-[500px] lg:h-[700px]">
-            <ImageCard src={images[0].image} alt={images[0].name} className="col-span-2 row-span-2" index={0} />
-            <ImageCard src={images[1].image} alt={images[1].name} className="col-span-1 row-span-2" index={1} />
-            <ImageCard src={images[2].image} alt={images[2].name} className="col-span-2 row-span-1" index={2} />
-            <ImageCard src={images[3].image} alt={images[3].name} className="col-span-2 row-span-3" index={3} />
-            <ImageCard src={images[4].image} alt={images[4].name} className="col-span-2 row-span-1" index={4} />
-            <ImageCard src={images[5].image} alt={images[5].name} className="col-span-1 row-span-1" index={5} />
-            <ImageCard src={images[6].image} alt={images[6].name} className="col-span-1 row-span-1" index={6} />
-            <ImageCard src={images[7].image} alt={images[7].name} className="col-span-3 row-span-1" index={7} />
+          {/* Desktop + Medium */}
+          <div
+            className="
+              hidden md:grid
+              md:grid-cols-4 md:grid-rows-4
+              lg:grid-cols-7 lg:grid-rows-3
+              gap-4
+              h-[650px] lg:h-[700px]
+            "
+          >
+            {/* FIXED MD SPANS */}
+            <ImageCard
+              src={images[0].image}
+              alt={images[0].name}
+              className="md:col-span-2 md:row-span-2 lg:col-span-2 lg:row-span-2"
+              index={0}
+            />
+
+            <ImageCard
+              src={images[1].image}
+              alt={images[1].name}
+              className="md:col-span-2 md:row-span-2 lg:col-span-1 lg:row-span-2"
+              index={1}
+            />
+
+            <ImageCard
+              src={images[2].image}
+              alt={images[2].name}
+              className="md:col-span-2 md:row-span-1 lg:col-span-2 lg:row-span-1"
+              index={2}
+            />
+
+            <ImageCard
+              src={images[3].image}
+              alt={images[3].name}
+              className="md:col-span-2 md:row-span-2 lg:col-span-2 lg:row-span-3"
+              index={3}
+            />
+
+            <ImageCard
+              src={images[4].image}
+              alt={images[4].name}
+              className="md:col-span-2 md:row-span-1 lg:col-span-2 lg:row-span-1"
+              index={4}
+            />
+
+            <ImageCard
+              src={images[5].image}
+              alt={images[5].name}
+              className="md:col-span-1 md:row-span-1 lg:col-span-1 lg:row-span-1"
+              index={5}
+            />
+
+            <ImageCard
+              src={images[6].image}
+              alt={images[6].name}
+              className="md:col-span-1 md:row-span-1 lg:col-span-1 lg:row-span-1"
+              index={6}
+            />
+
+            <ImageCard
+              src={images[7].image}
+              alt={images[7].name}
+              className="md:col-span-2 md:row-span-1 lg:col-span-3 lg:row-span-1"
+              index={7}
+            />
           </div>
         </div>
       </section>
