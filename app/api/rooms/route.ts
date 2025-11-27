@@ -34,7 +34,6 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ error: "Room not found" }, { status: 404 });
       }
 
-      // Convert image buffers → base64
       const roomWithBase64 = {
         ...room,
         img1: room.img1 ? `data:image/jpeg;base64,${room.img1.toString("base64")}` : null,
@@ -82,6 +81,7 @@ export async function POST(req: NextRequest) {
         cost: data.cost,
         offer: data.offer,
         size: data.size,
+        capacity: data.capacity, // ✅ manual capacity input
 
         // Amenities
         ac: data.ac,
@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
         img4: base64ToBuffer(data.img4),
         video: base64ToBuffer(data.video),
 
-        // Bedrooms (nested create)
+        // Bedrooms
         bedrooms: {
           create: data.bedrooms?.map((b: any) => ({
             bedType: b.bedType,
@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
           })) || [],
         },
 
-        // Bathrooms (nested create)
+        // Bathrooms
         bathrooms: {
           create: data.bathrooms?.map((b: any) => ({
             shower: b.shower,
@@ -126,7 +126,7 @@ export async function POST(req: NextRequest) {
           })) || [],
         },
 
-        // Kitchen (optional)
+        // Kitchen
         kitchen: data.kitchen
           ? {
               create: {
@@ -141,11 +141,7 @@ export async function POST(req: NextRequest) {
             }
           : undefined,
       },
-      include: {
-        bedrooms: true,
-        bathrooms: true,
-        kitchen: true,
-      },
+      include: { bedrooms: true, bathrooms: true, kitchen: true },
     });
 
     return NextResponse.json({ message: "Room created", room });
@@ -168,11 +164,9 @@ export async function PATCH(req: NextRequest) {
 
     if (!id) return NextResponse.json({ error: "Room id required" }, { status: 400 });
 
-    // Delete old bedrooms + bathrooms so new ones can replace them
+    // Delete old bedrooms, bathrooms, and kitchen
     await prisma.bedroom.deleteMany({ where: { roomId: id } });
     await prisma.bathroom.deleteMany({ where: { roomId: id } });
-
-    // Remove old kitchen
     await prisma.kitchen.deleteMany({ where: { roomId: id } });
 
     const room = await prisma.room.update({
@@ -182,6 +176,7 @@ export async function PATCH(req: NextRequest) {
         cost: data.cost,
         offer: data.offer,
         size: data.size,
+        capacity: data.capacity, // ✅ manual capacity input
 
         ac: data.ac,
         wifi: data.wifi,
@@ -236,11 +231,7 @@ export async function PATCH(req: NextRequest) {
             }
           : undefined,
       },
-      include: {
-        bedrooms: true,
-        bathrooms: true,
-        kitchen: true,
-      },
+      include: { bedrooms: true, bathrooms: true, kitchen: true },
     });
 
     return NextResponse.json({ message: "Room updated", room });
