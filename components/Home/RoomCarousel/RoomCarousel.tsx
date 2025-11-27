@@ -2,22 +2,38 @@
 
 import React, { useRef, useState, useEffect } from "react";
 import RoomCard from "@/components/Home/RoomCarousel/RoomCard";
-import { roomsData } from "@/data/rooms";
+import { BackendRoom } from "@/types/BackendRoom";
 import svgPaths from "../../Helper/Navbar/svgpath";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const RoomCarousel: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [rooms, setRooms] = useState<BackendRoom[]>([]);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
+
+  // Fetch rooms from backend
+  const fetchRooms = async () => {
+    try {
+      const res = await fetch("/api/rooms"); // replace with your backend endpoint
+      const data = await res.json();
+      setRooms(data.rooms || []); // ensure we always have an array
+    } catch (err) {
+      console.error("Error fetching rooms:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchRooms();
+  }, []);
 
   // Update arrow visibility
   const updateArrows = () => {
     if (!scrollRef.current) return;
     const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
     setCanScrollLeft(scrollLeft > 0);
-    setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 1); // -1 to fix rounding issues
+    setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 1);
   };
 
   // Scroll by card width dynamically
@@ -46,13 +62,12 @@ const RoomCarousel: React.FC = () => {
       const scrollAmount =
         card.offsetWidth + parseInt(getComputedStyle(card).marginRight || "0", 10);
 
-      // If at the end, loop back to start
       if (scrollLeft + clientWidth >= scrollWidth - 1) {
         scrollRef.current.scrollTo({ left: 0, behavior: "smooth" });
       } else {
         scrollRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
       }
-    }, 3000); // 3 seconds per slide
+    }, 3000);
 
     return () => clearInterval(interval);
   }, [isHovered]);
@@ -62,7 +77,7 @@ const RoomCarousel: React.FC = () => {
     updateArrows();
     window.addEventListener("resize", updateArrows);
     return () => window.removeEventListener("resize", updateArrows);
-  }, []);
+  }, [rooms]);
 
   return (
     <div className="bg-[#f9f7f4] pt-12 md:pt-16 pb-0 rounded-t-[50px] relative overflow-hidden">
@@ -94,14 +109,18 @@ const RoomCarousel: React.FC = () => {
           onScroll={updateArrows}
           className="flex gap-4 sm:gap-6 md:gap-10 overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar py-4 w-full"
         >
-          {roomsData.map((room, idx) => (
-            <div
-              key={room.id}
-              className="carousel-card snap-center shrink-0 w-[75vw] sm:w-[260px] md:w-[300px] lg:w-[320px]"
-            >
-              <RoomCard room={room} index={idx} />
-            </div>
-          ))}
+          {rooms.length === 0 ? (
+            <p className="text-center w-full text-gray-500">No rooms available.</p>
+          ) : (
+            rooms.map((room, idx) => (
+              <div
+                key={room.id}
+                className="carousel-card snap-center shrink-0 w-[75vw] sm:w-[260px] md:w-[300px] lg:w-[320px]"
+              >
+                <RoomCard room={room} index={idx} />
+              </div>
+            ))
+          )}
         </div>
 
         {/* Right Arrow */}
@@ -147,24 +166,21 @@ const RoomCarousel: React.FC = () => {
           </div>
         </div>
 
-      
         {/* Bottom Curve SVG */}
-
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 h-[60px] w-full flex justify-center items-center overflow-visible">
-        <div className="flex-none rotate-[180deg] overflow-visible">
-          <div className="relative h-[60px] w-full max-w-[1057px] flex justify-center items-center overflow-visible">
-            <svg
-              className="block w-full h-full overflow-visible"
-              viewBox="0 0 1057 49"
-              fill="none"
-              preserveAspectRatio="none"
-            >
-              <path d={svgPaths.p3e25ed70} fill="#FFFFFF" />
-            </svg>
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 h-[60px] w-full flex justify-center items-center overflow-visible">
+          <div className="flex-none rotate-[180deg] overflow-visible">
+            <div className="relative h-[60px] w-full max-w-[1057px] flex justify-center items-center overflow-visible">
+              <svg
+                className="block w-full h-full overflow-visible"
+                viewBox="0 0 1057 49"
+                fill="none"
+                preserveAspectRatio="none"
+              >
+                <path d={svgPaths.p3e25ed70} fill="#FFFFFF" />
+              </svg>
+            </div>
           </div>
         </div>
-      </div>
-
       </div>
     </div>
   );
