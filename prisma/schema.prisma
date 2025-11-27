@@ -54,6 +54,7 @@ model Room {
   cost      Float
   offer     Float?
   size      String
+  capacity    Int      @default(1)  // ✅ add default
 
   // basic amenities
   ac           ACType

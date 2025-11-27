@@ -50,11 +50,6 @@ interface Room {
   dryingRack: string;
   clothRack: string;
 
-  img1?: string | null;
-  img2?: string | null;
-  img3?: string | null;
-  img4?: string | null;
-
   video?: string | null;
   bedrooms: Bedroom[];
   bathrooms: Bathroom[];
@@ -156,9 +151,11 @@ export default function ViewRoomsTablePage() {
               <th className="py-2 px-3 text-left">Cost</th>
               <th className="py-2 px-3 text-left">Offer</th>
               <th className="py-2 px-3 text-left">Size (m²)</th>
+              <th className="py-2 px-3 text-left">Capacity</th>
               <th className="py-2 px-3 text-left">Bedrooms</th>
               <th className="py-2 px-3 text-left">Bathrooms</th>
               <th className="py-2 px-3 text-left">Amenities</th>
+              <th className="py-2 px-3 text-left">Kitchen</th>
               <th className="py-2 px-3 text-left">Actions</th>
             </tr>
           </thead>
@@ -169,6 +166,15 @@ export default function ViewRoomsTablePage() {
                 .map(([_, label]) => label)
                 .join(", ");
 
+              const kitchenItems = room.kitchen
+                ? Object.entries(room.kitchen)
+                    .filter(([_, val]) => val === "YES")
+                    .map(([key]) => key)
+                    .join(", ")
+                : "None";
+
+              const totalCapacity = room.bedrooms.reduce((sum, b) => sum + b.count, 0);
+
               return (
                 <tr key={room.id} className="border-b hover:bg-gray-50">
                   <td className="py-2 px-3">{room.id}</td>
@@ -176,13 +182,20 @@ export default function ViewRoomsTablePage() {
                   <td className="py-2 px-3">{room.cost}</td>
                   <td className="py-2 px-3">{room.offer}%</td>
                   <td className="py-2 px-3">{room.size}</td>
+                  <td className="py-2 px-3">{totalCapacity}</td>
                   <td className="py-2 px-3">
                     {room.bedrooms.map((b) => `${b.bedType}×${b.count}`).join(", ")}
                   </td>
                   <td className="py-2 px-3">
-                    {room.bathrooms.map((b, i) => `Bathroom ${i + 1}: Shower ${b.shower}, Slipper ${b.slipper}, Soap ${b.soap}`).join("; ")}
+                    {room.bathrooms
+                      .map(
+                        (b, i) =>
+                          `Bathroom ${i + 1}: Shower ${b.shower}, Slipper ${b.slipper}, Soap ${b.soap}, Bidet ${b.bidet}`
+                      )
+                      .join("; ")}
                   </td>
                   <td className="py-2 px-3">{enabledAmenities || "None"}</td>
+                  <td className="py-2 px-3">{kitchenItems}</td>
                   <td className="py-2 px-3 flex gap-2">
                     <button
                       onClick={() => router.push(`/admin/rooms/edit/${room.id}`)}
