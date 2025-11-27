@@ -205,7 +205,7 @@ export default function EditRoomPage() {
       if (!res.ok) throw new Error(data.error || "Failed to update room");
 
       alert("Room updated successfully!");
-      router.push("/admin/rooms");
+      router.push("/admin/rooms/view");
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -221,122 +221,198 @@ export default function EditRoomPage() {
   return (
     <div className="flex h-screen">
       <Sidebar />
-      <div className="flex-1 p-6 bg-gray-100 overflow-auto">
-        <h1 className="text-3xl font-bold mb-6">Edit Room</h1>
-        <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md max-w-4xl mx-auto flex flex-col gap-6">
-          {/* Basic Info */}
-          <div className="grid grid-cols-2 gap-4">
-            <Input label="Room Name" name="name" value={formData.name} onChange={handleChange} />
-            <Input type="number" label="Cost" name="cost" value={formData.cost} onChange={handleChange} />
-            <Input type="number" label="Offer (%)" name="offer" value={formData.offer} onChange={handleChange} />
-            <Input label="Room Size" name="size" value={formData.size} onChange={handleChange} />
-          </div>
+      <div className="flex-1 p-8 bg-gray-100 overflow-auto">
 
-          {/* Amenities */}
-          <h2 className="text-xl font-semibold">Amenities</h2>
-          <div className="grid grid-cols-3 gap-4">
-            {(
-              [
-                "ac","wifi","fan","balcony","gardenView","tv","iron","locker","parking","sittingArea","dryingRack","clothRack",
-              ] as (keyof FormState)[]
-            ).map((key) => (
-              <SelectYesNo key={key} label={key} name={key} value={formData[key]} onChange={handleChange} />
-            ))}
-          </div>
+        {/* Title */}
+        <h1 className="text-4xl font-bold mb-6 text-gray-800">Edit Room</h1>
 
-          {/* Bedrooms */}
-          <h2 className="text-xl font-semibold">Bedrooms</h2>
-          {bedrooms.map((b, i) => (
-            <div key={i} className="grid grid-cols-2 gap-4 border p-4 rounded">
-              <div>
-                <label className="font-semibold">Bed Type</label>
-                <select
-                  value={b.bedType}
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white p-8 rounded-xl shadow-lg max-w-5xl mx-auto flex flex-col gap-10"
+        >
+
+          {/* ================= BASIC INFO ================= */}
+          <Section title="Basic Information">
+            <div className="grid grid-cols-2 gap-6">
+              <Input label="Room Name" name="name" value={formData.name} onChange={handleChange} />
+              <Input type="number" label="Cost" name="cost" value={formData.cost} onChange={handleChange} />
+              <Input type="number" label="Offer (%)" name="offer" value={formData.offer} onChange={handleChange} />
+              <Input label="Room Size" name="size" value={formData.size} onChange={handleChange} />
+            </div>
+          </Section>
+
+          {/* ================= AMENITIES ================= */}
+          <Section title="Amenities">
+            <div className="grid grid-cols-3 gap-6">
+              {(
+                [
+                  "ac", "wifi", "fan", "balcony", "gardenView", "tv", "iron",
+                  "locker", "parking", "sittingArea", "dryingRack", "clothRack",
+                ] as (keyof FormState)[]
+              ).map((key) => (
+                <SelectYesNo key={key} label={formatLabel(key)} name={key} value={formData[key]} onChange={handleChange} />
+              ))}
+            </div>
+          </Section>
+
+          {/* ================= BEDROOMS ================= */}
+          <Section title="Bedrooms" description="Add different bed types available inside this room.">
+            {bedrooms.map((b, i) => (
+              <div key={i} className="p-5 rounded-xl border bg-gray-50 mb-4 grid grid-cols-2 gap-6">
+                <div>
+                  <label className="font-semibold block mb-1">Bed Type</label>
+                  <select
+                    value={b.bedType}
+                    onChange={(e) => {
+                      const beds = [...bedrooms];
+                      beds[i].bedType = e.target.value;
+                      setBedrooms(beds);
+                    }}
+                    className="border p-2 rounded w-full"
+                  >
+                    <option value="SINGLE">Single</option>
+                    <option value="DOUBLE">Double</option>
+                    <option value="QUEEN">Queen</option>
+                    <option value="KING">King</option>
+                    <option value="TWIN">Twin</option>
+                    <option value="DOUBLE_ROOM">Double Room</option>
+                    <option value="TRIPLE">Triple</option>
+                    <option value="FAMILY">Family</option>
+                  </select>
+                </div>
+
+                <Input
+                  type="number"
+                  label="Count"
+                  value={b.count}
                   onChange={(e) => {
                     const beds = [...bedrooms];
-                    beds[i].bedType = e.target.value;
+                    beds[i].count = Number(e.target.value);
                     setBedrooms(beds);
                   }}
-                  className="border p-2 rounded w-full"
-                >
-                  <option value="SINGLE">Single</option>
-                  <option value="DOUBLE">Double</option>
-                  <option value="QUEEN">Queen</option>
-                  <option value="KING">King</option>
-                  <option value="TWIN">Twin</option>
-                  <option value="DOUBLE_ROOM">Double Room</option>
-                  <option value="TRIPLE">Triple</option>
-                  <option value="FAMILY">Family</option>
-                </select>
+                />
               </div>
-              <Input type="number" label="Count" value={b.count} onChange={(e) => {
-                const beds = [...bedrooms];
-                beds[i].count = Number(e.target.value);
-                setBedrooms(beds);
-              }} />
-            </div>
-          ))}
-          <button type="button" className="bg-blue-500 text-white px-3 py-1 rounded" onClick={() => setBedrooms([...bedrooms, { bedType: "SINGLE", count: 1 }])}>
-            + Add Bedroom
-          </button>
-
-          {/* Bathrooms */}
-          <h2 className="text-xl font-semibold">Bathrooms</h2>
-          {bathrooms.map((b, i) => (
-            <div key={i} className="grid grid-cols-4 gap-4 border p-4 rounded">
-              {(Object.keys(b) as (keyof Bathroom)[]).map((key) => (
-                <SelectYesNo key={key} label={key} name={key} value={b[key]} onChange={(e) => {
-                  const list = [...bathrooms];
-                  list[i][key] = e.target.value as YesNo;
-                  setBathrooms(list);
-                }} />
-              ))}
-            </div>
-          ))}
-          <button type="button" className="bg-blue-500 text-white px-3 py-1 rounded" onClick={() =>
-            setBathrooms([...bathrooms, { shower: "YES", slipper: "YES", soap: "YES", bidet: "NO", towels: "YES", toiletPaper: "YES", hotWater: "YES", privateBathroom: "YES" }])
-          }>
-            + Add Bathroom
-          </button>
-
-          {/* Kitchen */}
-          <h2 className="text-xl font-semibold">Kitchen</h2>
-          <div className="grid grid-cols-3 gap-4">
-            {(Object.keys(kitchen) as (keyof Kitchen)[]).map((key) => (
-              <SelectYesNo key={key} label={key} name={key} value={kitchen[key]} onChange={(e) => setKitchen({ ...kitchen, [key]: e.target.value as YesNo })} />
             ))}
-          </div>
 
-          {/* Images */}
-          <div>
-            <label className="font-semibold">Existing Images</label>
-            <div className="flex gap-2 mt-2 mb-4">
+            <AddButton label="Add Bedroom" onClick={() =>
+              setBedrooms([...bedrooms, { bedType: "SINGLE", count: 1 }])
+            } />
+          </Section>
+
+          {/* ================= BATHROOMS ================= */}
+          <Section title="Bathrooms" description="Configure bathroom items included in this room.">
+            {bathrooms.map((b, i) => (
+              <div key={i} className="p-5 rounded-xl border bg-gray-50 mb-4 grid grid-cols-4 gap-4">
+                {(Object.keys(b) as (keyof Bathroom)[]).map((key) => (
+                  <SelectYesNo
+                    key={key}
+                    label={formatLabel(key)}
+                    name={key}
+                    value={b[key]}
+                    onChange={(e) => {
+                      const list = [...bathrooms];
+                      list[i][key] = e.target.value as YesNo;
+                      setBathrooms(list);
+                    }}
+                  />
+                ))}
+              </div>
+            ))}
+
+            <AddButton
+              label="Add Bathroom"
+              onClick={() =>
+                setBathrooms([...bathrooms, {
+                  shower: "YES",
+                  slipper: "YES",
+                  soap: "YES",
+                  bidet: "NO",
+                  towels: "YES",
+                  toiletPaper: "YES",
+                  hotWater: "YES",
+                  privateBathroom: "YES"
+                }])
+              }
+            />
+          </Section>
+
+          {/* ================= KITCHEN ================= */}
+          <Section title="Kitchen Items" description="List kitchen-related facilities available.">
+            <div className="grid grid-cols-3 gap-6">
+              {(Object.keys(kitchen) as (keyof Kitchen)[]).map((key) => (
+                <SelectYesNo
+                  key={key}
+                  label={formatLabel(key)}
+                  name={key}
+                  value={kitchen[key]}
+                  onChange={(e) =>
+                    setKitchen({ ...kitchen, [key]: e.target.value as YesNo })
+                  }
+                />
+              ))}
+            </div>
+          </Section>
+
+          {/* ================= IMAGES ================= */}
+          <Section title="Room Images">
+            <label className="block font-semibold mb-2">Existing Images</label>
+            <div className="flex gap-3 mb-6">
               {existingImages.map((src, i) => (
-                <img key={i} src={src} className="w-20 h-20 object-cover rounded" />
+                <img key={i} src={src} className="w-24 h-24 object-cover rounded-lg border" />
               ))}
             </div>
-          </div>
 
-          <div>
-            <label className="font-semibold">Upload New Images (max 4)</label>
+            <label className="block font-semibold">Upload New Images (max 4)</label>
             <input type="file" multiple accept="image/*" onChange={handleImageChange} className="block mt-2" />
-            <div className="flex gap-2 mt-2">
+
+            <div className="flex gap-3 mt-3">
               {previewImages.map((src, i) => (
-                <img key={i} src={src} className="w-20 h-20 rounded object-cover" />
+                <img key={i} src={src} className="w-24 h-24 rounded-lg object-cover border" />
               ))}
             </div>
-          </div>
+          </Section>
 
-          <button className="bg-green-600 text-white px-6 py-3 rounded text-lg" disabled={saving}>
+          {/* ================= SUBMIT ================= */}
+          <button
+            className="bg-green-600 hover:bg-green-700 transition text-white px-8 py-3 rounded-lg text-lg font-semibold"
+            disabled={saving}
+          >
             {saving ? "Saving..." : "Update Room"}
           </button>
+
         </form>
       </div>
     </div>
   );
 }
 
-// ---------------------- REUSABLE COMPONENTS ----------------------
+// ---------------------- UI COMPONENTS ----------------------
+
+function Section({ title, description, children }: any) {
+  return (
+    <div>
+      <h2 className="text-2xl font-semibold mb-1 text-gray-900">{title}</h2>
+      {description && <p className="text-gray-500 mb-4">{description}</p>}
+      {children}
+    </div>
+  );
+}
+
+function AddButton({ label, onClick }: { label: string; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      className="bg-blue-500 hover:bg-blue-600 transition text-white px-4 py-2 rounded-lg"
+      onClick={onClick}
+    >
+      + {label}
+    </button>
+  );
+}
+
+function formatLabel(key: string) {
+  return key.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase());
+}
 
 interface InputProps {
   label: string;
@@ -349,7 +425,7 @@ interface InputProps {
 function Input({ label, name, value, onChange, type = "text" }: InputProps) {
   return (
     <div className="flex flex-col">
-      <label className="font-semibold">{label}</label>
+      <label className="font-semibold mb-1">{label}</label>
       <input type={type} name={name} value={value} onChange={onChange} className="border p-2 rounded" />
     </div>
   );
@@ -365,7 +441,7 @@ interface SelectProps {
 function SelectYesNo({ label, name, value, onChange }: SelectProps) {
   return (
     <div className="flex flex-col">
-      <label className="font-semibold">{label}</label>
+      <label className="font-semibold mb-1">{label}</label>
       <select name={name} value={value} onChange={onChange} className="border p-2 rounded">
         <option value="YES">YES</option>
         <option value="NO">NO</option>
