@@ -3,22 +3,11 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Slider from "react-slick";
-import { FaBed, FaUsers } from "react-icons/fa";
+import { FaBed, FaUsers, FaWifi, FaFan, FaTv, FaParking, FaChair, FaSnowflake } from "react-icons/fa";
 import { motion } from "framer-motion";
-import Link from "next/link"; // ✅ Import Link
-import svgpath from "@/components/Helper/Navbar/svgpath";
+import Link from "next/link";
 
-interface RoomCardProps {
-  room: {
-    id: number;
-    image: string[];
-    name: string;
-    beds: string;
-    capacity: string | number;
-    price: string;
-  };
-  index: number;
-}
+import { BackendRoom } from "@/types/BackendRoom";
 
 // ==================== IMAGE SECTION ====================
 const RoomImageSection: React.FC<{
@@ -48,41 +37,18 @@ const RoomImageSection: React.FC<{
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
       className="relative w-full h-[220px] sm:h-[260px] md:h-[340px] rounded-[24px] overflow-hidden group cursor-pointer shadow-md bg-white"
     >
-    <Slider {...sliderSettings} className="h-full">
-  {images.map((img, idx) => (
-    <div
-      key={idx}
-      className="relative w-full h-[220px] sm:h-[260px] md:h-[340px]"
-    >
-      <Image
-        src={img}
-        alt={`${name}-${idx}`}
-        fill
-        className="object-cover transition-transform duration-700 group-hover:scale-110 rounded-[24px]"
-      />
-    </div>
-  ))}
-</Slider>
-
-
-      {/* Favorite Icon */}
-      <motion.div
-        whileHover={{ scale: 1.15 }}
-        whileTap={{ scale: 0.9 }}
-        onClick={() => setIsFavorited(!isFavorited)}
-        className="absolute right-3 top-3 sm:right-4 sm:top-4 w-9 h-9 flex items-center justify-center cursor-pointer z-10"
-      >
-        <svg
-          className="w-6 h-6"
-          fill={isFavorited ? "#ff6b6b" : "none"}
-          stroke="#ffffff"
-          strokeWidth="2"
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d={svgpath.pea4b2f0} />
-        </svg>
-      </motion.div>
-
+      <Slider {...sliderSettings} className="h-full">
+        {images.map((img, idx) => (
+          <div key={idx} className="relative w-full h-[220px] sm:h-[260px] md:h-[340px]">
+            <Image
+              src={img}
+              alt={`${name}-${idx}`}
+              fill
+              className="object-cover transition-transform duration-700 group-hover:scale-110 rounded-[24px]"
+            />
+          </div>
+        ))}
+      </Slider>
       {/* Slider Dots */}
       <div className="absolute bottom-2 sm:bottom-3 left-1/2 -translate-x-1/2 flex gap-1">
         {images.map((_, dot) => (
@@ -100,61 +66,55 @@ const RoomImageSection: React.FC<{
 };
 
 // ==================== DATA SECTION ====================
-const RoomDataSection: React.FC<{
-  id: number; // ✅ Added ID to props
-  name: string;
-  beds: string;
-  capacity: string | number;
-  price: string;
-}> = ({ id, name, beds, capacity, price }) => {
-  
-  const formattedCapacity = typeof capacity === 'number' 
-    ? `${capacity} Adult${capacity > 1 ? 's' : ''}` 
-    : capacity;
+const RoomDataSection: React.FC<{ room: BackendRoom }> = ({ room }) => {
+  const formattedCapacity = `${room.capacity} Adult${room.capacity > 1 ? "s" : ""}`;
+
+  // ✅ Safely handle bedrooms
+  const bedInfo =
+    room.bedrooms && room.bedrooms.length > 0
+      ? room.bedrooms.map(b => `${b.count} ${b.bedType}`).join(" & ")
+      : "No bed info";
+
+  // Collect available features safely
+  const features = [
+    room.ac === "AC" && <FaSnowflake key="ac" title="AC" />,
+    room.wifi === "YES" && <FaWifi key="wifi" title="WiFi" />,
+    room.fan === "YES" && <FaFan key="fan" title="Fan" />,
+    room.tv === "YES" && <FaTv key="tv" title="TV" />,
+    room.parking === "YES" && <FaParking key="parking" title="Parking" />,
+    room.sittingArea === "YES" && <FaChair key="sitting" title="Sitting Area" />,
+  ].filter(Boolean);
+
+  const images = [room.img1, room.img2, room.img3, room.img4].filter(Boolean) as string[];
+  const sliderImages = images.length ? images : ["/images/placeholder-room.png"];
 
   return (
-    <div className="mt-4 flex gap-4 bg-transparent">
-      {/* Left Column - Room Name and Details */}
-      <div className="flex-1 flex flex-col gap-2.5">
-        
-        {/* ✅ Room Name wrapped in Link */}
-        <Link href={`/rooms#room-${id}`} scroll={true}>
-          <h3 className="text-lg font-semibold text-gray-800 hover:text-orange-600 transition-colors cursor-pointer">
-            {name}
-          </h3>
-        </Link>
-        
-        {/* Bed & Capacity Info */}
-        <div className="flex flex-col gap-1.5 text-sm text-gray-500">
-          <div className="flex items-center gap-2">
-            <FaBed className="text-gray-400" />
-            <span>{beds}</span>
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <FaUsers className="text-gray-400" />
-            <span>{formattedCapacity}</span>
-          </div>
-        </div>
+    <div className="mt-4 flex flex-col gap-2.5">
+      <Link href={`/rooms#room-${room.id}`} scroll={true}>
+        <h3 className="text-lg font-semibold text-gray-800 hover:text-orange-600 transition-colors cursor-pointer">
+          {room.name}
+        </h3>
+      </Link>
+      <div className="flex items-center gap-3 text-gray-500 text-sm">
+        <FaBed className="text-gray-400" /> {bedInfo}
+        <FaUsers className="text-gray-400 ml-2" /> {formattedCapacity}
       </div>
-
-      {/* Right */}
-      <div className="flex items-start sm:items-center justify-start sm:justify-end flex-col sm:flex-row gap-1 sm:gap-2">
-        <span className="text-lg sm:text-xl text-[#C49C74]">$ {price}</span>
-        <span className="text-xs sm:text-sm text-gray-400 whitespace-nowrap">per day</span>
+      {features.length > 0 && <div className="flex gap-2 mt-2 text-gray-600">{features}</div>}
+      <div className="mt-2 text-right">
+        <span className="text-lg sm:text-xl text-[#C49C74]">${room.cost}</span>
+        <span className="text-xs sm:text-sm text-gray-400 ml-1">per day</span>
       </div>
     </div>
   );
 };
 
 // ==================== MAIN ROOM CARD ====================
-const RoomCard: React.FC<RoomCardProps> = ({ room, index }) => {
+const RoomCard: React.FC<{ room: BackendRoom; index: number }> = ({ room, index }) => {
   const [isFavorited, setIsFavorited] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
 
-  if (!room || !room.image || room.image.length === 0) {
-    return null;
-  }
+  const images = [room.img1, room.img2, room.img3, room.img4].filter(Boolean) as string[];
+  const sliderImages = images.length ? images : ["/images/placeholder-room.png"];
 
   return (
     <motion.div
@@ -164,24 +124,15 @@ const RoomCard: React.FC<RoomCardProps> = ({ room, index }) => {
       transition={{ duration: 0.6, delay: index * 0.1 }}
       className="w-full shrink-0 relative mx-2 sm:mx-4 md:mx-9"
     >
-      {/* Image Section */}
       <RoomImageSection
-        images={room.image}
+        images={sliderImages}
         name={room.name}
         isFavorited={isFavorited}
         setIsFavorited={setIsFavorited}
         activeSlide={activeSlide}
         setActiveSlide={setActiveSlide}
       />
-
-      {/* Data Section */}
-      <RoomDataSection
-        id={room.id} // ✅ Passing ID to the data section
-        name={room.name}
-        beds={room.beds}
-        capacity={room.capacity}
-        price={room.price}
-      />
+      <RoomDataSection room={room} />
     </motion.div>
   );
 };
