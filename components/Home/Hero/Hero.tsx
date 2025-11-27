@@ -16,7 +16,7 @@ const Hero = () => {
       />
       <div className="absolute top-0 left-0 w-full h-full bg-black/50" />
 
-      <div className="relative z-10 flex flex-col justify-center h-full px-4 py-8 sm:px-6 md:px-12 lg:px-20 xl:px-32 text-white">
+      <div className="relative z-10 flex flex-col justify-start h-full px-4 py-8 sm:px-6 md:px-12 lg:px-20 xl:px-32 text-white">
         <motion.h1
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
