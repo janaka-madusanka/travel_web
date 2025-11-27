@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Sidebar from "../../dashboard/Sidebar";
+import Sidebar from "../../dashboard/Sidebar"; // adjust path if needed
 
 // ---------------------- TYPES ----------------------
 
@@ -53,7 +53,7 @@ interface FormState {
   clothRack: YesNo;
 }
 
-// ---------------------- COMPONENT ----------------------
+// ---------------------- MAIN COMPONENT ----------------------
 
 export default function AddRoomPage() {
   const router = useRouter();
@@ -63,7 +63,7 @@ export default function AddRoomPage() {
     cost: "",
     offer: "",
     size: "",
-    ac: "YES", // mapped later to ACType
+    ac: "YES",
     wifi: "YES",
     fan: "NO",
     balcony: "NO",
@@ -76,6 +76,11 @@ export default function AddRoomPage() {
     dryingRack: "NO",
     clothRack: "NO",
   });
+
+  // Optional sections toggles
+  const [hasBedrooms, setHasBedrooms] = useState<boolean>(true);
+  const [hasBathrooms, setHasBathrooms] = useState<boolean>(true);
+  const [hasKitchen, setHasKitchen] = useState<boolean>(false);
 
   const [bedrooms, setBedrooms] = useState<Bedroom[]>([{ bedType: "SINGLE", count: 1 }]);
   const [bathrooms, setBathrooms] = useState<Bathroom[]>([
@@ -91,23 +96,39 @@ export default function AddRoomPage() {
     waterBottle: "NO",
   });
 
+  // images
   const [images, setImages] = useState<File[]>([]);
   const [previewImages, setPreviewImages] = useState<string[]>([]);
+
+  // ui state
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // ---------------- INPUT HANDLERS ------------------
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData((s) => ({ ...s, [name]: value }));
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const files = Array.from(e.target.files).slice(0, 4);
+
+    // cleanup old object URLs
+    previewImages.forEach((u) => URL.revokeObjectURL(u));
+
     setImages(files);
     setPreviewImages(files.map((f) => URL.createObjectURL(f)));
   };
+
+  // cleanup previews on unmount
+  useEffect(() => {
+    return () => {
+      previewImages.forEach((u) => URL.revokeObjectURL(u));
+    };
+  }, [previewImages]);
 
   const fileToBase64 = (file: File) =>
     new Promise<string>((resolve, reject) => {
@@ -117,15 +138,36 @@ export default function AddRoomPage() {
       reader.onerror = (err) => reject(err);
     });
 
+  // ---------------- DYNAMIC LIST HANDLERS ------------------
+
+  const addBedroom = () => setBedrooms((b) => [...b, { bedType: "SINGLE", count: 1 }]);
+  const removeBedroom = (idx: number) => setBedrooms((b) => b.filter((_, i) => i !== idx));
+  const updateBedroomType = (idx: number, val: string) => setBedrooms((b) => { const copy = [...b]; copy[idx].bedType = val; return copy; });
+  const updateBedroomCount = (idx: number, val: number) => setBedrooms((b) => { const copy = [...b]; copy[idx].count = val; return copy; });
+
+  const addBathroom = () =>
+    setBathrooms((b) => [
+      ...b,
+      { shower: "YES", slipper: "YES", soap: "YES", bidet: "NO", towels: "YES", toiletPaper: "YES", hotWater: "YES", privateBathroom: "YES" },
+    ]);
+  const removeBathroom = (idx: number) => setBathrooms((b) => b.filter((_, i) => i !== idx));
+  const updateBathroomField = (idx: number, key: keyof Bathroom, val: YesNo) =>
+    setBathrooms((b) => {
+      const copy = [...b];
+      copy[idx] = { ...copy[idx], [key]: val };
+      return copy;
+    });
+
   // ---------------- SUBMIT --------------------------
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
+    setSuccessMessage(null);
     setLoading(true);
 
     try {
-      const token = localStorage.getItem("adminToken");
+      const token = typeof window !== "undefined" ? localStorage.getItem("adminToken") : null;
 
       // Convert images → Base64
       const imagesBase64: Record<string, string> = {};
@@ -133,20 +175,36 @@ export default function AddRoomPage() {
         imagesBase64[`img${i + 1}`] = await fileToBase64(images[i]);
       }
 
-      // Only send kitchen if at least one YES
-      const kitchenPayload = Object.values(kitchen).some((v) => v === "YES") ? kitchen : undefined;
+      // Only send kitchen if user enabled it AND at least one YES
+      const kitchenHasAnyYes = Object.values(kitchen).some((v) => v === "YES");
+      const kitchenPayload = hasKitchen && kitchenHasAnyYes ? kitchen : undefined;
 
       // Map AC field to Prisma enum ACType
       const acEnum = formData.ac === "YES" ? "AC" : "NonAC";
 
       const payload = {
-        ...formData,
-        ac: acEnum,
-        cost: Number(formData.cost),
+        name: formData.name,
+        cost: Number(formData.cost || 0),
         offer: formData.offer ? Number(formData.offer) : null,
-        bedrooms,
-        bathrooms,
+        size: formData.size,
+        ac: acEnum,
+        // amenities
+        wifi: formData.wifi,
+        fan: formData.fan,
+        balcony: formData.balcony,
+        gardenView: formData.gardenView,
+        tv: formData.tv,
+        iron: formData.iron,
+        locker: formData.locker,
+        parking: formData.parking,
+        sittingArea: formData.sittingArea,
+        dryingRack: formData.dryingRack,
+        clothRack: formData.clothRack,
+        // conditional sections
+        bedrooms: hasBedrooms ? bedrooms : [],
+        bathrooms: hasBathrooms ? bathrooms : [],
         kitchen: kitchenPayload,
+        // images
         ...imagesBase64,
       };
 
@@ -154,18 +212,22 @@ export default function AddRoomPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify(payload),
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to create room");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const message = (data && (data.error || data.message)) || "Failed to create room";
+        throw new Error(message);
+      }
 
-      alert("Room created successfully!");
-      router.push("/admin/rooms");
+      setSuccessMessage("Room created successfully! Redirecting...");
+      // small delay so user sees message (but not required)
+      setTimeout(() => router.push("admin/rooms/add"), 700);
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || "Unknown error");
     } finally {
       setLoading(false);
     }
@@ -174,132 +236,219 @@ export default function AddRoomPage() {
   // ---------------- RENDER --------------------------
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen bg-gray-50">
       <Sidebar />
-      <div className="flex-1 p-6 bg-gray-100 overflow-auto">
-        <h1 className="text-3xl font-bold mb-6">Add New Room</h1>
-        {error && <p className="text-red-500 mb-4">{error}</p>}
+      <div className="flex-1 p-6 overflow-auto">
+        <h1 className="text-3xl font-bold mb-4">Add New Room</h1>
 
-        <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md max-w-4xl mx-auto flex flex-col gap-6">
+        <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md max-w-5xl mx-auto flex flex-col gap-6">
+          {error && <div className="text-red-600 bg-red-50 p-3 rounded">{error}</div>}
+          {successMessage && <div className="text-green-700 bg-green-50 p-3 rounded">{successMessage}</div>}
+
           {/* Basic Info */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input label="Room Name" name="name" value={formData.name} onChange={handleChange} />
-            <Input type="number" label="Cost" name="cost" value={formData.cost} onChange={handleChange} />
+            <Input type="number" label="Cost (LKR)" name="cost" value={formData.cost} onChange={handleChange} />
             <Input type="number" label="Offer (%)" name="offer" value={formData.offer} onChange={handleChange} />
             <Input label="Room Size" name="size" value={formData.size} onChange={handleChange} />
+            <div>
+              <label className="font-semibold">AC</label>
+              <select name="ac" value={formData.ac} onChange={handleChange} className="border p-2 rounded w-full">
+                <option value="YES">YES</option>
+                <option value="NO">NO</option>
+              </select>
+            </div>
+            <div>
+              <label className="font-semibold">Preview / Save</label>
+              <div className="text-sm text-gray-600 p-2 border rounded">
+                Use the form to add the room. You can toggle optional sections below.
+              </div>
+            </div>
           </div>
 
           {/* Amenities */}
-          <h2 className="text-xl font-semibold">Amenities</h2>
-          <div className="grid grid-cols-3 gap-4">
-            {(
-              [
-                "ac","wifi","fan","balcony","gardenView","tv","iron","locker","parking","sittingArea","dryingRack","clothRack",
-              ] as (keyof FormState)[]
-            ).map((key) => (
-              <SelectYesNo key={key} label={key} name={key} value={formData[key]} onChange={handleChange} />
-            ))}
-          </div>
-
-          {/* Bedrooms */}
-          <h2 className="text-xl font-semibold">Bedrooms</h2>
-          {bedrooms.map((b, i) => (
-            <div key={i} className="grid grid-cols-2 gap-4 border p-4 rounded">
-              <div>
-                <label className="font-semibold">Bed Type</label>
-                <select
-                  value={b.bedType}
-                  onChange={(e) => {
-                    const beds = [...bedrooms];
-                    beds[i].bedType = e.target.value;
-                    setBedrooms(beds);
-                  }}
-                  className="border p-2 rounded w-full"
-                >
-                  <option value="SINGLE">Single</option>
-                  <option value="DOUBLE">Double</option>
-                  <option value="QUEEN">Queen</option>
-                  <option value="KING">King</option>
-                  <option value="TWIN">Twin</option>
-                  <option value="DOUBLE_ROOM">Double Room</option>
-                  <option value="TRIPLE">Triple</option>
-                  <option value="FAMILY">Family</option>
-                </select>
-              </div>
-              <Input type="number" label="Count" value={b.count} onChange={(e) => {
-                const beds = [...bedrooms];
-                beds[i].count = Number(e.target.value);
-                setBedrooms(beds);
-              }} />
-            </div>
-          ))}
-          <button type="button" className="bg-blue-500 text-white px-3 py-1 rounded" onClick={() => setBedrooms([...bedrooms, { bedType: "SINGLE", count: 1 }])}>
-            + Add Bedroom
-          </button>
-
-          {/* Bathrooms */}
-          <h2 className="text-xl font-semibold">Bathrooms</h2>
-          {bathrooms.map((b, i) => (
-            <div key={i} className="grid grid-cols-4 gap-4 border p-4 rounded">
-              {(Object.keys(b) as (keyof Bathroom)[]).map((key) => (
-                <SelectYesNo key={key} label={key} name={key} value={b[key]} onChange={(e) => {
-                  const list = [...bathrooms];
-                  list[i][key] = e.target.value as YesNo;
-                  setBathrooms(list);
-                }} />
+          <div className="border-t pt-4">
+            <h2 className="text-xl font-semibold mb-2">Amenities</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {(
+                [
+                  "wifi","fan","balcony","gardenView","tv","iron","locker","parking","sittingArea","dryingRack","clothRack",
+                ] as (keyof FormState)[]
+              ).map((key) => (
+                <SelectYesNo key={key} label={toLabel(key)} name={key} value={formData[key]} onChange={handleChange} />
               ))}
             </div>
-          ))}
-          <button type="button" className="bg-blue-500 text-white px-3 py-1 rounded" onClick={() =>
-            setBathrooms([...bathrooms, { shower: "YES", slipper: "YES", soap: "YES", bidet: "NO", towels: "YES", toiletPaper: "YES", hotWater: "YES", privateBathroom: "YES" }])
-          }>
-            + Add Bathroom
-          </button>
+          </div>
 
-          {/* Kitchen */}
-          <h2 className="text-xl font-semibold">Kitchen</h2>
-          <div className="grid grid-cols-3 gap-4">
-            {(Object.keys(kitchen) as (keyof Kitchen)[]).map((key) => (
-              <SelectYesNo key={key} label={key} name={key} value={kitchen[key]} onChange={(e) => setKitchen({ ...kitchen, [key]: e.target.value as YesNo })} />
-            ))}
+          {/* Bedrooms Section */}
+          <div className="border-t pt-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">Bedrooms</h2>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600">Has bedrooms?</span>
+                <SelectYesNo label="" name="hasBedrooms" value={hasBedrooms ? "YES" : "NO"} onChange={(e) => setHasBedrooms(e.target.value === "YES")} />
+              </div>
+            </div>
+
+            {hasBedrooms && (
+              <>
+                <div className="flex flex-col gap-3 mt-3">
+                  {bedrooms.map((b, i) => (
+                    <div key={i} className="grid grid-cols-1 md:grid-cols-4 gap-3 border p-3 rounded items-end">
+                      <div>
+                        <label className="font-semibold">Bed Type</label>
+                        <select value={b.bedType} onChange={(e) => updateBedroomType(i, e.target.value)} className="border p-2 rounded w-full">
+                          <option value="SINGLE">Single</option>
+                          <option value="DOUBLE">Double</option>
+                          <option value="QUEEN">Queen</option>
+                          <option value="KING">King</option>
+                          <option value="TWIN">Twin</option>
+                          <option value="DOUBLE_ROOM">Double Room</option>
+                          <option value="TRIPLE">Triple</option>
+                          <option value="FAMILY">Family</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="font-semibold">Count</label>
+                        <input
+                          type="number"
+                          min={1}
+                          value={b.count}
+                          onChange={(e) => updateBedroomCount(i, Number(e.target.value || 1))}
+                          className="border p-2 rounded w-full"
+                        />
+                      </div>
+
+                      <div className="md:col-span-2 flex justify-end gap-2">
+                        <button
+                          type="button"
+                          className="bg-red-500 text-white px-3 py-1 rounded"
+                          onClick={() => removeBedroom(i)}
+                          aria-label={`Remove bedroom ${i + 1}`}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-3">
+                  <button type="button" onClick={addBedroom} className="bg-blue-600 text-white px-4 py-2 rounded">
+                    + Add Bedroom
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Bathrooms Section */}
+          <div className="border-t pt-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">Bathrooms</h2>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600">Has bathrooms?</span>
+                <SelectYesNo label="" name="hasBathrooms" value={hasBathrooms ? "YES" : "NO"} onChange={(e) => setHasBathrooms(e.target.value === "YES")} />
+              </div>
+            </div>
+
+            {hasBathrooms && (
+              <>
+                <div className="flex flex-col gap-3 mt-3">
+                  {bathrooms.map((b, i) => (
+                    <div key={i} className="grid grid-cols-2 md:grid-cols-8 gap-2 border p-3 rounded">
+                      {(Object.keys(b) as (keyof Bathroom)[]).map((key) => (
+                        <div key={key} className="md:col-span-1">
+                          <label className="font-semibold text-sm">{toLabel(key)}</label>
+                          <select
+                            value={b[key]}
+                            onChange={(e) => updateBathroomField(i, key, e.target.value as YesNo)}
+                            className="border p-2 rounded w-full"
+                          >
+                            <option value="YES">YES</option>
+                            <option value="NO">NO</option>
+                          </select>
+                        </div>
+                      ))}
+
+                      <div className="md:col-span-1 flex items-center justify-end gap-2">
+                        <button type="button" className="bg-red-500 text-white px-3 py-1 rounded" onClick={() => removeBathroom(i)}>
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-3">
+                  <button type="button" onClick={addBathroom} className="bg-blue-600 text-white px-4 py-2 rounded">
+                    + Add Bathroom
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Kitchen Section */}
+          <div className="border-t pt-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">Kitchen</h2>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600">Has kitchen?</span>
+                <SelectYesNo label="" name="hasKitchen" value={hasKitchen ? "YES" : "NO"} onChange={(e) => setHasKitchen(e.target.value === "YES")} />
+              </div>
+            </div>
+
+            {hasKitchen && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
+                {(Object.keys(kitchen) as (keyof Kitchen)[]).map((key) => (
+                  <SelectYesNo key={key} label={toLabel(key)} name={key} value={kitchen[key]} onChange={(e) => setKitchen({ ...kitchen, [key]: e.target.value as YesNo })} />
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Images */}
-          <div>
+          <div className="border-t pt-4">
             <label className="font-semibold">Upload Images (max 4)</label>
-            <input type="file" multiple accept="image/*" onChange={handleImageChange} className="block" />
-            <div className="flex gap-2 mt-2">
+            <input type="file" multiple accept="image/*" onChange={handleImageChange} className="block mt-2" />
+            <div className="flex gap-2 mt-3">
               {previewImages.map((src, i) => (
-                <img key={i} src={src} className="w-20 h-20 rounded object-cover" />
+                <div key={i} className="relative">
+                  <img src={src} alt={`preview-${i}`} className="w-28 h-20 rounded object-cover border" />
+                </div>
               ))}
             </div>
           </div>
 
           {/* Submit */}
-          <button className="bg-green-600 text-white px-6 py-3 rounded text-lg" disabled={loading}>
-            {loading ? "Saving..." : "Create Room"}
-          </button>
+          <div className="pt-4">
+            <button type="submit" className="bg-green-600 text-white px-6 py-3 rounded text-lg" disabled={loading}>
+              {loading ? "Saving..." : "Create Room"}
+            </button>
+          </div>
         </form>
       </div>
     </div>
   );
 }
 
-// ---------------------- REUSABLE COMPONENTS ----------------------
+// ---------------------- REUSABLE UI ----------------------
 
 interface InputProps {
   label: string;
   name?: string;
   value: any;
   type?: string;
-  onChange?: React.ChangeEventHandler<HTMLInputElement>;
+  onChange?: React.ChangeEventHandler<HTMLInputElement | HTMLSelectElement>;
 }
 
 function Input({ label, name, value, onChange, type = "text" }: InputProps) {
   return (
     <div className="flex flex-col">
       <label className="font-semibold">{label}</label>
-      <input type={type} name={name} value={value} onChange={onChange} className="border p-2 rounded" />
+      <input type={type} name={name} value={value} onChange={onChange as any} className="border p-2 rounded" />
     </div>
   );
 }
@@ -314,11 +463,21 @@ interface SelectProps {
 function SelectYesNo({ label, name, value, onChange }: SelectProps) {
   return (
     <div className="flex flex-col">
-      <label className="font-semibold">{label}</label>
-      <select name={name} value={value} onChange={onChange} className="border p-2 rounded">
+      {label && <label className="font-semibold">{label}</label>}
+      <select name={name} value={value} onChange={onChange as any} className="border p-2 rounded">
         <option value="YES">YES</option>
         <option value="NO">NO</option>
       </select>
     </div>
   );
+}
+
+// ---------------------- HELPERS ----------------------
+
+function toLabel(key: string) {
+  // convert camelCase or snake_case to nicer label
+  return key
+    .replace(/([A-Z])/g, " $1")
+    .replace(/_/g, " ")
+    .replace(/^\w/, (c) => c.toUpperCase());
 }
