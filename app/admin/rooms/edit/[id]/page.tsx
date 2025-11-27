@@ -39,6 +39,7 @@ interface FormState {
   cost: string;
   offer: string;
   size: string;
+  capacity: string; // ✅ added capacity
   ac: YesNo;
   wifi: YesNo;
   fan: YesNo;
@@ -65,6 +66,7 @@ export default function EditRoomPage() {
     cost: "",
     offer: "",
     size: "",
+    capacity: "", // ✅ initial value
     ac: "YES",
     wifi: "YES",
     fan: "NO",
@@ -114,6 +116,7 @@ export default function EditRoomPage() {
           cost: room.cost.toString(),
           offer: room.offer?.toString() || "",
           size: room.size,
+          capacity: room.capacity?.toString() || "", // ✅ fetch capacity
           ac: room.ac === "AC" ? "YES" : "NO",
           wifi: room.wifi,
           fan: room.fan,
@@ -186,6 +189,7 @@ export default function EditRoomPage() {
         ac: formData.ac === "YES" ? "AC" : "NonAC",
         cost: Number(formData.cost),
         offer: formData.offer ? Number(formData.offer) : null,
+        capacity: Number(formData.capacity), // ✅ send capacity
         bedrooms,
         bathrooms,
         kitchen: kitchenPayload,
@@ -238,6 +242,7 @@ export default function EditRoomPage() {
               <Input type="number" label="Cost" name="cost" value={formData.cost} onChange={handleChange} />
               <Input type="number" label="Offer (%)" name="offer" value={formData.offer} onChange={handleChange} />
               <Input label="Room Size" name="size" value={formData.size} onChange={handleChange} />
+              <Input type="number" label="Capacity" name="capacity" value={formData.capacity} onChange={handleChange} /> {/* ✅ Capacity input */}
             </div>
           </Section>
 
