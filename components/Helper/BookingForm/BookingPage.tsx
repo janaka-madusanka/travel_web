@@ -79,19 +79,10 @@ const roomsData = [
 ];
 
 const vehicleData = [
-  { id: 1, type: "Car - 4 seats", price: "20" },
-  { id: 2, type: "Tuk Tuk", price: "10" },
-  { id: 3, type: "Safari", price: "100" },
-  { id: 4, type: "Bike", price: "15" },
-];
-
-const countries = [
-  "United States",
-  "United Kingdom",
-  "Canada",
-  "Australia",
-  "Sri Lanka",
-  "India",
+  { id: 1, type: "Car - 4 seats" },
+  { id: 2, type: "Tuk Tuk" },
+  { id: 3, type: "Safari" },
+  { id: 4, type: "Bike" },
 ];
 
 export default function BookingSystem() {
@@ -194,37 +185,12 @@ useEffect(() => {
     return days > 0 ? Number(selectedRoom.price) * days : 0;
   };
 
-  // Calculate vehicle costs
-  const calculateVehicleCost = () => {
-    if (!formData.vehicleNeeded || formData.vehicles.length === 0) return [];
 
-    return formData.vehicles
-      .map((v, idx) => {
-        const vehicleInfo = vehicleData.find(
-          (item) => item.id === Number(v.type)
-        );
-        if (!vehicleInfo || !v.startDate || !v.endDate) return null;
-
-        const start = new Date(v.startDate);
-        const end = new Date(v.endDate);
-        const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
-        const cost =
-          days > 0 ? Number(vehicleInfo.price) * v.quantity * days : 0;
-
-        return {
-          name: vehicleInfo.type,
-          days,
-          cost,
-        };
-      })
-      .filter(Boolean);
-  };
 
   const roomCost = calculateRoomCost();
-  const vehicleCosts = calculateVehicleCost();
-  const totalVehicleCost = vehicleCosts.reduce((sum, v) => sum + v.cost, 0);
-  const serviceCharge = (roomCost + totalVehicleCost) * 0.05;
-  const grandTotal = roomCost + totalVehicleCost + serviceCharge;
+
+  const serviceCharge = roomCost * 0.05;
+const grandTotal = roomCost + serviceCharge;
 
   const handleChange = (field: keyof typeof formData, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -347,7 +313,7 @@ useEffect(() => {
             <div
               className={`w-6 h-6 rounded-full ${
                 isContactComplete ? "bg-white" : "border-2 border-green-500"
-              } flex items-center justify-center flex-shrink-0`}
+              } flex items-center justify-center shrink-0`}
             >
               <span
                 className={`${
@@ -371,7 +337,7 @@ useEffect(() => {
             <div
               className={`w-6 h-6 rounded-full ${
                 isBookingComplete ? "bg-white" : "border-2 border-green-500"
-              } flex items-center justify-center flex-shrink-0`}
+              } flex items-center justify-center shrink-0`}
             >
               <span
                 className={`${
@@ -409,7 +375,7 @@ useEffect(() => {
                     <select
                       value={formData.title}
                       onChange={(e) => handleChange("title", e.target.value)}
-                      className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent appearance-none bg-white"
+                      className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none appearance-none bg-white"
                     >
                       <option>Title</option>
                       <option>Mr</option>
@@ -439,7 +405,7 @@ useEffect(() => {
                     placeholder="First Name"
                     value={formData.firstName}
                     onChange={(e) => handleChange("firstName", e.target.value)}
-                    className="px-2.5 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="px-2.5 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                   />
 
                   <input
@@ -447,7 +413,7 @@ useEffect(() => {
                     placeholder="Last Name"
                     value={formData.lastName}
                     onChange={(e) => handleChange("lastName", e.target.value)}
-                    className="px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                   />
                 </div>
 
@@ -460,7 +426,7 @@ useEffect(() => {
                       onChange={(e) =>
                         handleChange("dateOfBirth", e.target.value)
                       }
-                      className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                     />
                     {/*  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
                       <svg
@@ -585,7 +551,7 @@ useEffect(() => {
                   placeholder="Email Address"
                   value={formData.email}
                   onChange={(e) => handleChange("email", e.target.value)}
-                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                 />
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -595,7 +561,7 @@ useEffect(() => {
                       onChange={(e) =>
                         handleChange("passportType", e.target.value)
                       }
-                      className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent appearance-none bg-white"
+                      className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none appearance-none bg-white"
                     >
                       <option>Passport</option>
                       <option>NIC</option>
@@ -624,8 +590,8 @@ useEffect(() => {
                     onChange={(e) =>
                       handleChange("passportNumber", e.target.value)
                     }
-                    className="md:col-span-2 px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  />
+                    className="md:col-span-2 px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                  />  
                 </div>
               </div>
             </div>
@@ -649,7 +615,7 @@ useEffect(() => {
                     <select
                       value={formData.room}
                       onChange={(e) => handleChange("room", e.target.value)}
-                      className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent appearance-none bg-white"
+                      className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none appearance-none bg-white"
                     >
                       <option value="">The Grand London</option>
                       {roomsData.map((room) => (
@@ -688,7 +654,7 @@ useEffect(() => {
                         onChange={(e) =>
                           handleChange("checkInDate", e.target.value)
                         }
-                        className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                         placeholder="Select Date"
                       />
                       {/* <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
@@ -719,7 +685,7 @@ useEffect(() => {
                         onChange={(e) =>
                           handleChange("checkOutDate", e.target.value)
                         }
-                        className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                         placeholder="Select Date"
                       />
                       {/*  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
@@ -753,7 +719,7 @@ useEffect(() => {
                         onChange={(e) =>
                           handleChange("checkInTime", e.target.value)
                         }
-                        className="w-full px-3 py-2.5 mb-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        className="w-full px-3 py-2.5 mb-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                         placeholder="Select Time"
                       />
                       {/*  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
@@ -784,7 +750,7 @@ useEffect(() => {
                         onChange={(e) =>
                           handleChange("checkOutTime", e.target.value)
                         }
-                        className="w-full px-3 py-2.5 mb-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        className="w-full px-3 py-2.5 mb-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                         placeholder="Select Time"
                       />
                       {/*  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
@@ -836,13 +802,18 @@ useEffect(() => {
                           className="border border-gray-200 rounded-lg p-4 bg-gray-50"
                         >
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+
+                              <div className="flex items-center px-3 py-2.5 text-sm border border-gray-300 rounded-md bg-gray-50">
+                    <span className="text-gray-600">Select Vehicle</span>
+                  </div>
+
                             <div className="relative">
                               <select
                                 value={vehicle.type}
                                 onChange={(e) =>
                                   updateVehicle(index, "type", e.target.value)
                                 }
-                                className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent appearance-none bg-white"
+                                className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent  outline-none appearance-none bg-white"
                               >
                                 <option value="">Select Vehicle</option>
                                 {vehicleData.map((v) => (
@@ -868,7 +839,7 @@ useEffect(() => {
                               </div>
                             </div>
 
-                            <input
+                            {/* <input
                               type="text"
                               placeholder="Car"
                               value={
@@ -878,7 +849,7 @@ useEffect(() => {
                               }
                               readOnly
                               className="px-3 py-2.5 text-sm border border-gray-300 rounded-md bg-white"
-                            />
+                            /> */}
 
                             <div className="flex items-center gap-2">
                               <input
@@ -892,7 +863,7 @@ useEffect(() => {
                                     Number(e.target.value)
                                   )
                                 }
-                                className="w-20 px-3 py-2.5 text-sm border border-gray-300 rounded-md text-center focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                className="w-20 px-3 py-2.5 text-sm border border-gray-300 rounded-md text-center focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                               />
                               <button
                                 onClick={() => removeVehicle(index)}
@@ -919,7 +890,7 @@ useEffect(() => {
                                       e.target.value
                                     )
                                   }
-                                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                                   placeholder="Select Date"
                                 />
                                 {/*   <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
@@ -954,7 +925,7 @@ useEffect(() => {
                                       e.target.value
                                     )
                                   }
-                                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                                   placeholder="Select Date"
                                 />
                                 {/* <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
@@ -1013,28 +984,27 @@ useEffect(() => {
       {/* Guest Details */}
       <div className="space-y-2 text-sm">
         <div className="flex justify-between gap-2">
-          <span className="text-gray-600 truncate">
+
+          <span className="text-gray-600 flex-shrink-0">Name</span>
+          <span className="text-gray-900 truncate text-right">
             {formData.title}. {formData.firstName} {formData.lastName}
-          </span>
-          <span className="text-gray-800 font-medium truncate flex-shrink-0">
-            {formData.country}
           </span>
         </div>
         <div className="flex justify-between gap-2">
           <span className="text-gray-600 flex-shrink-0">Contact:</span>
-          <span className="text-gray-800 truncate text-right">
+          <span className="text-gray-900 truncate text-right">
          {formData.contactNumber}
           </span>
         </div>
         <div className="flex justify-between gap-2">
           <span className="text-gray-600 flex-shrink-0">Email:</span>
-          <span className="text-gray-800 truncate text-right">
+          <span className="text-gray-900 truncate text-right">
             {formData.email}
           </span>
         </div>
         <div className="flex justify-between gap-2">
-          <span className="text-gray-600 flex-shrink-0">Passport:</span>
-          <span className="text-gray-800 truncate text-right">
+          <span className="text-gray-600 flex-shrink-0">{formData.passportType}</span>
+          <span className="text-gray-900 truncate text-right">
             {formData.passportNumber}
           </span>
         </div>
@@ -1063,35 +1033,7 @@ useEffect(() => {
           </span>
         </div>
 
-        {formData.vehicleNeeded && vehicleCosts.length > 0 && (
-          <>
-            <div className="flex justify-between items-center gap-2">
-              <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                <span className="text-gray-700 text-sm truncate">Vehicle Charge</span>
-                {vehicleCosts[0] && (
-                  <span className="bg-gray-300 text-gray-700 text-xs px-2 py-0.5 rounded-full flex-shrink-0">
-                    {vehicleCosts[0].days} Days
-                  </span>
-                )}
-              </div>
-            </div>
-            {vehicleCosts.map((v, idx) => (
-              <div key={idx} className="pl-4 space-y-1">
-                <div className="flex justify-between text-sm gap-2">
-                  <span className="text-gray-600 truncate">{v.name}</span>
-                  <span className="text-gray-800 flex-shrink-0">USD {v.cost}</span>
-                </div>
-              </div>
-            ))}
-            <div className="flex justify-between border-t pt-2 gap-2">
-              <span className="text-gray-700 text-sm"></span>
-              <span className="text-gray-800 font-medium text-sm flex-shrink-0">
-                USD {totalVehicleCost}
-              </span>
-            </div>
-          </>
-        )}
-
+      
         <div className="flex justify-between items-center gap-2">
           <div className="flex items-center gap-1.5 flex-1 min-w-0">
             <span className="text-gray-700 text-sm truncate">Service Charge</span>
