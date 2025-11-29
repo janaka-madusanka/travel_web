@@ -193,9 +193,22 @@ useEffect(() => {
 const grandTotal = roomCost + serviceCharge;
 
   const handleChange = (field: keyof typeof formData, value: any) => {
+  if (field === "vehicleNeeded" && value === true) {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+      vehicles: [{ type: "", quantity: 1, startDate: "", endDate: "" }],
+    }));
+  } else if (field === "vehicleNeeded" && value === false) {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+      vehicles: [],
+    }));
+  } else {
     setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
+  }
+};
   const addVehicle = () => {
     setFormData((prev) => ({
       ...prev,
