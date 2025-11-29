@@ -7,6 +7,10 @@ import Select from "react-select";
 import { getData } from "country-list";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
 
 interface Vehicle {
   type: string;
@@ -190,13 +194,12 @@ export default function BookingSystem() {
 
   const handleChange = (field: keyof typeof formData, value: any) => {
     if (field === "vehicleNeeded" && value === true) {
-
-  setFormData((prev) => ({
-    ...prev,
-    [field]: value,
-    vehicles: [{ type: "1", quantity: 1, startDate: "", endDate: "" }], 
-  }));
-} else if (field === "vehicleNeeded" && value === false) {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value,
+        vehicles: [{ type: "1", quantity: 1, startDate: "", endDate: "" }],
+      }));
+    } else if (field === "vehicleNeeded" && value === false) {
       setFormData((prev) => ({
         ...prev,
         [field]: value,
@@ -207,14 +210,14 @@ export default function BookingSystem() {
     }
   };
   const addVehicle = () => {
-  setFormData((prev) => ({
-    ...prev,
-    vehicles: [
-      ...prev.vehicles,
-      { type: "1", quantity: 1, startDate: "", endDate: "" }, 
-    ],
-  }));
-};
+    setFormData((prev) => ({
+      ...prev,
+      vehicles: [
+        ...prev.vehicles,
+        { type: "1", quantity: 1, startDate: "", endDate: "" },
+      ],
+    }));
+  };
   const updateVehicle = (index: number, field: keyof Vehicle, value: any) => {
     const updated = [...formData.vehicles];
     updated[index][field] = value;
@@ -620,16 +623,16 @@ export default function BookingSystem() {
                   </div>
                   <div className="relative">
                     <select
-  value={formData.room}
-  onChange={(e) => handleChange("room", e.target.value)}
-  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none appearance-none bg-white"
->
-  {roomsData.map((room) => (
-    <option key={room.id} value={room.id}>
-      {room.name}
-    </option>
-  ))}
-</select>
+                      value={formData.room}
+                      onChange={(e) => handleChange("room", e.target.value)}
+                      className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none appearance-none bg-white"
+                    >
+                      {roomsData.map((room) => (
+                        <option key={room.id} value={room.id}>
+                          {room.name}
+                        </option>
+                      ))}
+                    </select>
                     <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
                       <svg
                         className="w-4 h-4 text-gray-500"
@@ -653,62 +656,71 @@ export default function BookingSystem() {
                     <label className="block text-xs font-medium text-gray-600 mb-1.5">
                       From
                     </label>
-                    <div className="relative">
-                      <input
-                        type="date"
-                        value={formData.checkInDate}
-                        onChange={(e) =>
-                          handleChange("checkInDate", e.target.value)
+                    <div className="w-full relative">
+                      <DatePicker
+                        selected={
+                          formData.checkInDate
+                            ? new Date(formData.checkInDate)
+                            : null
                         }
+                        onChange={(date) =>
+                          handleChange(
+                            "checkInDate",
+                            date ? date.toISOString().split("T")[0] : ""
+                          )
+                        }
+                        dateFormat="yyyy-MM-dd"
+                        placeholderText="Select Check-In Date"
+                        minDate={new Date()}
                         className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
-                        placeholder="Select Date"
+                        wrapperClassName="w-full"
+                        popperProps={{
+    strategy: "fixed"
+  }}
+  popperPlacement="bottom-start"
                       />
-                      {/* <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                        <svg
-                          className="w-4 h-4 text-gray-500"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                          />
-                        </svg>
-                      </div> */}
+                      <CalendarTodayIcon
+                        sx={{ fontSize: 16 }}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none"
+                      />
                     </div>
                   </div>
+
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1.5">
                       To
                     </label>
-                    <div className="relative">
-                      <input
-                        type="date"
-                        value={formData.checkOutDate}
-                        onChange={(e) =>
-                          handleChange("checkOutDate", e.target.value)
+                    <div className="w-full relative">
+                      <DatePicker
+                        selected={
+                          formData.checkOutDate
+                            ? new Date(formData.checkOutDate)
+                            : null
+                        }
+                        onChange={(date) =>
+                          handleChange(
+                            "checkOutDate",
+                            date ? date.toISOString().split("T")[0] : ""
+                          )
+                        }
+                        dateFormat="yyyy-MM-dd"
+                        placeholderText="Select Check-Out Date"
+                        minDate={
+                          formData.checkInDate
+                            ? new Date(formData.checkInDate)
+                            : new Date()
                         }
                         className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
-                        placeholder="Select Date"
+                        wrapperClassName="w-full"
+                        popperProps={{
+    strategy: "fixed"
+  }}
+  popperPlacement="bottom-start"
                       />
-                      {/*  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                        <svg
-                          className="w-4 h-4 text-gray-500"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                          />
-                        </svg>
-                      </div> */}
+                      <CalendarTodayIcon 
+        sx={{ fontSize: 16 }}
+        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none" 
+      />
                     </div>
                   </div>
                 </div>
@@ -718,62 +730,72 @@ export default function BookingSystem() {
                     <label className="block text-xs font-medium text-gray-600 mb-1.5">
                       Check-In
                     </label>
-                    <div className="relative">
-                      <input
-                        type="time"
-                        value={formData.checkInTime}
-                        onChange={(e) =>
-                          handleChange("checkInTime", e.target.value)
+                    <div className="w-full relative">
+                      <DatePicker
+                        selected={
+                          formData.checkInTime
+                            ? new Date(`2000-01-01T${formData.checkInTime}`)
+                            : null
                         }
-                        className="w-full px-3 py-2.5 mb-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
-                        placeholder="Select Time"
+                        onChange={(date) =>
+                          handleChange(
+                            "checkInTime",
+                            date ? date.toTimeString().slice(0, 5) : ""
+                          )
+                        }
+                        showTimeSelect
+                        showTimeSelectOnly
+                        timeIntervals={15}
+                        timeCaption="Time"
+                        dateFormat="h:mm aa"
+                        placeholderText="Select Time"
+                        className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                        wrapperClassName="w-full"
+                        popperProps={{
+    strategy: "fixed"
+  }}
+  popperPlacement="bottom-start"
                       />
-                      {/*  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                        <svg
-                          className="w-4 h-4 text-gray-500"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-                      </div> */}
+                       <AccessTimeIcon 
+        sx={{ fontSize: 16 }}
+        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none" 
+      />
                     </div>
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                      Check-Out
+                      Check-Out 
                     </label>
-                    <div className="relative">
-                      <input
-                        type="time"
-                        value={formData.checkOutTime}
-                        onChange={(e) =>
-                          handleChange("checkOutTime", e.target.value)
+                    <div className="w-full relative">
+                      <DatePicker
+                        selected={
+                          formData.checkOutTime
+                            ? new Date(`2000-01-01T${formData.checkOutTime}`)
+                            : null
                         }
-                        className="w-full px-3 py-2.5 mb-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
-                        placeholder="Select Time"
+                        onChange={(date) =>
+                          handleChange(
+                            "checkOutTime",
+                            date ? date.toTimeString().slice(0, 5) : ""
+                          )
+                        }
+                        showTimeSelect
+                        showTimeSelectOnly
+                        timeIntervals={15}
+                        timeCaption="Time"
+                        dateFormat="h:mm aa"
+                        placeholderText="Select Time"
+                        className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                        wrapperClassName="w-full"
+                        popperProps={{
+    strategy: "fixed"
+  }}
+  popperPlacement="bottom-start"
                       />
-                      {/*  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                        <svg
-                          className="w-4 h-4 text-gray-500"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-                      </div> */}
+                       <AccessTimeIcon 
+        sx={{ fontSize: 16 }}
+        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none" 
+      />
                     </div>
                   </div>
                 </div>
@@ -883,70 +905,76 @@ export default function BookingSystem() {
                               <label className="block text-xs font-medium text-gray-600 mb-1.5">
                                 From
                               </label>
-                              <div className="relative">
-                                <input
-                                  type="date"
-                                  value={vehicle.startDate}
-                                  onChange={(e) =>
+                              <div className="w-full relative">
+                                <DatePicker
+                                  selected={
+                                    vehicle.startDate
+                                      ? new Date(vehicle.startDate)
+                                      : null
+                                  }
+                                  onChange={(date) =>
                                     updateVehicle(
                                       index,
                                       "startDate",
-                                      e.target.value
+                                      date
+                                        ? date.toISOString().split("T")[0]
+                                        : ""
                                     )
                                   }
+                                  dateFormat="yyyy-MM-dd"
+                                  placeholderText="Select Start Date"
+                                  minDate={new Date()}
                                   className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
-                                  placeholder="Select Date"
+                                  wrapperClassName="w-full"
+                                  popperProps={{
+    strategy: "fixed"
+  }}
+  popperPlacement="bottom-start"
                                 />
-                                {/*   <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                                  <svg
-                                    className="w-4 h-4 text-gray-500"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth="2"
-                                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                    />
-                                  </svg>
-                                </div> */}
+                                  <CalendarTodayIcon 
+        sx={{ fontSize: 16 }}
+        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none" 
+      />
                               </div>
                             </div>
                             <div>
                               <label className="block text-xs font-medium text-gray-600 mb-1.5">
                                 To
                               </label>
-                              <div className="relative">
-                                <input
-                                  type="date"
-                                  value={vehicle.endDate}
-                                  onChange={(e) =>
+                              <div className="w-full relative">
+                                <DatePicker
+                                  selected={
+                                    vehicle.endDate
+                                      ? new Date(vehicle.endDate)
+                                      : null
+                                  }
+                                  onChange={(date) =>
                                     updateVehicle(
                                       index,
                                       "endDate",
-                                      e.target.value
+                                      date
+                                        ? date.toISOString().split("T")[0]
+                                        : ""
                                     )
                                   }
+                                  dateFormat="yyyy-MM-dd"
+                                  placeholderText="Select End Date"
+                                  minDate={
+                                    vehicle.startDate
+                                      ? new Date(vehicle.startDate)
+                                      : new Date()
+                                  }
                                   className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
-                                  placeholder="Select Date"
+                                  wrapperClassName="w-full"
+                                  popperProps={{
+    strategy: "fixed"
+  }}
+  popperPlacement="bottom-start"
                                 />
-                                {/* <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                                  <svg
-                                    className="w-4 h-4 text-gray-500"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth="2"
-                                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                    />
-                                  </svg>
-                                </div> */}
+                                  <CalendarTodayIcon 
+        sx={{ fontSize: 16 }}
+        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none" 
+      />
                               </div>
                             </div>
                           </div>
