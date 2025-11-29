@@ -8,7 +8,6 @@ import { getData } from "country-list";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 
-
 interface Vehicle {
   type: string;
   quantity: number;
@@ -117,7 +116,7 @@ export default function BookingSystem() {
     contactNumber: "",
     passportType: "Passport",
     passportNumber: "",
-    room: "",
+    room: "1",
     checkInDate: "",
     checkInTime: "",
     checkOutDate: "",
@@ -129,22 +128,21 @@ export default function BookingSystem() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [detectedCountry, setDetectedCountry] = useState<string>("GB");
 
-
-useEffect(() => {
-  fetch("https://ipapi.co/json/")
-    .then((res) => res.json())
-    .then((data) => {
-      if (data.country_code) {
-        setFormData((prev) => ({
-          ...prev,
-          country: data.country_name || "",
-        }));
-        // Set the detected country code for PhoneInput
-        setDetectedCountry(data.country_code || "GB");
-      }
-    })
-    .catch((err) => console.log("Could not detect country:", err));
-}, []);
+  useEffect(() => {
+    fetch("https://ipapi.co/json/")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.country_code) {
+          setFormData((prev) => ({
+            ...prev,
+            country: data.country_name || "",
+          }));
+          // Set the detected country code for PhoneInput
+          setDetectedCountry(data.country_code || "GB");
+        }
+      })
+      .catch((err) => console.log("Could not detect country:", err));
+  }, []);
 
   const selectedRoom = roomsData.find((r) => r.id === Number(formData.room));
 
@@ -185,40 +183,38 @@ useEffect(() => {
     return days > 0 ? Number(selectedRoom.price) * days : 0;
   };
 
-
-
   const roomCost = calculateRoomCost();
 
   const serviceCharge = roomCost * 0.05;
-const grandTotal = roomCost + serviceCharge;
+  const grandTotal = roomCost + serviceCharge;
 
   const handleChange = (field: keyof typeof formData, value: any) => {
-  if (field === "vehicleNeeded" && value === true) {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-      vehicles: [{ type: "", quantity: 1, startDate: "", endDate: "" }],
-    }));
-  } else if (field === "vehicleNeeded" && value === false) {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-      vehicles: [],
-    }));
-  } else {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  }
-};
-  const addVehicle = () => {
-    setFormData((prev) => ({
-      ...prev,
-      vehicles: [
-        ...prev.vehicles,
-        { type: "", quantity: 1, startDate: "", endDate: "" },
-      ],
-    }));
-  };
+    if (field === "vehicleNeeded" && value === true) {
 
+  setFormData((prev) => ({
+    ...prev,
+    [field]: value,
+    vehicles: [{ type: "1", quantity: 1, startDate: "", endDate: "" }], 
+  }));
+} else if (field === "vehicleNeeded" && value === false) {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value,
+        vehicles: [],
+      }));
+    } else {
+      setFormData((prev) => ({ ...prev, [field]: value }));
+    }
+  };
+  const addVehicle = () => {
+  setFormData((prev) => ({
+    ...prev,
+    vehicles: [
+      ...prev.vehicles,
+      { type: "1", quantity: 1, startDate: "", endDate: "" }, 
+    ],
+  }));
+};
   const updateVehicle = (index: number, field: keyof Vehicle, value: any) => {
     const updated = [...formData.vehicles];
     updated[index][field] = value;
@@ -241,8 +237,6 @@ const grandTotal = roomCost + serviceCharge;
     value: country.code,
     label: country.name,
   }));
-
-  
 
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-gray-50 py-4 px-2 md:px-4">
@@ -547,16 +541,16 @@ const grandTotal = roomCost + serviceCharge;
                   />
                 </div> */}
                 <div className="flex">
-<PhoneInput
-  international
-  defaultCountry={detectedCountry}
-  value={phoneNumber}
-  onChange={(value) => {
-    setPhoneNumber(value || "");
-    handleChange("contactNumber", value || "");
-  }}
-  className="flex w-full [&_.PhoneInputCountry]:px-3 [&_.PhoneInputCountry]:py-2.5 [&_.PhoneInputCountry]:border [&_.PhoneInputCountry]:border-gray-300 [&_.PhoneInputCountry]:rounded-l-md [&_.PhoneInputCountry]:bg-white [&_.PhoneInputInput]:flex-1 [&_.PhoneInputInput]:px-3 [&_.PhoneInputInput]:py-2.5 [&_.PhoneInputInput]:text-sm [&_.PhoneInputInput]:border [&_.PhoneInputInput]:border-gray-300 [&_.PhoneInputInput]:rounded-r-md [&_.PhoneInputInput:focus]:ring-2 [&_.PhoneInputInput:focus]:ring-green-500 [&_.PhoneInputInput:focus]:border-transparent [&_.PhoneInputInput]:outline-none"
-/>
+                  <PhoneInput
+                    international
+                    defaultCountry={detectedCountry}
+                    value={phoneNumber}
+                    onChange={(value) => {
+                      setPhoneNumber(value || "");
+                      handleChange("contactNumber", value || "");
+                    }}
+                    className="flex w-full [&_.PhoneInputCountry]:px-3 [&_.PhoneInputCountry]:py-2.5 [&_.PhoneInputCountry]:border [&_.PhoneInputCountry]:border-gray-300 [&_.PhoneInputCountry]:rounded-l-md [&_.PhoneInputCountry]:bg-white [&_.PhoneInputInput]:flex-1 [&_.PhoneInputInput]:px-3 [&_.PhoneInputInput]:py-2.5 [&_.PhoneInputInput]:text-sm [&_.PhoneInputInput]:border [&_.PhoneInputInput]:border-gray-300 [&_.PhoneInputInput]:rounded-r-md [&_.PhoneInputInput:focus]:ring-2 [&_.PhoneInputInput:focus]:ring-green-500 [&_.PhoneInputInput:focus]:border-transparent [&_.PhoneInputInput]:outline-none"
+                  />
                 </div>
 
                 <input
@@ -604,7 +598,7 @@ const grandTotal = roomCost + serviceCharge;
                       handleChange("passportNumber", e.target.value)
                     }
                     className="md:col-span-2 px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
-                  />  
+                  />
                 </div>
               </div>
             </div>
@@ -626,17 +620,16 @@ const grandTotal = roomCost + serviceCharge;
                   </div>
                   <div className="relative">
                     <select
-                      value={formData.room}
-                      onChange={(e) => handleChange("room", e.target.value)}
-                      className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none appearance-none bg-white"
-                    >
-                      <option value="">The Grand London</option>
-                      {roomsData.map((room) => (
-                        <option key={room.id} value={room.id}>
-                          {room.name}
-                        </option>
-                      ))}
-                    </select>
+  value={formData.room}
+  onChange={(e) => handleChange("room", e.target.value)}
+  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none appearance-none bg-white"
+>
+  {roomsData.map((room) => (
+    <option key={room.id} value={room.id}>
+      {room.name}
+    </option>
+  ))}
+</select>
                     <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
                       <svg
                         className="w-4 h-4 text-gray-500"
@@ -788,9 +781,7 @@ const grandTotal = roomCost + serviceCharge;
                 {/* Vehicle Section */}
                 <div className="border-t pt-5">
                   <div className="flex items-center gap-3 mb-4">
-                    <h3 className="text-sm font-bold text-gray-800">
-                      Vehicle
-                    </h3>
+                    <h3 className="text-sm font-bold text-gray-800">Vehicle</h3>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
                         type="checkbox"
@@ -815,10 +806,11 @@ const grandTotal = roomCost + serviceCharge;
                           className="border border-gray-200 rounded-lg p-4 bg-gray-50"
                         >
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-
-                              <div className="flex items-center px-3 py-2.5 text-sm border border-gray-300 rounded-md bg-gray-50">
-                    <span className="text-gray-600">Select Vehicle</span>
-                  </div>
+                            <div className="flex items-center px-3 py-2.5 text-sm border border-gray-300 rounded-md bg-gray-50">
+                              <span className="text-gray-600">
+                                Select Vehicle
+                              </span>
+                            </div>
 
                             <div className="relative">
                               <select
@@ -826,9 +818,8 @@ const grandTotal = roomCost + serviceCharge;
                                 onChange={(e) =>
                                   updateVehicle(index, "type", e.target.value)
                                 }
-                                className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent  outline-none appearance-none bg-white"
+                                className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none appearance-none bg-white"
                               >
-                                <option value="">Select Vehicle</option>
                                 {vehicleData.map((v) => (
                                   <option key={v.id} value={v.id}>
                                     {v.type}
@@ -882,7 +873,7 @@ const grandTotal = roomCost + serviceCharge;
                                 onClick={() => removeVehicle(index)}
                                 className="text-gray-400 hover:text-red-500 text-xl font-bold ml-auto"
                               >
-                                  <CloseIcon fontSize="small" />
+                                <CloseIcon fontSize="small" />
                               </button>
                             </div>
                           </div>
@@ -976,109 +967,115 @@ const grandTotal = roomCost + serviceCharge;
           </div>
 
           {/* Right Column - Summary */}
-  {/* Right Column - Summary */}
-<div className="lg:col-span-1">
-  <div className="bg-white rounded-xl shadow-lg overflow-hidden sticky top-4">
-    {/* Summary Header */}
-    <div className="bg-green-500 text-white text-center py-3">
-      <h2 className="text-lg font-semibold">Summary</h2>
-    </div>
+          {/* Right Column - Summary */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden sticky top-4">
+              {/* Summary Header */}
+              <div className="bg-green-500 text-white text-center py-3">
+                <h2 className="text-lg font-semibold">Summary</h2>
+              </div>
 
-    <div className="p-4 space-y-3">
-      {/* Room Name */}
-      <div className="bg-gray-100 rounded-lg p-2.5 text-center">
-        <p className="text-gray-700 font-medium text-sm truncate">
-          {selectedRoom
-            ? `Scenic Cottage - ${selectedRoom.name} Room`
-            : "Scenic Cottage - The Grand London Room"}
-        </p>
-      </div>
+              <div className="p-4 space-y-3">
+                {/* Room Name */}
+                <div className="bg-gray-100 rounded-lg p-2.5 text-center">
+                  <p className="text-gray-700 font-medium text-sm truncate">
+                    {selectedRoom
+                      ? `Scenic Cottage - ${selectedRoom.name} Room`
+                      : "Scenic Cottage - The Grand London Room"}
+                  </p>
+                </div>
 
-      {/* Guest Details */}
-      <div className="space-y-2 text-sm">
-        <div className="flex justify-between gap-2">
+                {/* Guest Details */}
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between gap-2">
+                    <span className="text-gray-600 flex-shrink-0">Name</span>
+                    <span className="text-gray-900 truncate text-right">
+                      {formData.title}. {formData.firstName} {formData.lastName}
+                    </span>
+                  </div>
+                  <div className="flex justify-between gap-2">
+                    <span className="text-gray-600 flex-shrink-0">
+                      Contact:
+                    </span>
+                    <span className="text-gray-900 truncate text-right">
+                      {formData.contactNumber}
+                    </span>
+                  </div>
+                  <div className="flex justify-between gap-2">
+                    <span className="text-gray-600 flex-shrink-0">Email:</span>
+                    <span className="text-gray-900 truncate text-right">
+                      {formData.email}
+                    </span>
+                  </div>
+                  <div className="flex justify-between gap-2">
+                    <span className="text-gray-600 flex-shrink-0">
+                      {formData.passportType}
+                    </span>
+                    <span className="text-gray-900 truncate text-right">
+                      {formData.passportNumber}
+                    </span>
+                  </div>
+                </div>
 
-          <span className="text-gray-600 flex-shrink-0">Name</span>
-          <span className="text-gray-900 truncate text-right">
-            {formData.title}. {formData.firstName} {formData.lastName}
-          </span>
-        </div>
-        <div className="flex justify-between gap-2">
-          <span className="text-gray-600 flex-shrink-0">Contact:</span>
-          <span className="text-gray-900 truncate text-right">
-         {formData.contactNumber}
-          </span>
-        </div>
-        <div className="flex justify-between gap-2">
-          <span className="text-gray-600 flex-shrink-0">Email:</span>
-          <span className="text-gray-900 truncate text-right">
-            {formData.email}
-          </span>
-        </div>
-        <div className="flex justify-between gap-2">
-          <span className="text-gray-600 flex-shrink-0">{formData.passportType}</span>
-          <span className="text-gray-900 truncate text-right">
-            {formData.passportNumber}
-          </span>
-        </div>
-      </div>
+                <div className="border-t-2 border-green-500 my-3"></div>
 
-      <div className="border-t-2 border-green-500 my-3"></div>
+                {/* Pricing */}
+                <div className="space-y-2.5">
+                  <div className="flex justify-between items-center gap-2">
+                    <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                      <span className="text-gray-700 text-sm truncate">
+                        Room Charge
+                      </span>
+                      {roomCost > 0 && (
+                        <span className="bg-gray-300 text-gray-700 text-xs px-2 py-0.5 rounded-full flex-shrink-0">
+                          {Math.ceil(
+                            (new Date(formData.checkOutDate) -
+                              new Date(formData.checkInDate)) /
+                              (1000 * 60 * 60 * 24)
+                          )}{" "}
+                          days
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-gray-800 font-medium text-sm flex-shrink-0">
+                      USD {roomCost}
+                    </span>
+                  </div>
 
-      {/* Pricing */}
-      <div className="space-y-2.5">
-        <div className="flex justify-between items-center gap-2">
-          <div className="flex items-center gap-1.5 flex-1 min-w-0">
-            <span className="text-gray-700 text-sm truncate">Room Charge</span>
-            {roomCost > 0 && (
-              <span className="bg-gray-300 text-gray-700 text-xs px-2 py-0.5 rounded-full flex-shrink-0">
-                {Math.ceil(
-                  (new Date(formData.checkOutDate) -
-                    new Date(formData.checkInDate)) /
-                    (1000 * 60 * 60 * 24)
-                )}{" "}
-                days
-              </span>
-            )}
+                  <div className="flex justify-between items-center gap-2">
+                    <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                      <span className="text-gray-700 text-sm truncate">
+                        Service Charge
+                      </span>
+                      <span className="bg-gray-300 text-gray-700 text-xs px-2 py-0.5 rounded-full flex-shrink-0">
+                        5%
+                      </span>
+                    </div>
+                    <span className="text-gray-800 font-medium text-sm flex-shrink-0">
+                      USD {serviceCharge.toFixed(0)}
+                    </span>
+                  </div>
+
+                  <div className="border-t-2 border-gray-300 pt-2.5 flex justify-between items-center gap-2">
+                    <span className="text-lg font-bold text-gray-800">
+                      TOTAL
+                    </span>
+                    <span className="text-lg font-bold text-gray-800 flex-shrink-0">
+                      USD {grandTotal.toFixed(0)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Complete Booking Button */}
+              <button
+                onClick={handleSubmit}
+                className="w-full bg-green-500 text-white py-3.5 font-bold text-base hover:bg-green-600 transition"
+              >
+                COMPLETE BOOKING
+              </button>
+            </div>
           </div>
-          <span className="text-gray-800 font-medium text-sm flex-shrink-0">
-            USD {roomCost}
-          </span>
-        </div>
-
-      
-        <div className="flex justify-between items-center gap-2">
-          <div className="flex items-center gap-1.5 flex-1 min-w-0">
-            <span className="text-gray-700 text-sm truncate">Service Charge</span>
-            <span className="bg-gray-300 text-gray-700 text-xs px-2 py-0.5 rounded-full flex-shrink-0">
-              5%
-            </span>
-          </div>
-          <span className="text-gray-800 font-medium text-sm flex-shrink-0">
-            USD {serviceCharge.toFixed(0)}
-          </span>
-        </div>
-
-        <div className="border-t-2 border-gray-300 pt-2.5 flex justify-between items-center gap-2">
-          <span className="text-lg font-bold text-gray-800">
-            TOTAL
-          </span>
-          <span className="text-lg font-bold text-gray-800 flex-shrink-0">
-            USD {grandTotal.toFixed(0)}
-          </span>
-        </div>
-      </div>
-    </div>
-
-    {/* Complete Booking Button */}
-    <button
-      onClick={handleSubmit}
-      className="w-full bg-green-500 text-white py-3.5 font-bold text-base hover:bg-green-600 transition"
-    >
-      COMPLETE BOOKING
-    </button>
-  </div>
-</div>
         </div>
       </div>
     </div>
