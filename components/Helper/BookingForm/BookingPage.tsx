@@ -19,6 +19,32 @@ interface Vehicle {
   endDate: string;
 }
 
+interface BookingPayload {
+  customer: {
+    title: string;
+    firstName: string;
+    lastName: string;
+    dateOfBirth: string;
+    email: string;
+    country: string;
+    contactNumber: string;
+    passportType: string;
+    nicNumber?: string;
+    passportNumber?: string;
+  };
+  roomId: number;
+  checkIn: string;
+  checkOut: string;
+  otherDetails?: {
+    vehicleSupport: "YES" | "NO";
+    meal: "YES" | "NO";
+    guide: "YES" | "NO";
+    vehicleType?: string;
+    vehicleNumber?: string;
+    driver?: "YES" | "NO";
+  };
+}
+
 // Mock Data
 const hotelInfo = {
   name: "The Grand London",
@@ -82,55 +108,66 @@ const roomsData = [
 ];
 
 const vehicleData = [
-  { id: 1, type: "Car - 4 seats" },
-  { id: 2, type: "Tuk Tuk" },
-  { id: 3, type: "Safari" },
-  { id: 4, type: "Bike" },
+  { id: "BIKE", type: "Bike" },
+  { id: "CAR", type: "Car - 4 seats" },
+  { id: "VAN", type: "Safari" },
+  { id: "SUV", type: "Tuk Tuk" },
 ];
+
+
 
 export default function BookingSystem() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
-  const [formData, setFormData] = useState<{
-    title: string;
-    firstName: string;
-    lastName: string;
-    dateOfBirth: string;
-    email: string;
-    country: string;
-    countryCode: string;
-    contactNumber: string;
-    passportType: string;
-    passportNumber: string;
-    room: string;
-    checkInDate: string;
-    checkInTime: string;
-    checkOutDate: string;
-    checkOutTime: string;
-    vehicleNeeded: boolean;
-    vehicles: Vehicle[];
-  }>({
-    title: "Mr",
-    firstName: "",
-    lastName: "",
-    dateOfBirth: "",
-    email: "",
-    country: "",
-    countryCode: "+44",
-    contactNumber: "",
-    passportType: "Passport",
-    passportNumber: "",
-    room: "1",
-    checkInDate: "",
-    checkInTime: "",
-    checkOutDate: "",
-    checkOutTime: "",
-    vehicleNeeded: false,
-    vehicles: [],
-  });
+const [formData, setFormData] = useState<{
+  title: string;
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+  email: string;
+  country: string;
+  countryCode: string;
+  contactNumber: string;
+  address: string; // 
+  passportType: string;
+  passportNumber: string;
+  room: string;
+  checkInDate: string;
+  checkInTime: string;
+  checkOutDate: string;
+  checkOutTime: string;
+  vehicleNeeded: boolean;
+  vehicles: Vehicle[];
+  meal: boolean; 
+  guide: boolean; 
+  driver: boolean; 
+}>({
+  title: "Mr",
+  firstName: "",
+  lastName: "",
+  dateOfBirth: "",
+  email: "",
+  country: "",
+  countryCode: "+44",
+  contactNumber: "",
+  address: "", 
+  passportType: "Passport",
+  passportNumber: "",
+  room: "1",
+  checkInDate: "",
+  checkInTime: "",
+  checkOutDate: "",
+  checkOutTime: "",
+  vehicleNeeded: false,
+  vehicles: [],
+  meal: false, 
+  guide: false, 
+  driver: false, 
+});
 
   const [phoneNumber, setPhoneNumber] = useState("");
   const [detectedCountry, setDetectedCountry] = useState<string>("GB");
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetch("https://ipapi.co/json/")
@@ -193,31 +230,31 @@ export default function BookingSystem() {
   const grandTotal = roomCost + serviceCharge;
 
   const handleChange = (field: keyof typeof formData, value: any) => {
-    if (field === "vehicleNeeded" && value === true) {
-      setFormData((prev) => ({
-        ...prev,
-        [field]: value,
-        vehicles: [{ type: "1", quantity: 1, startDate: "", endDate: "" }],
-      }));
-    } else if (field === "vehicleNeeded" && value === false) {
-      setFormData((prev) => ({
-        ...prev,
-        [field]: value,
-        vehicles: [],
-      }));
-    } else {
-      setFormData((prev) => ({ ...prev, [field]: value }));
-    }
-  };
-  const addVehicle = () => {
+  if (field === "vehicleNeeded" && value === true) {
     setFormData((prev) => ({
       ...prev,
-      vehicles: [
-        ...prev.vehicles,
-        { type: "1", quantity: 1, startDate: "", endDate: "" },
-      ],
+      [field]: value,
+      vehicles: [{ type: "2", quantity: 1, startDate: "", endDate: "" }], // Changed from "1" to "2" (CAR)
     }));
-  };
+  } else if (field === "vehicleNeeded" && value === false) {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+      vehicles: [],
+    }));
+  } else {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  }
+};
+  const addVehicle = () => {
+  setFormData((prev) => ({
+    ...prev,
+    vehicles: [
+      ...prev.vehicles,
+      { type: "2", quantity: 1, startDate: "", endDate: "" }, // Changed from "1" to "2" (CAR)
+    ],
+  }));
+};
   const updateVehicle = (index: number, field: keyof Vehicle, value: any) => {
     const updated = [...formData.vehicles];
     updated[index][field] = value;
@@ -230,12 +267,82 @@ export default function BookingSystem() {
       vehicles: prev.vehicles.filter((_, i) => i !== index),
     }));
   };
+const handleSubmit = async () => {
+  // Validation
+  if (!isContactComplete || !isBookingComplete) {
+    alert("Please complete all required fields");
+    return;
+  }
 
-  const handleSubmit = () => {
-    console.log("Booking submitted:", formData);
+  setIsSubmitting(true);
+
+  try {
+    // Prepare customer data matching backend Customer model
+    const customerData = {
+      name: `${formData.title} ${formData.firstName} ${formData.lastName}`.trim(),
+      passportNumber: formData.passportType === "Passport" ? formData.passportNumber : "",
+      nicNumber: formData.passportType === "NIC" ? formData.passportNumber : "",
+      address: formData.address || "N/A",
+      contactNumber: formData.contactNumber,
+    };
+
+    // Prepare the payload matching backend structure
+    const payload: any = {
+      customer: customerData,
+      roomId: Number(formData.room),
+      checkIn: `${formData.checkInDate}T${formData.checkInTime || "14:00"}:00.000Z`,
+      checkOut: `${formData.checkOutDate}T${formData.checkOutTime || "11:00"}:00.000Z`,
+    };
+
+    // Add vehicle details if needed
+    if (formData.vehicleNeeded && formData.vehicles.length > 0) {
+      const firstVehicle = formData.vehicles[0];
+      
+      // Map numeric ID to string ID for backend
+      let vehicleTypeId = "CAR";
+      if (firstVehicle.type === "1") vehicleTypeId = "BIKE";
+      else if (firstVehicle.type === "2") vehicleTypeId = "CAR";
+      else if (firstVehicle.type === "3") vehicleTypeId = "VAN";
+      else if (firstVehicle.type === "4") vehicleTypeId = "SUV";
+      
+      payload.otherDetails = {
+        vehicleSupport: "YES",
+        meal: formData.meal ? "YES" : "NO",
+        guide: formData.guide ? "YES" : "NO",
+        vehicleType: vehicleTypeId,
+        vehicleNumber: parseInt(firstVehicle.quantity) || 1,
+        driver: formData.driver ? "YES" : "NO",
+      };
+    }
+
+    console.log("Sending payload:", payload);
+
+    const response = await fetch("/api/bookings", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      alert(`Error: ${result.error}`);
+      setIsSubmitting(false);
+      return;
+    }
+
     alert("Booking completed successfully!");
-  };
-
+    console.log("Booking created:", result.booking);
+    
+  } catch (error) {
+    console.error("Booking error:", error);
+    alert("Failed to create booking. Please try again.");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
   const countryOptions = getData().map((country) => ({
     value: country.code,
     label: country.name,
