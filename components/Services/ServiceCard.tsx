@@ -3,6 +3,7 @@ import React from 'react';
 import Image from 'next/image';
 import { FaCheck, FaArrowRight } from 'react-icons/fa';
 import { Service } from '@/data/services'; 
+import Link from 'next/link'; // ✅ Import Link
 
 type Props = {
   service: Service;
@@ -28,10 +29,8 @@ const ServiceCard = ({ service, index }: Props) => {
         </div>
 
         {/* ============ CONTENT SECTION ============ */}
-        {/* ✅ FIX: Added 'relative' class here so the number stays inside this box */}
         <div className="w-full lg:w-1/2 flex flex-col justify-center p-8 sm:p-12 lg:p-16 bg-white relative">
           
-          {/* Decorative Number */}
           <p className="text-6xl font-serif text-gray-100 font-bold absolute top-4 right-6 select-none">
             0{service.id}
           </p>
@@ -60,10 +59,13 @@ const ServiceCard = ({ service, index }: Props) => {
             ))}
           </div>
 
-          {/* Action Button */}
-          <button className="self-start flex items-center gap-2 text-gray-900 border-b-2 border-gray-200 pb-1 hover:border-orange-500 hover:text-orange-600 transition-all duration-300 font-semibold text-sm uppercase tracking-wider">
+          {/* ✅ Changed button to Link pointing to #amenities-section */}
+          <Link 
+            href="#amenities-section"
+            className="self-start flex items-center gap-2 text-gray-900 border-b-2 border-gray-200 pb-1 hover:border-orange-500 hover:text-orange-600 transition-all duration-300 font-semibold text-sm uppercase tracking-wider cursor-pointer"
+          >
             Explore More <FaArrowRight className="text-xs" />
-          </button>
+          </Link>
 
         </div>
       </div>
