@@ -7,7 +7,10 @@ import Select from "react-select";
 import { getData } from "country-list";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
-
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
 
 interface Vehicle {
   type: string;
@@ -79,19 +82,10 @@ const roomsData = [
 ];
 
 const vehicleData = [
-  { id: 1, type: "Car - 4 seats", price: "20" },
-  { id: 2, type: "Tuk Tuk", price: "10" },
-  { id: 3, type: "Safari", price: "100" },
-  { id: 4, type: "Bike", price: "15" },
-];
-
-const countries = [
-  "United States",
-  "United Kingdom",
-  "Canada",
-  "Australia",
-  "Sri Lanka",
-  "India",
+  { id: 1, type: "Car - 4 seats" },
+  { id: 2, type: "Tuk Tuk" },
+  { id: 3, type: "Safari" },
+  { id: 4, type: "Bike" },
 ];
 
 export default function BookingSystem() {
@@ -126,7 +120,7 @@ export default function BookingSystem() {
     contactNumber: "",
     passportType: "Passport",
     passportNumber: "",
-    room: "",
+    room: "1",
     checkInDate: "",
     checkInTime: "",
     checkOutDate: "",
@@ -138,22 +132,21 @@ export default function BookingSystem() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [detectedCountry, setDetectedCountry] = useState<string>("GB");
 
-
-useEffect(() => {
-  fetch("https://ipapi.co/json/")
-    .then((res) => res.json())
-    .then((data) => {
-      if (data.country_code) {
-        setFormData((prev) => ({
-          ...prev,
-          country: data.country_name || "",
-        }));
-        // Set the detected country code for PhoneInput
-        setDetectedCountry(data.country_code || "GB");
-      }
-    })
-    .catch((err) => console.log("Could not detect country:", err));
-}, []);
+  useEffect(() => {
+    fetch("https://ipapi.co/json/")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.country_code) {
+          setFormData((prev) => ({
+            ...prev,
+            country: data.country_name || "",
+          }));
+          // Set the detected country code for PhoneInput
+          setDetectedCountry(data.country_code || "GB");
+        }
+      })
+      .catch((err) => console.log("Could not detect country:", err));
+  }, []);
 
   const selectedRoom = roomsData.find((r) => r.id === Number(formData.room));
 
@@ -194,52 +187,37 @@ useEffect(() => {
     return days > 0 ? Number(selectedRoom.price) * days : 0;
   };
 
-  // Calculate vehicle costs
-  const calculateVehicleCost = () => {
-    if (!formData.vehicleNeeded || formData.vehicles.length === 0) return [];
-
-    return formData.vehicles
-      .map((v, idx) => {
-        const vehicleInfo = vehicleData.find(
-          (item) => item.id === Number(v.type)
-        );
-        if (!vehicleInfo || !v.startDate || !v.endDate) return null;
-
-        const start = new Date(v.startDate);
-        const end = new Date(v.endDate);
-        const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
-        const cost =
-          days > 0 ? Number(vehicleInfo.price) * v.quantity * days : 0;
-
-        return {
-          name: vehicleInfo.type,
-          days,
-          cost,
-        };
-      })
-      .filter(Boolean);
-  };
-
   const roomCost = calculateRoomCost();
-  const vehicleCosts = calculateVehicleCost();
-  const totalVehicleCost = vehicleCosts.reduce((sum, v) => sum + v.cost, 0);
-  const serviceCharge = (roomCost + totalVehicleCost) * 0.05;
-  const grandTotal = roomCost + totalVehicleCost + serviceCharge;
+
+  const serviceCharge = roomCost * 0.05;
+  const grandTotal = roomCost + serviceCharge;
 
   const handleChange = (field: keyof typeof formData, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (field === "vehicleNeeded" && value === true) {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value,
+        vehicles: [{ type: "1", quantity: 1, startDate: "", endDate: "" }],
+      }));
+    } else if (field === "vehicleNeeded" && value === false) {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value,
+        vehicles: [],
+      }));
+    } else {
+      setFormData((prev) => ({ ...prev, [field]: value }));
+    }
   };
-
   const addVehicle = () => {
     setFormData((prev) => ({
       ...prev,
       vehicles: [
         ...prev.vehicles,
-        { type: "", quantity: 1, startDate: "", endDate: "" },
+        { type: "1", quantity: 1, startDate: "", endDate: "" },
       ],
     }));
   };
-
   const updateVehicle = (index: number, field: keyof Vehicle, value: any) => {
     const updated = [...formData.vehicles];
     updated[index][field] = value;
@@ -262,8 +240,6 @@ useEffect(() => {
     value: country.code,
     label: country.name,
   }));
-
-  
 
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-gray-50 py-4 px-2 md:px-4">
@@ -347,7 +323,7 @@ useEffect(() => {
             <div
               className={`w-6 h-6 rounded-full ${
                 isContactComplete ? "bg-white" : "border-2 border-green-500"
-              } flex items-center justify-center flex-shrink-0`}
+              } flex items-center justify-center shrink-0`}
             >
               <span
                 className={`${
@@ -371,7 +347,7 @@ useEffect(() => {
             <div
               className={`w-6 h-6 rounded-full ${
                 isBookingComplete ? "bg-white" : "border-2 border-green-500"
-              } flex items-center justify-center flex-shrink-0`}
+              } flex items-center justify-center shrink-0`}
             >
               <span
                 className={`${
@@ -409,7 +385,7 @@ useEffect(() => {
                     <select
                       value={formData.title}
                       onChange={(e) => handleChange("title", e.target.value)}
-                      className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent appearance-none bg-white"
+                      className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none appearance-none bg-white"
                     >
                       <option>Title</option>
                       <option>Mr</option>
@@ -439,7 +415,7 @@ useEffect(() => {
                     placeholder="First Name"
                     value={formData.firstName}
                     onChange={(e) => handleChange("firstName", e.target.value)}
-                    className="px-2.5 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="px-2.5 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                   />
 
                   <input
@@ -447,7 +423,7 @@ useEffect(() => {
                     placeholder="Last Name"
                     value={formData.lastName}
                     onChange={(e) => handleChange("lastName", e.target.value)}
-                    className="px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                   />
                 </div>
 
@@ -460,7 +436,7 @@ useEffect(() => {
                       onChange={(e) =>
                         handleChange("dateOfBirth", e.target.value)
                       }
-                      className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                     />
                     {/*  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
                       <svg
@@ -568,16 +544,16 @@ useEffect(() => {
                   />
                 </div> */}
                 <div className="flex">
-<PhoneInput
-  international
-  defaultCountry={detectedCountry}
-  value={phoneNumber}
-  onChange={(value) => {
-    setPhoneNumber(value || "");
-    handleChange("contactNumber", value || "");
-  }}
-  className="flex w-full [&_.PhoneInputCountry]:px-3 [&_.PhoneInputCountry]:py-2.5 [&_.PhoneInputCountry]:border [&_.PhoneInputCountry]:border-gray-300 [&_.PhoneInputCountry]:rounded-l-md [&_.PhoneInputCountry]:bg-white [&_.PhoneInputInput]:flex-1 [&_.PhoneInputInput]:px-3 [&_.PhoneInputInput]:py-2.5 [&_.PhoneInputInput]:text-sm [&_.PhoneInputInput]:border [&_.PhoneInputInput]:border-gray-300 [&_.PhoneInputInput]:rounded-r-md [&_.PhoneInputInput:focus]:ring-2 [&_.PhoneInputInput:focus]:ring-green-500 [&_.PhoneInputInput:focus]:border-transparent [&_.PhoneInputInput]:outline-none"
-/>
+                  <PhoneInput
+                    international
+                    defaultCountry={detectedCountry}
+                    value={phoneNumber}
+                    onChange={(value) => {
+                      setPhoneNumber(value || "");
+                      handleChange("contactNumber", value || "");
+                    }}
+                    className="flex w-full [&_.PhoneInputCountry]:px-3 [&_.PhoneInputCountry]:py-2.5 [&_.PhoneInputCountry]:border [&_.PhoneInputCountry]:border-gray-300 [&_.PhoneInputCountry]:rounded-l-md [&_.PhoneInputCountry]:bg-white [&_.PhoneInputInput]:flex-1 [&_.PhoneInputInput]:px-3 [&_.PhoneInputInput]:py-2.5 [&_.PhoneInputInput]:text-sm [&_.PhoneInputInput]:border [&_.PhoneInputInput]:border-gray-300 [&_.PhoneInputInput]:rounded-r-md [&_.PhoneInputInput:focus]:ring-2 [&_.PhoneInputInput:focus]:ring-green-500 [&_.PhoneInputInput:focus]:border-transparent [&_.PhoneInputInput]:outline-none"
+                  />
                 </div>
 
                 <input
@@ -585,7 +561,7 @@ useEffect(() => {
                   placeholder="Email Address"
                   value={formData.email}
                   onChange={(e) => handleChange("email", e.target.value)}
-                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                 />
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -595,7 +571,7 @@ useEffect(() => {
                       onChange={(e) =>
                         handleChange("passportType", e.target.value)
                       }
-                      className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent appearance-none bg-white"
+                      className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none appearance-none bg-white"
                     >
                       <option>Passport</option>
                       <option>NIC</option>
@@ -624,7 +600,7 @@ useEffect(() => {
                     onChange={(e) =>
                       handleChange("passportNumber", e.target.value)
                     }
-                    className="md:col-span-2 px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="md:col-span-2 px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                   />
                 </div>
               </div>
@@ -649,9 +625,8 @@ useEffect(() => {
                     <select
                       value={formData.room}
                       onChange={(e) => handleChange("room", e.target.value)}
-                      className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent appearance-none bg-white"
+                      className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none appearance-none bg-white"
                     >
-                      <option value="">The Grand London</option>
                       {roomsData.map((room) => (
                         <option key={room.id} value={room.id}>
                           {room.name}
@@ -681,62 +656,71 @@ useEffect(() => {
                     <label className="block text-xs font-medium text-gray-600 mb-1.5">
                       From
                     </label>
-                    <div className="relative">
-                      <input
-                        type="date"
-                        value={formData.checkInDate}
-                        onChange={(e) =>
-                          handleChange("checkInDate", e.target.value)
+                    <div className="w-full relative">
+                      <DatePicker
+                        selected={
+                          formData.checkInDate
+                            ? new Date(formData.checkInDate)
+                            : null
                         }
-                        className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                        placeholder="Select Date"
+                        onChange={(date) =>
+                          handleChange(
+                            "checkInDate",
+                            date ? date.toISOString().split("T")[0] : ""
+                          )
+                        }
+                        dateFormat="yyyy-MM-dd"
+                        placeholderText="Select Check-In Date"
+                        minDate={new Date()}
+                        className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                        wrapperClassName="w-full"
+                        popperProps={{
+    strategy: "fixed"
+  }}
+  popperPlacement="bottom-start"
                       />
-                      {/* <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                        <svg
-                          className="w-4 h-4 text-gray-500"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                          />
-                        </svg>
-                      </div> */}
+                      <CalendarTodayIcon
+                        sx={{ fontSize: 16 }}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none"
+                      />
                     </div>
                   </div>
+
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1.5">
                       To
                     </label>
-                    <div className="relative">
-                      <input
-                        type="date"
-                        value={formData.checkOutDate}
-                        onChange={(e) =>
-                          handleChange("checkOutDate", e.target.value)
+                    <div className="w-full relative">
+                      <DatePicker
+                        selected={
+                          formData.checkOutDate
+                            ? new Date(formData.checkOutDate)
+                            : null
                         }
-                        className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                        placeholder="Select Date"
+                        onChange={(date) =>
+                          handleChange(
+                            "checkOutDate",
+                            date ? date.toISOString().split("T")[0] : ""
+                          )
+                        }
+                        dateFormat="yyyy-MM-dd"
+                        placeholderText="Select Check-Out Date"
+                        minDate={
+                          formData.checkInDate
+                            ? new Date(formData.checkInDate)
+                            : new Date()
+                        }
+                        className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                        wrapperClassName="w-full"
+                        popperProps={{
+    strategy: "fixed"
+  }}
+  popperPlacement="bottom-start"
                       />
-                      {/*  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                        <svg
-                          className="w-4 h-4 text-gray-500"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                          />
-                        </svg>
-                      </div> */}
+                      <CalendarTodayIcon 
+        sx={{ fontSize: 16 }}
+        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none" 
+      />
                     </div>
                   </div>
                 </div>
@@ -746,62 +730,72 @@ useEffect(() => {
                     <label className="block text-xs font-medium text-gray-600 mb-1.5">
                       Check-In
                     </label>
-                    <div className="relative">
-                      <input
-                        type="time"
-                        value={formData.checkInTime}
-                        onChange={(e) =>
-                          handleChange("checkInTime", e.target.value)
+                    <div className="w-full relative">
+                      <DatePicker
+                        selected={
+                          formData.checkInTime
+                            ? new Date(`2000-01-01T${formData.checkInTime}`)
+                            : null
                         }
-                        className="w-full px-3 py-2.5 mb-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                        placeholder="Select Time"
+                        onChange={(date) =>
+                          handleChange(
+                            "checkInTime",
+                            date ? date.toTimeString().slice(0, 5) : ""
+                          )
+                        }
+                        showTimeSelect
+                        showTimeSelectOnly
+                        timeIntervals={15}
+                        timeCaption="Time"
+                        dateFormat="h:mm aa"
+                        placeholderText="Select Time"
+                        className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                        wrapperClassName="w-full"
+                        popperProps={{
+    strategy: "fixed"
+  }}
+  popperPlacement="bottom-start"
                       />
-                      {/*  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                        <svg
-                          className="w-4 h-4 text-gray-500"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-                      </div> */}
+                       <AccessTimeIcon 
+        sx={{ fontSize: 16 }}
+        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none" 
+      />
                     </div>
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                      Check-Out
+                      Check-Out 
                     </label>
-                    <div className="relative">
-                      <input
-                        type="time"
-                        value={formData.checkOutTime}
-                        onChange={(e) =>
-                          handleChange("checkOutTime", e.target.value)
+                    <div className="w-full relative">
+                      <DatePicker
+                        selected={
+                          formData.checkOutTime
+                            ? new Date(`2000-01-01T${formData.checkOutTime}`)
+                            : null
                         }
-                        className="w-full px-3 py-2.5 mb-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                        placeholder="Select Time"
+                        onChange={(date) =>
+                          handleChange(
+                            "checkOutTime",
+                            date ? date.toTimeString().slice(0, 5) : ""
+                          )
+                        }
+                        showTimeSelect
+                        showTimeSelectOnly
+                        timeIntervals={15}
+                        timeCaption="Time"
+                        dateFormat="h:mm aa"
+                        placeholderText="Select Time"
+                        className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                        wrapperClassName="w-full"
+                        popperProps={{
+    strategy: "fixed"
+  }}
+  popperPlacement="bottom-start"
                       />
-                      {/*  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                        <svg
-                          className="w-4 h-4 text-gray-500"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-                      </div> */}
+                       <AccessTimeIcon 
+        sx={{ fontSize: 16 }}
+        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none" 
+      />
                     </div>
                   </div>
                 </div>
@@ -809,9 +803,7 @@ useEffect(() => {
                 {/* Vehicle Section */}
                 <div className="border-t pt-5">
                   <div className="flex items-center gap-3 mb-4">
-                    <h3 className="text-sm font-bold text-gray-800">
-                      Vehicle
-                    </h3>
+                    <h3 className="text-sm font-bold text-gray-800">Vehicle</h3>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
                         type="checkbox"
@@ -836,15 +828,20 @@ useEffect(() => {
                           className="border border-gray-200 rounded-lg p-4 bg-gray-50"
                         >
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                            <div className="flex items-center px-3 py-2.5 text-sm border border-gray-300 rounded-md bg-gray-50">
+                              <span className="text-gray-600">
+                                Select Vehicle
+                              </span>
+                            </div>
+
                             <div className="relative">
                               <select
                                 value={vehicle.type}
                                 onChange={(e) =>
                                   updateVehicle(index, "type", e.target.value)
                                 }
-                                className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent appearance-none bg-white"
+                                className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none appearance-none bg-white"
                               >
-                                <option value="">Select Vehicle</option>
                                 {vehicleData.map((v) => (
                                   <option key={v.id} value={v.id}>
                                     {v.type}
@@ -868,7 +865,7 @@ useEffect(() => {
                               </div>
                             </div>
 
-                            <input
+                            {/* <input
                               type="text"
                               placeholder="Car"
                               value={
@@ -878,7 +875,7 @@ useEffect(() => {
                               }
                               readOnly
                               className="px-3 py-2.5 text-sm border border-gray-300 rounded-md bg-white"
-                            />
+                            /> */}
 
                             <div className="flex items-center gap-2">
                               <input
@@ -892,13 +889,13 @@ useEffect(() => {
                                     Number(e.target.value)
                                   )
                                 }
-                                className="w-20 px-3 py-2.5 text-sm border border-gray-300 rounded-md text-center focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                className="w-20 px-3 py-2.5 text-sm border border-gray-300 rounded-md text-center focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                               />
                               <button
                                 onClick={() => removeVehicle(index)}
                                 className="text-gray-400 hover:text-red-500 text-xl font-bold ml-auto"
                               >
-                                  <CloseIcon fontSize="small" />
+                                <CloseIcon fontSize="small" />
                               </button>
                             </div>
                           </div>
@@ -908,70 +905,76 @@ useEffect(() => {
                               <label className="block text-xs font-medium text-gray-600 mb-1.5">
                                 From
                               </label>
-                              <div className="relative">
-                                <input
-                                  type="date"
-                                  value={vehicle.startDate}
-                                  onChange={(e) =>
+                              <div className="w-full relative">
+                                <DatePicker
+                                  selected={
+                                    vehicle.startDate
+                                      ? new Date(vehicle.startDate)
+                                      : null
+                                  }
+                                  onChange={(date) =>
                                     updateVehicle(
                                       index,
                                       "startDate",
-                                      e.target.value
+                                      date
+                                        ? date.toISOString().split("T")[0]
+                                        : ""
                                     )
                                   }
-                                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                                  placeholder="Select Date"
+                                  dateFormat="yyyy-MM-dd"
+                                  placeholderText="Select Start Date"
+                                  minDate={new Date()}
+                                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                                  wrapperClassName="w-full"
+                                  popperProps={{
+    strategy: "fixed"
+  }}
+  popperPlacement="bottom-start"
                                 />
-                                {/*   <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                                  <svg
-                                    className="w-4 h-4 text-gray-500"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth="2"
-                                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                    />
-                                  </svg>
-                                </div> */}
+                                  <CalendarTodayIcon 
+        sx={{ fontSize: 16 }}
+        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none" 
+      />
                               </div>
                             </div>
                             <div>
                               <label className="block text-xs font-medium text-gray-600 mb-1.5">
                                 To
                               </label>
-                              <div className="relative">
-                                <input
-                                  type="date"
-                                  value={vehicle.endDate}
-                                  onChange={(e) =>
+                              <div className="w-full relative">
+                                <DatePicker
+                                  selected={
+                                    vehicle.endDate
+                                      ? new Date(vehicle.endDate)
+                                      : null
+                                  }
+                                  onChange={(date) =>
                                     updateVehicle(
                                       index,
                                       "endDate",
-                                      e.target.value
+                                      date
+                                        ? date.toISOString().split("T")[0]
+                                        : ""
                                     )
                                   }
-                                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                                  placeholder="Select Date"
+                                  dateFormat="yyyy-MM-dd"
+                                  placeholderText="Select End Date"
+                                  minDate={
+                                    vehicle.startDate
+                                      ? new Date(vehicle.startDate)
+                                      : new Date()
+                                  }
+                                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                                  wrapperClassName="w-full"
+                                  popperProps={{
+    strategy: "fixed"
+  }}
+  popperPlacement="bottom-start"
                                 />
-                                {/* <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                                  <svg
-                                    className="w-4 h-4 text-gray-500"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth="2"
-                                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                    />
-                                  </svg>
-                                </div> */}
+                                  <CalendarTodayIcon 
+        sx={{ fontSize: 16 }}
+        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none" 
+      />
                               </div>
                             </div>
                           </div>
@@ -992,138 +995,115 @@ useEffect(() => {
           </div>
 
           {/* Right Column - Summary */}
-  {/* Right Column - Summary */}
-<div className="lg:col-span-1">
-  <div className="bg-white rounded-xl shadow-lg overflow-hidden sticky top-4">
-    {/* Summary Header */}
-    <div className="bg-green-500 text-white text-center py-3">
-      <h2 className="text-lg font-semibold">Summary</h2>
-    </div>
-
-    <div className="p-4 space-y-3">
-      {/* Room Name */}
-      <div className="bg-gray-100 rounded-lg p-2.5 text-center">
-        <p className="text-gray-700 font-medium text-sm truncate">
-          {selectedRoom
-            ? `Scenic Cottage - ${selectedRoom.name} Room`
-            : "Scenic Cottage - The Grand London Room"}
-        </p>
-      </div>
-
-      {/* Guest Details */}
-      <div className="space-y-2 text-sm">
-        <div className="flex justify-between gap-2">
-          <span className="text-gray-600 truncate">
-            {formData.title}. {formData.firstName} {formData.lastName}
-          </span>
-          <span className="text-gray-800 font-medium truncate flex-shrink-0">
-            {formData.country}
-          </span>
-        </div>
-        <div className="flex justify-between gap-2">
-          <span className="text-gray-600 flex-shrink-0">Contact:</span>
-          <span className="text-gray-800 truncate text-right">
-         {formData.contactNumber}
-          </span>
-        </div>
-        <div className="flex justify-between gap-2">
-          <span className="text-gray-600 flex-shrink-0">Email:</span>
-          <span className="text-gray-800 truncate text-right">
-            {formData.email}
-          </span>
-        </div>
-        <div className="flex justify-between gap-2">
-          <span className="text-gray-600 flex-shrink-0">Passport:</span>
-          <span className="text-gray-800 truncate text-right">
-            {formData.passportNumber}
-          </span>
-        </div>
-      </div>
-
-      <div className="border-t-2 border-green-500 my-3"></div>
-
-      {/* Pricing */}
-      <div className="space-y-2.5">
-        <div className="flex justify-between items-center gap-2">
-          <div className="flex items-center gap-1.5 flex-1 min-w-0">
-            <span className="text-gray-700 text-sm truncate">Room Charge</span>
-            {roomCost > 0 && (
-              <span className="bg-gray-300 text-gray-700 text-xs px-2 py-0.5 rounded-full flex-shrink-0">
-                {Math.ceil(
-                  (new Date(formData.checkOutDate) -
-                    new Date(formData.checkInDate)) /
-                    (1000 * 60 * 60 * 24)
-                )}{" "}
-                days
-              </span>
-            )}
-          </div>
-          <span className="text-gray-800 font-medium text-sm flex-shrink-0">
-            USD {roomCost}
-          </span>
-        </div>
-
-        {formData.vehicleNeeded && vehicleCosts.length > 0 && (
-          <>
-            <div className="flex justify-between items-center gap-2">
-              <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                <span className="text-gray-700 text-sm truncate">Vehicle Charge</span>
-                {vehicleCosts[0] && (
-                  <span className="bg-gray-300 text-gray-700 text-xs px-2 py-0.5 rounded-full flex-shrink-0">
-                    {vehicleCosts[0].days} Days
-                  </span>
-                )}
+          {/* Right Column - Summary */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden sticky top-4">
+              {/* Summary Header */}
+              <div className="bg-green-500 text-white text-center py-3">
+                <h2 className="text-lg font-semibold">Summary</h2>
               </div>
-            </div>
-            {vehicleCosts.map((v, idx) => (
-              <div key={idx} className="pl-4 space-y-1">
-                <div className="flex justify-between text-sm gap-2">
-                  <span className="text-gray-600 truncate">{v.name}</span>
-                  <span className="text-gray-800 flex-shrink-0">USD {v.cost}</span>
+
+              <div className="p-4 space-y-3">
+                {/* Room Name */}
+                <div className="bg-gray-100 rounded-lg p-2.5 text-center">
+                  <p className="text-gray-700 font-medium text-sm truncate">
+                    {selectedRoom
+                      ? `Scenic Cottage - ${selectedRoom.name} Room`
+                      : "Scenic Cottage - The Grand London Room"}
+                  </p>
+                </div>
+
+                {/* Guest Details */}
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between gap-2">
+                    <span className="text-gray-600 flex-shrink-0">Name</span>
+                    <span className="text-gray-900 truncate text-right">
+                      {formData.title}. {formData.firstName} {formData.lastName}
+                    </span>
+                  </div>
+                  <div className="flex justify-between gap-2">
+                    <span className="text-gray-600 flex-shrink-0">
+                      Contact:
+                    </span>
+                    <span className="text-gray-900 truncate text-right">
+                      {formData.contactNumber}
+                    </span>
+                  </div>
+                  <div className="flex justify-between gap-2">
+                    <span className="text-gray-600 flex-shrink-0">Email:</span>
+                    <span className="text-gray-900 truncate text-right">
+                      {formData.email}
+                    </span>
+                  </div>
+                  <div className="flex justify-between gap-2">
+                    <span className="text-gray-600 flex-shrink-0">
+                      {formData.passportType}
+                    </span>
+                    <span className="text-gray-900 truncate text-right">
+                      {formData.passportNumber}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="border-t-2 border-green-500 my-3"></div>
+
+                {/* Pricing */}
+                <div className="space-y-2.5">
+                  <div className="flex justify-between items-center gap-2">
+                    <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                      <span className="text-gray-700 text-sm truncate">
+                        Room Charge
+                      </span>
+                      {roomCost > 0 && (
+                        <span className="bg-gray-300 text-gray-700 text-xs px-2 py-0.5 rounded-full flex-shrink-0">
+                          {Math.ceil(
+                            (new Date(formData.checkOutDate) -
+                              new Date(formData.checkInDate)) /
+                              (1000 * 60 * 60 * 24)
+                          )}{" "}
+                          days
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-gray-800 font-medium text-sm flex-shrink-0">
+                      USD {roomCost}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between items-center gap-2">
+                    <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                      <span className="text-gray-700 text-sm truncate">
+                        Service Charge
+                      </span>
+                      <span className="bg-gray-300 text-gray-700 text-xs px-2 py-0.5 rounded-full flex-shrink-0">
+                        5%
+                      </span>
+                    </div>
+                    <span className="text-gray-800 font-medium text-sm flex-shrink-0">
+                      USD {serviceCharge.toFixed(0)}
+                    </span>
+                  </div>
+
+                  <div className="border-t-2 border-gray-300 pt-2.5 flex justify-between items-center gap-2">
+                    <span className="text-lg font-bold text-gray-800">
+                      TOTAL
+                    </span>
+                    <span className="text-lg font-bold text-gray-800 flex-shrink-0">
+                      USD {grandTotal.toFixed(0)}
+                    </span>
+                  </div>
                 </div>
               </div>
-            ))}
-            <div className="flex justify-between border-t pt-2 gap-2">
-              <span className="text-gray-700 text-sm"></span>
-              <span className="text-gray-800 font-medium text-sm flex-shrink-0">
-                USD {totalVehicleCost}
-              </span>
+
+              {/* Complete Booking Button */}
+              <button
+                onClick={handleSubmit}
+                className="w-full bg-green-500 text-white py-3.5 font-bold text-base hover:bg-green-600 transition"
+              >
+                COMPLETE BOOKING
+              </button>
             </div>
-          </>
-        )}
-
-        <div className="flex justify-between items-center gap-2">
-          <div className="flex items-center gap-1.5 flex-1 min-w-0">
-            <span className="text-gray-700 text-sm truncate">Service Charge</span>
-            <span className="bg-gray-300 text-gray-700 text-xs px-2 py-0.5 rounded-full flex-shrink-0">
-              5%
-            </span>
           </div>
-          <span className="text-gray-800 font-medium text-sm flex-shrink-0">
-            USD {serviceCharge.toFixed(0)}
-          </span>
-        </div>
-
-        <div className="border-t-2 border-gray-300 pt-2.5 flex justify-between items-center gap-2">
-          <span className="text-lg font-bold text-gray-800">
-            TOTAL
-          </span>
-          <span className="text-lg font-bold text-gray-800 flex-shrink-0">
-            USD {grandTotal.toFixed(0)}
-          </span>
-        </div>
-      </div>
-    </div>
-
-    {/* Complete Booking Button */}
-    <button
-      onClick={handleSubmit}
-      className="w-full bg-green-500 text-white py-3.5 font-bold text-base hover:bg-green-600 transition"
-    >
-      COMPLETE BOOKING
-    </button>
-  </div>
-</div>
         </div>
       </div>
     </div>
