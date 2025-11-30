@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
       bedrooms: true,
       bathrooms: true,
       kitchen: true,
-      bookings: true,
+      bookings: false,
     };
 
     if (id) {
