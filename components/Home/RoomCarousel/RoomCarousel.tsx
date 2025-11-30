@@ -51,7 +51,7 @@ const RoomCarousel: React.FC = () => {
   };
 
   // Auto-slide one card every 3 seconds
-  useEffect(() => {
+  /*useEffect(() => {
     if (isHovered) return; // pause on hover
     const interval = setInterval(() => {
       if (!scrollRef.current) return;
@@ -70,7 +70,7 @@ const RoomCarousel: React.FC = () => {
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [isHovered]);
+  }, [isHovered]); */
 
   // Update arrows on resize
   useEffect(() => {
