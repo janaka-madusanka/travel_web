@@ -13,7 +13,24 @@ type Props = {
 const RoomCard = ({ room, index }: Props) => {
   const isReversed = index % 2 !== 0;
   const [showDetails, setShowDetails] = useState(false);
-  const toggleDetails = () => setShowDetails(!showDetails);
+
+  const toggleDetails = () => {
+    const nextState = !showDetails;
+    setShowDetails(nextState);
+
+    // ✅ FIX: Only scroll on MOBILE screens (width < 1024px).
+    // On Desktop, the layout is side-by-side, so no scrolling is needed.
+    if (nextState && typeof window !== "undefined" && window.innerWidth < 1024) {
+      setTimeout(() => {
+        const element = document.getElementById(`room-${room.id}`);
+        if (element) {
+          const yOffset = -100; 
+          const y = element.getBoundingClientRect().top + window.scrollY + yOffset;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+      }, 100);
+    }
+  };
 
   const images = [room.img1, room.img2, room.img3, room.img4].filter(Boolean);
 
@@ -83,11 +100,9 @@ const RoomCard = ({ room, index }: Props) => {
       id={`room-${room.id}`}
       className="scroll-mt-40 group w-full bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-100 relative"
     >
-      {/* ✅ FIXED HEIGHT: Changed min-h to fixed h-[500px] on desktop to prevent expansion */}
       <div className={`flex flex-col lg:flex-row ${isReversed ? "lg:flex-row-reverse" : ""} h-auto lg:h-[500px]`}>
         
         {/* ============ LEFT SECTION (Image / Details) ============ */}
-        {/* ✅ ADDED: lg:h-full to ensure it fills the parent fixed height */}
         <div className="w-full lg:w-[55%] relative h-[500px] lg:h-full overflow-hidden bg-gray-100">
           <AnimatePresence mode="wait" initial={false}>
             {!showDetails ? (
@@ -123,7 +138,6 @@ const RoomCard = ({ room, index }: Props) => {
               // --- DETAILS VIEW ---
               <motion.div
                 key="details"
-                // ✅ ADDED: flex column layout with overflow-hidden on parent to manage scrolling inside
                 className="relative w-full h-full flex flex-col bg-gray-900 text-white"
                 initial={{ x: isReversed ? "-100%" : "100%", opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
@@ -173,7 +187,6 @@ const RoomCard = ({ room, index }: Props) => {
         </div>
 
         {/* ============ RIGHT SECTION (Static Info) ============ */}
-        {/* ✅ ADDED: h-full so it matches the fixed height of the left side */}
         <div className="w-full lg:w-[45%] flex flex-col justify-center p-8 sm:p-10 lg:p-10 bg-white relative h-auto lg:h-full">
           <h3 className="text-4xl sm:text-5xl font-serif font-medium text-gray-900 mb-8 leading-tight">
             {room.name}
