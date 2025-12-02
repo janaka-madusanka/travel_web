@@ -11,12 +11,18 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import { useSearchParams } from 'next/navigation';
+
 
 interface Vehicle {
   type: string;
   quantity: number;
   startDate: string;
   endDate: string;
+}
+interface BookedSlot {
+  checkIn: string;
+  checkOut: string;
 }
 
 interface BookingPayload {
@@ -114,60 +120,133 @@ const vehicleData = [
   { id: "SUV", type: "Tuk Tuk" },
 ];
 
-
-
 export default function BookingSystem() {
+   const searchParams = useSearchParams();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-const [formData, setFormData] = useState<{
-  title: string;
-  firstName: string;
-  lastName: string;
-  dateOfBirth: string;
-  email: string;
-  country: string;
-  countryCode: string;
-  contactNumber: string;
-  address: string; // 
-  passportType: string;
-  passportNumber: string;
-  room: string;
-  checkInDate: string;
-  checkInTime: string;
-  checkOutDate: string;
-  checkOutTime: string;
-  vehicleNeeded: boolean;
-  vehicles: Vehicle[];
-  meal: boolean; 
-  guide: boolean; 
-  driver: boolean; 
-}>({
-  title: "Mr",
-  firstName: "",
-  lastName: "",
-  dateOfBirth: "",
-  email: "",
-  country: "",
-  countryCode: "+44",
-  contactNumber: "",
-  address: "", 
-  passportType: "Passport",
-  passportNumber: "",
-  room: "1",
-  checkInDate: "",
-  checkInTime: "",
-  checkOutDate: "",
-  checkOutTime: "",
-  vehicleNeeded: false,
-  vehicles: [],
-  meal: false, 
-  guide: false, 
-  driver: false, 
-});
+  const [formData, setFormData] = useState<{
+    title: string;
+    firstName: string;
+    lastName: string;
+    dateOfBirth: string;
+    email: string;
+    country: string;
+    countryCode: string;
+    contactNumber: string;
+    address: string; //
+    passportType: string;
+    passportNumber: string;
+    room: string;
+    checkInDate: string;
+    checkInTime: string;
+    checkOutDate: string;
+    checkOutTime: string;
+    vehicleNeeded: boolean;
+    vehicles: Vehicle[];
+    meal: boolean;
+    guide: boolean;
+    driver: boolean;
+  }>({
+    title: "Mr",
+    firstName: "",
+    lastName: "",
+    dateOfBirth: "",
+    email: "",
+    country: "",
+    countryCode: "+44",
+    contactNumber: "",
+    address: "",
+    passportType: "Passport",
+    passportNumber: "",
+    room: "1",
+    checkInDate: "",
+    checkInTime: "",
+    checkOutDate: "",
+    checkOutTime: "",
+    vehicleNeeded: false,
+    vehicles: [],
+    meal: false,
+    guide: false,
+    driver: false,
+  });
 
   const [phoneNumber, setPhoneNumber] = useState("");
   const [detectedCountry, setDetectedCountry] = useState<string>("GB");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [rooms, setRooms] = useState(roomsData); // Initialize with hardcoded data as fallback
+  const [isLoadingRooms, setIsLoadingRooms] = useState(true);
+  const [bookedSlots, setBookedSlots] = useState<BookedSlot[]>([]);
+
+    useEffect(() => {
+    const roomIdFromUrl = searchParams.get('roomId');
+    if (roomIdFromUrl) {
+      setFormData(prev => ({
+        ...prev,
+        room: roomIdFromUrl
+      }));
+    }
+  }, [searchParams]);
+
+
+  useEffect(() => {
+    const fetchRooms = async () => {
+      try {
+        setIsLoadingRooms(true);
+        const response = await fetch("/api/rooms");
+        const data = await response.json();
+
+        if (data.rooms && data.rooms.length > 0) {
+          const transformedRooms = data.rooms.map((room: any) => ({
+            id: room.id,
+            name: room.name,
+            image:
+              room.img1 ||
+              "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800&q=80",
+            beds: room.bedrooms[0]?.bedType || "King Bed",
+            capacity: room.capacity,
+            price: room.cost.toString(),
+            features: [
+              { name: "Bed", detail: room.bedrooms[0]?.bedType || "King Bed" },
+              { name: "Capacity", detail: `${room.capacity} Adults` },
+              { name: "Size", detail: room.size || "N/A" },
+              { name: "Air Conditioning", detail: room.ac || "No" },
+              {
+                name: "Hot Water",
+                detail: room.bathrooms[0]?.hotWater || "No",
+              },
+              { name: "Wi-Fi", detail: room.wifi || "No" },
+              {
+                name: "Special",
+                detail:
+                  room.gardenView === "YES"
+                    ? "Garden View"
+                    : room.balcony === "YES"
+                    ? "Balcony"
+                    : "N/A",
+              },
+            ].filter((f) => f.detail !== "N/A"), // Remove N/A features
+          }));
+
+          setRooms(transformedRooms);
+          // Set first room as default if no room is selected
+          if (!formData.room) {
+            setFormData((prev) => ({
+              ...prev,
+              room: transformedRooms[0]?.id.toString() || "1",
+            }));
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch rooms:", error);
+        // Keep using hardcoded data on error
+      } finally {
+        setIsLoadingRooms(false);
+      }
+    };
+
+    fetchRooms();
+  }, []);
 
   useEffect(() => {
     fetch("https://ipapi.co/json/")
@@ -185,7 +264,84 @@ const [formData, setFormData] = useState<{
       .catch((err) => console.log("Could not detect country:", err));
   }, []);
 
-  const selectedRoom = roomsData.find((r) => r.id === Number(formData.room));
+  useEffect(() => {
+    const fetchBookedDates = async () => {
+      if (!formData.room) return;
+
+      try {
+        const today = new Date().toISOString().split("T")[0];
+        const response = await fetch(
+          `/api/bookings/available?roomId=${formData.room}&from=${today}`
+        );
+        const data = await response.json();
+
+        if (data.bookedSlots) {
+          setBookedSlots(data.bookedSlots);
+
+          if (formData.checkInDate && formData.checkOutDate) {
+            const isCheckInBooked = data.bookedSlots.some(
+              (slot: BookedSlot) => {
+                return (
+                  formData.checkInDate >= slot.checkIn &&
+                  formData.checkInDate <= slot.checkOut
+                );
+              }
+            );
+
+            const isCheckOutBooked = data.bookedSlots.some(
+              (slot: BookedSlot) => {
+                return (
+                  formData.checkOutDate >= slot.checkIn &&
+                  formData.checkOutDate <= slot.checkOut
+                );
+              }
+            );
+
+            if (isCheckInBooked || isCheckOutBooked) {
+              setFormData((prev) => ({
+                ...prev,
+                checkInDate: "",
+                checkOutDate: "",
+              }));
+              alert(
+                "Your selected dates are not available for this room. Please select new dates."
+              );
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch booked dates:", error);
+      }
+    };
+
+    fetchBookedDates();
+  }, [formData.room]);
+
+  // Check if a date falls within any booked range
+  const isDateBooked = (date: Date) => {
+    // Format date to YYYY-MM-DD in local timezone
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const checkDate = `${year}-${month}-${day}`;
+
+    return bookedSlots.some((slot) => {
+      // Date is booked if it falls within the range (inclusive)
+      return checkDate >= slot.checkIn && checkDate <= slot.checkOut;
+    });
+  };
+
+  // Check if selected date range crosses any booked slots
+  const isDateRangeCrossingBooking = (checkIn: string, checkOut: string) => {
+    if (!checkIn || !checkOut) return false;
+
+    return bookedSlots.some((slot) => {
+      // Check if the selected range overlaps with any booked slot
+      return checkIn <= slot.checkOut && checkOut >= slot.checkIn;
+    });
+  };
+
+  const selectedRoom = rooms.find((r) => r.id === Number(formData.room));
 
   // Check if contact details are complete
   const isContactComplete =
@@ -230,31 +386,31 @@ const [formData, setFormData] = useState<{
   const grandTotal = roomCost + serviceCharge;
 
   const handleChange = (field: keyof typeof formData, value: any) => {
-  if (field === "vehicleNeeded" && value === true) {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-      vehicles: [{ type: "2", quantity: 1, startDate: "", endDate: "" }], // Changed from "1" to "2" (CAR)
-    }));
-  } else if (field === "vehicleNeeded" && value === false) {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-      vehicles: [],
-    }));
-  } else {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  }
-};
+    if (field === "vehicleNeeded" && value === true) {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value,
+        vehicles: [{ type: "2", quantity: 1, startDate: "", endDate: "" }], // Changed from "1" to "2" (CAR)
+      }));
+    } else if (field === "vehicleNeeded" && value === false) {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value,
+        vehicles: [],
+      }));
+    } else {
+      setFormData((prev) => ({ ...prev, [field]: value }));
+    }
+  };
   const addVehicle = () => {
-  setFormData((prev) => ({
-    ...prev,
-    vehicles: [
-      ...prev.vehicles,
-      { type: "2", quantity: 1, startDate: "", endDate: "" }, // Changed from "1" to "2" (CAR)
-    ],
-  }));
-};
+    setFormData((prev) => ({
+      ...prev,
+      vehicles: [
+        ...prev.vehicles,
+        { type: "2", quantity: 1, startDate: "", endDate: "" }, // Changed from "1" to "2" (CAR)
+      ],
+    }));
+  };
   const updateVehicle = (index: number, field: keyof Vehicle, value: any) => {
     const updated = [...formData.vehicles];
     updated[index][field] = value;
@@ -267,82 +423,87 @@ const [formData, setFormData] = useState<{
       vehicles: prev.vehicles.filter((_, i) => i !== index),
     }));
   };
-const handleSubmit = async () => {
-  // Validation
-  if (!isContactComplete || !isBookingComplete) {
-    alert("Please complete all required fields");
-    return;
-  }
-
-  setIsSubmitting(true);
-
-  try {
-    // Prepare customer data matching backend Customer model
-    const customerData = {
-      name: `${formData.title} ${formData.firstName} ${formData.lastName}`.trim(),
-      passportNumber: formData.passportType === "Passport" ? formData.passportNumber : "",
-      nicNumber: formData.passportType === "NIC" ? formData.passportNumber : "",
-      address: formData.address || "N/A",
-      contactNumber: formData.contactNumber,
-    };
-
-    // Prepare the payload matching backend structure
-    const payload: any = {
-      customer: customerData,
-      roomId: Number(formData.room),
-      checkIn: `${formData.checkInDate}T${formData.checkInTime || "14:00"}:00.000Z`,
-      checkOut: `${formData.checkOutDate}T${formData.checkOutTime || "11:00"}:00.000Z`,
-    };
-
-    // Add vehicle details if needed
-    if (formData.vehicleNeeded && formData.vehicles.length > 0) {
-      const firstVehicle = formData.vehicles[0];
-      
-      // Map numeric ID to string ID for backend
-      let vehicleTypeId = "CAR";
-      if (firstVehicle.type === "1") vehicleTypeId = "BIKE";
-      else if (firstVehicle.type === "2") vehicleTypeId = "CAR";
-      else if (firstVehicle.type === "3") vehicleTypeId = "VAN";
-      else if (firstVehicle.type === "4") vehicleTypeId = "SUV";
-      
-      payload.otherDetails = {
-        vehicleSupport: "YES",
-        meal: formData.meal ? "YES" : "NO",
-        guide: formData.guide ? "YES" : "NO",
-        vehicleType: vehicleTypeId,
-        vehicleNumber: parseInt(firstVehicle.quantity) || 1,
-        driver: formData.driver ? "YES" : "NO",
-      };
-    }
-
-    console.log("Sending payload:", payload);
-
-    const response = await fetch("/api/bookings", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      alert(`Error: ${result.error}`);
-      setIsSubmitting(false);
+  const handleSubmit = async () => {
+    // Validation
+    if (!isContactComplete || !isBookingComplete) {
+      alert("Please complete all required fields");
       return;
     }
 
-    alert("Booking completed successfully!");
-    console.log("Booking created:", result.booking);
-    
-  } catch (error) {
-    console.error("Booking error:", error);
-    alert("Failed to create booking. Please try again.");
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+    setIsSubmitting(true);
+
+    try {
+      // Prepare customer data matching backend Customer model
+      const customerData = {
+        name: `${formData.title} ${formData.firstName} ${formData.lastName}`.trim(),
+        passportNumber:
+          formData.passportType === "Passport" ? formData.passportNumber : "",
+        nicNumber:
+          formData.passportType === "NIC" ? formData.passportNumber : "",
+        address: formData.address || "N/A",
+        contactNumber: formData.contactNumber,
+      };
+
+      // Prepare the payload matching backend structure
+      const payload: any = {
+        customer: customerData,
+        roomId: Number(formData.room),
+        checkIn: `${formData.checkInDate}T${
+          formData.checkInTime || "14:00"
+        }:00.000Z`,
+        checkOut: `${formData.checkOutDate}T${
+          formData.checkOutTime || "11:00"
+        }:00.000Z`,
+      };
+
+      // Add vehicle details if needed
+      if (formData.vehicleNeeded && formData.vehicles.length > 0) {
+        const firstVehicle = formData.vehicles[0];
+
+        // Map numeric ID to string ID for backend
+        let vehicleTypeId = "CAR";
+        if (firstVehicle.type === "1") vehicleTypeId = "BIKE";
+        else if (firstVehicle.type === "2") vehicleTypeId = "CAR";
+        else if (firstVehicle.type === "3") vehicleTypeId = "VAN";
+        else if (firstVehicle.type === "4") vehicleTypeId = "SUV";
+
+        payload.otherDetails = {
+          vehicleSupport: "YES",
+          meal: formData.meal ? "YES" : "NO",
+          guide: formData.guide ? "YES" : "NO",
+          vehicleType: vehicleTypeId,
+          vehicleNumber: parseInt(firstVehicle.quantity) || 1,
+          driver: formData.driver ? "YES" : "NO",
+        };
+      }
+
+      console.log("Sending payload:", payload);
+
+      const response = await fetch("/api/bookings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        alert(`Error: ${result.error}`);
+        setIsSubmitting(false);
+        return;
+      }
+
+      alert("Booking completed successfully!");
+      console.log("Booking created:", result.booking);
+    } catch (error) {
+      console.error("Booking error:", error);
+      alert("Failed to create booking. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   const countryOptions = getData().map((country) => ({
     value: country.code,
     label: country.name,
@@ -734,7 +895,7 @@ const handleSubmit = async () => {
                       onChange={(e) => handleChange("room", e.target.value)}
                       className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none appearance-none bg-white"
                     >
-                      {roomsData.map((room) => (
+                      {rooms.map((room) => (
                         <option key={room.id} value={room.id}>
                           {room.name}
                         </option>
@@ -767,24 +928,50 @@ const handleSubmit = async () => {
                       <DatePicker
                         selected={
                           formData.checkInDate
-                            ? new Date(formData.checkInDate)
+                            ? new Date(formData.checkInDate + "T00:00:00")
                             : null
                         }
-                        onChange={(date) =>
-                          handleChange(
-                            "checkInDate",
-                            date ? date.toISOString().split("T")[0] : ""
-                          )
-                        }
+                        onChange={(date) => {
+                          if (date) {
+                            const year = date.getFullYear();
+                            const month = String(date.getMonth() + 1).padStart(
+                              2,
+                              "0"
+                            );
+                            const day = String(date.getDate()).padStart(2, "0");
+                            const selectedDate = `${year}-${month}-${day}`;
+
+                            // Check if the range crosses any booking
+                            if (
+                              formData.checkOutDate &&
+                              isDateRangeCrossingBooking(
+                                selectedDate,
+                                formData.checkOutDate
+                              )
+                            ) {
+                              alert(
+                                "Your selected date range includes booked dates. Please choose different dates."
+                              );
+                              handleChange("checkInDate", selectedDate);
+                              handleChange("checkOutDate", ""); // Clear checkout date
+                              return;
+                            }
+
+                            handleChange("checkInDate", selectedDate);
+                          } else {
+                            handleChange("checkInDate", "");
+                          }
+                        }}
                         dateFormat="yyyy-MM-dd"
                         placeholderText="Select Check-In Date"
                         minDate={new Date()}
+                        filterDate={(date) => !isDateBooked(date)}
                         className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                         wrapperClassName="w-full"
                         popperProps={{
-    strategy: "fixed"
-  }}
-  popperPlacement="bottom-start"
+                          strategy: "fixed",
+                        }}
+                        popperPlacement="bottom-start"
                       />
                       <CalendarTodayIcon
                         sx={{ fontSize: 16 }}
@@ -801,33 +988,57 @@ const handleSubmit = async () => {
                       <DatePicker
                         selected={
                           formData.checkOutDate
-                            ? new Date(formData.checkOutDate)
+                            ? new Date(formData.checkOutDate + "T00:00:00")
                             : null
                         }
-                        onChange={(date) =>
-                          handleChange(
-                            "checkOutDate",
-                            date ? date.toISOString().split("T")[0] : ""
-                          )
+                        onChange={(date) => {
+                          if (date) {
+                            const year = date.getFullYear();
+                            const month = String(date.getMonth() + 1).padStart(
+                              2,
+                              "0"
+                            );
+                            const day = String(date.getDate()).padStart(2, "0");
+                            const selectedDate = `${year}-${month}-${day}`;
+
+                            // Check if the range crosses any booking
+                            if (
+                              formData.checkInDate &&
+                              isDateRangeCrossingBooking(
+                                formData.checkInDate,
+                                selectedDate
+                              )
+                            ) {
+                              alert(
+                                "Your selected date range includes booked dates. Please choose a different checkout date."
+                              );
+                              return;
+                            }
+
+                            handleChange("checkOutDate", selectedDate);
+                          } else {
+                            handleChange("checkOutDate", "");
+                          }
+                        }}
+                        minDate={
+                          formData.checkInDate
+                            ? new Date(formData.checkInDate + "T00:00:00")
+                            : new Date()
                         }
                         dateFormat="yyyy-MM-dd"
                         placeholderText="Select Check-Out Date"
-                        minDate={
-                          formData.checkInDate
-                            ? new Date(formData.checkInDate)
-                            : new Date()
-                        }
+                        filterDate={(date) => !isDateBooked(date)}
                         className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                         wrapperClassName="w-full"
                         popperProps={{
-    strategy: "fixed"
-  }}
-  popperPlacement="bottom-start"
+                          strategy: "fixed",
+                        }}
+                        popperPlacement="bottom-start"
                       />
-                      <CalendarTodayIcon 
-        sx={{ fontSize: 16 }}
-        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none" 
-      />
+                      <CalendarTodayIcon
+                        sx={{ fontSize: 16 }}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none"
+                      />
                     </div>
                   </div>
                 </div>
@@ -859,19 +1070,19 @@ const handleSubmit = async () => {
                         className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                         wrapperClassName="w-full"
                         popperProps={{
-    strategy: "fixed"
-  }}
-  popperPlacement="bottom-start"
+                          strategy: "fixed",
+                        }}
+                        popperPlacement="bottom-start"
                       />
-                       <AccessTimeIcon 
-        sx={{ fontSize: 16 }}
-        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none" 
-      />
+                      <AccessTimeIcon
+                        sx={{ fontSize: 16 }}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none"
+                      />
                     </div>
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                      Check-Out 
+                      Check-Out
                     </label>
                     <div className="w-full relative">
                       <DatePicker
@@ -895,14 +1106,14 @@ const handleSubmit = async () => {
                         className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                         wrapperClassName="w-full"
                         popperProps={{
-    strategy: "fixed"
-  }}
-  popperPlacement="bottom-start"
+                          strategy: "fixed",
+                        }}
+                        popperPlacement="bottom-start"
                       />
-                       <AccessTimeIcon 
-        sx={{ fontSize: 16 }}
-        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none" 
-      />
+                      <AccessTimeIcon
+                        sx={{ fontSize: 16 }}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none"
+                      />
                     </div>
                   </div>
                 </div>
@@ -1034,14 +1245,14 @@ const handleSubmit = async () => {
                                   className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                                   wrapperClassName="w-full"
                                   popperProps={{
-    strategy: "fixed"
-  }}
-  popperPlacement="bottom-start"
+                                    strategy: "fixed",
+                                  }}
+                                  popperPlacement="bottom-start"
                                 />
-                                  <CalendarTodayIcon 
-        sx={{ fontSize: 16 }}
-        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none" 
-      />
+                                <CalendarTodayIcon
+                                  sx={{ fontSize: 16 }}
+                                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none"
+                                />
                               </div>
                             </div>
                             <div>
@@ -1074,14 +1285,14 @@ const handleSubmit = async () => {
                                   className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                                   wrapperClassName="w-full"
                                   popperProps={{
-    strategy: "fixed"
-  }}
-  popperPlacement="bottom-start"
+                                    strategy: "fixed",
+                                  }}
+                                  popperPlacement="bottom-start"
                                 />
-                                  <CalendarTodayIcon 
-        sx={{ fontSize: 16 }}
-        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none" 
-      />
+                                <CalendarTodayIcon
+                                  sx={{ fontSize: 16 }}
+                                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none"
+                                />
                               </div>
                             </div>
                           </div>
