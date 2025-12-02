@@ -11,6 +11,8 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import { useSearchParams } from 'next/navigation';
+
 
 interface Vehicle {
   type: string;
@@ -119,6 +121,7 @@ const vehicleData = [
 ];
 
 export default function BookingSystem() {
+   const searchParams = useSearchParams();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [formData, setFormData] = useState<{
     title: string;
@@ -174,6 +177,17 @@ export default function BookingSystem() {
   const [rooms, setRooms] = useState(roomsData); // Initialize with hardcoded data as fallback
   const [isLoadingRooms, setIsLoadingRooms] = useState(true);
   const [bookedSlots, setBookedSlots] = useState<BookedSlot[]>([]);
+
+    useEffect(() => {
+    const roomIdFromUrl = searchParams.get('roomId');
+    if (roomIdFromUrl) {
+      setFormData(prev => ({
+        ...prev,
+        room: roomIdFromUrl
+      }));
+    }
+  }, [searchParams]);
+
 
   useEffect(() => {
     const fetchRooms = async () => {
@@ -250,60 +264,82 @@ export default function BookingSystem() {
       .catch((err) => console.log("Could not detect country:", err));
   }, []);
 
- useEffect(() => {
-  const fetchBookedDates = async () => {
-    if (!formData.room) return;
+  useEffect(() => {
+    const fetchBookedDates = async () => {
+      if (!formData.room) return;
 
-    try {
-      const today = new Date().toISOString().split("T")[0];
-      const response = await fetch(
-        `/api/bookings/available?roomId=${formData.room}&from=${today}`
-      );
-      const data = await response.json();
+      try {
+        const today = new Date().toISOString().split("T")[0];
+        const response = await fetch(
+          `/api/bookings/available?roomId=${formData.room}&from=${today}`
+        );
+        const data = await response.json();
 
-      if (data.bookedSlots) {
-        setBookedSlots(data.bookedSlots);
-        
-        if (formData.checkInDate && formData.checkOutDate) {
-          const isCheckInBooked = data.bookedSlots.some((slot: BookedSlot) => {
-            return formData.checkInDate >= slot.checkIn && formData.checkInDate <= slot.checkOut;
-          });
-          
-          const isCheckOutBooked = data.bookedSlots.some((slot: BookedSlot) => {
-            return formData.checkOutDate >= slot.checkIn && formData.checkOutDate <= slot.checkOut;
-          });
-          
-          if (isCheckInBooked || isCheckOutBooked) {
-            setFormData(prev => ({
-              ...prev,
-              checkInDate: "",
-              checkOutDate: ""
-            }));
-            alert("Your selected dates are not available for this room. Please select new dates.");
+        if (data.bookedSlots) {
+          setBookedSlots(data.bookedSlots);
+
+          if (formData.checkInDate && formData.checkOutDate) {
+            const isCheckInBooked = data.bookedSlots.some(
+              (slot: BookedSlot) => {
+                return (
+                  formData.checkInDate >= slot.checkIn &&
+                  formData.checkInDate <= slot.checkOut
+                );
+              }
+            );
+
+            const isCheckOutBooked = data.bookedSlots.some(
+              (slot: BookedSlot) => {
+                return (
+                  formData.checkOutDate >= slot.checkIn &&
+                  formData.checkOutDate <= slot.checkOut
+                );
+              }
+            );
+
+            if (isCheckInBooked || isCheckOutBooked) {
+              setFormData((prev) => ({
+                ...prev,
+                checkInDate: "",
+                checkOutDate: "",
+              }));
+              alert(
+                "Your selected dates are not available for this room. Please select new dates."
+              );
+            }
           }
         }
+      } catch (error) {
+        console.error("Failed to fetch booked dates:", error);
       }
-    } catch (error) {
-      console.error("Failed to fetch booked dates:", error);
-    }
-  };
+    };
 
-  fetchBookedDates();
-}, [formData.room]);
+    fetchBookedDates();
+  }, [formData.room]);
 
   // Check if a date falls within any booked range
   const isDateBooked = (date: Date) => {
-  // Format date to YYYY-MM-DD in local timezone
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const checkDate = `${year}-${month}-${day}`;
-  
-  return bookedSlots.some((slot) => {
-    // Date is booked if it falls within the range (inclusive)
-    return checkDate >= slot.checkIn && checkDate <= slot.checkOut;
-  });
-};
+    // Format date to YYYY-MM-DD in local timezone
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const checkDate = `${year}-${month}-${day}`;
+
+    return bookedSlots.some((slot) => {
+      // Date is booked if it falls within the range (inclusive)
+      return checkDate >= slot.checkIn && checkDate <= slot.checkOut;
+    });
+  };
+
+  // Check if selected date range crosses any booked slots
+  const isDateRangeCrossingBooking = (checkIn: string, checkOut: string) => {
+    if (!checkIn || !checkOut) return false;
+
+    return bookedSlots.some((slot) => {
+      // Check if the selected range overlaps with any booked slot
+      return checkIn <= slot.checkOut && checkOut >= slot.checkIn;
+    });
+  };
 
   const selectedRoom = rooms.find((r) => r.id === Number(formData.room));
 
@@ -903,10 +939,25 @@ export default function BookingSystem() {
                               "0"
                             );
                             const day = String(date.getDate()).padStart(2, "0");
-                            handleChange(
-                              "checkInDate",
-                              `${year}-${month}-${day}`
-                            );
+                            const selectedDate = `${year}-${month}-${day}`;
+
+                            // Check if the range crosses any booking
+                            if (
+                              formData.checkOutDate &&
+                              isDateRangeCrossingBooking(
+                                selectedDate,
+                                formData.checkOutDate
+                              )
+                            ) {
+                              alert(
+                                "Your selected date range includes booked dates. Please choose different dates."
+                              );
+                              handleChange("checkInDate", selectedDate);
+                              handleChange("checkOutDate", ""); // Clear checkout date
+                              return;
+                            }
+
+                            handleChange("checkInDate", selectedDate);
                           } else {
                             handleChange("checkInDate", "");
                           }
@@ -948,10 +999,23 @@ export default function BookingSystem() {
                               "0"
                             );
                             const day = String(date.getDate()).padStart(2, "0");
-                            handleChange(
-                              "checkOutDate",
-                              `${year}-${month}-${day}`
-                            );
+                            const selectedDate = `${year}-${month}-${day}`;
+
+                            // Check if the range crosses any booking
+                            if (
+                              formData.checkInDate &&
+                              isDateRangeCrossingBooking(
+                                formData.checkInDate,
+                                selectedDate
+                              )
+                            ) {
+                              alert(
+                                "Your selected date range includes booked dates. Please choose a different checkout date."
+                              );
+                              return;
+                            }
+
+                            handleChange("checkOutDate", selectedDate);
                           } else {
                             handleChange("checkOutDate", "");
                           }

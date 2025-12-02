@@ -4,6 +4,8 @@ import Image from "next/image";
 import { FaArrowRight, FaCheck, FaTimes, FaUserFriends, FaBed, FaRulerCombined, FaListUl } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { BackendRoom } from "@/types/BackendRoom";
+import { useRouter } from 'next/navigation';
+
 
 type Props = {
   room: BackendRoom;
@@ -11,6 +13,7 @@ type Props = {
 };
 
 const RoomCard = ({ room, index }: Props) => {
+  const router = useRouter();
   const isReversed = index % 2 !== 0;
   const [showDetails, setShowDetails] = useState(false);
 
@@ -30,6 +33,10 @@ const RoomCard = ({ room, index }: Props) => {
         }
       }, 100);
     }
+  };
+
+   const handleBookNow = () => {
+    router.push(`/booking?roomId=${room.id}`);
   };
 
   const images = [room.img1, room.img2, room.img3, room.img4].filter(Boolean);
@@ -241,7 +248,7 @@ const RoomCard = ({ room, index }: Props) => {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 mt-auto">
-            <button className="flex-1 px-8 py-3.5 bg-gray-900 text-white text-sm font-bold uppercase tracking-wider hover:bg-orange-600 transition-colors duration-300 rounded-sm shadow-lg shadow-gray-200">
+            <button  onClick={handleBookNow} className="flex-1 px-8 py-3.5 bg-gray-900 text-white text-sm font-bold uppercase tracking-wider hover:bg-orange-600 transition-colors duration-300 rounded-sm shadow-lg shadow-gray-200">
               Book Now
             </button>
             <button
