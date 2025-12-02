@@ -18,6 +18,10 @@ interface Vehicle {
   startDate: string;
   endDate: string;
 }
+interface BookedSlot {
+  checkIn: string;
+  checkOut: string;
+}
 
 interface BookingPayload {
   customer: {
@@ -246,27 +250,46 @@ export default function BookingSystem() {
       .catch((err) => console.log("Could not detect country:", err));
   }, []);
 
-  useEffect(() => {
-    const fetchBookedDates = async () => {
-      if (!formData.room) return;
+ useEffect(() => {
+  const fetchBookedDates = async () => {
+    if (!formData.room) return;
 
-      try {
-        const today = new Date().toISOString().split("T")[0];
-        const response = await fetch(
-          `/api/bookings/available?roomId=${formData.room}&from=${today}`
-        );
-        const data = await response.json();
+    try {
+      const today = new Date().toISOString().split("T")[0];
+      const response = await fetch(
+        `/api/bookings/available?roomId=${formData.room}&from=${today}`
+      );
+      const data = await response.json();
 
-        if (data.bookedSlots) {
-          setBookedSlots(data.bookedSlots);
+      if (data.bookedSlots) {
+        setBookedSlots(data.bookedSlots);
+        
+        if (formData.checkInDate && formData.checkOutDate) {
+          const isCheckInBooked = data.bookedSlots.some((slot: BookedSlot) => {
+            return formData.checkInDate >= slot.checkIn && formData.checkInDate <= slot.checkOut;
+          });
+          
+          const isCheckOutBooked = data.bookedSlots.some((slot: BookedSlot) => {
+            return formData.checkOutDate >= slot.checkIn && formData.checkOutDate <= slot.checkOut;
+          });
+          
+          if (isCheckInBooked || isCheckOutBooked) {
+            setFormData(prev => ({
+              ...prev,
+              checkInDate: "",
+              checkOutDate: ""
+            }));
+            alert("Your selected dates are not available for this room. Please select new dates.");
+          }
         }
-      } catch (error) {
-        console.error("Failed to fetch booked dates:", error);
       }
-    };
+    } catch (error) {
+      console.error("Failed to fetch booked dates:", error);
+    }
+  };
 
-    fetchBookedDates();
-  }, [formData.room]);
+  fetchBookedDates();
+}, [formData.room]);
 
   // Check if a date falls within any booked range
   const isDateBooked = (date: Date) => {
