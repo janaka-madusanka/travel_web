@@ -1,4 +1,6 @@
-import React from "react";
+'use client';
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Calendar, Users } from "lucide-react";
 
 interface InputFieldProps {
@@ -6,6 +8,8 @@ interface InputFieldProps {
   type?: "text" | "date" | "select";
   options?: string[];
   icon?: React.ElementType;
+  value?: string;
+  onChange?: (value: string) => void;
 }
 
 const InputField: React.FC<InputFieldProps> = ({
@@ -13,6 +17,8 @@ const InputField: React.FC<InputFieldProps> = ({
   type = "text",
   options = [],
   icon: Icon,
+  value,
+  onChange,
 }) => {
   return (
     <div className="flex items-center gap-3 px-4 py-3 bg-white/10 backdrop-blur-lg rounded-xl w-full">
@@ -22,7 +28,11 @@ const InputField: React.FC<InputFieldProps> = ({
         <label className="text-xs text-gray-300 mb-1">{label}</label>
 
         {type === "select" ? (
-          <select className="bg-transparent text-white outline-none text-sm cursor-pointer w-full">
+          <select 
+            className="bg-transparent text-white outline-none text-sm cursor-pointer w-full"
+            value={value}
+            onChange={(e) => onChange?.(e.target.value)}
+          >
             {options.map((opt, i) => (
               <option key={i} value={opt} className="bg-gray-900">
                 {opt}
@@ -33,6 +43,8 @@ const InputField: React.FC<InputFieldProps> = ({
           <input
             type={type}
             className="bg-transparent text-white outline-none text-sm w-full"
+            value={value}
+            onChange={(e) => onChange?.(e.target.value)}
           />
         )}
       </div>
@@ -41,6 +53,19 @@ const InputField: React.FC<InputFieldProps> = ({
 };
 
 const BookingForm: React.FC = () => {
+  const router = useRouter();
+  const [checkIn, setCheckIn] = useState("");
+  const [checkOut, setCheckOut] = useState("");
+  const [guests, setGuests] = useState("1 Guest");
+
+  const handleCheckout = () => {
+    const params = new URLSearchParams();
+    if (checkIn) params.append('checkIn', checkIn);
+    if (checkOut) params.append('checkOut', checkOut);
+    
+    router.push(`/booking?${params.toString()}`);
+  };
+
   return (
     <div className="flex items-center justify-center px-4 w-full">
       <div
@@ -54,12 +79,24 @@ const BookingForm: React.FC = () => {
         "
       >
         {/* Inputs */}
-        <div className="flex-1 min-w-[200px] ">
-          <InputField label="Check in" type="date" icon={Calendar} />
+        <div className="flex-1 min-w-[200px]">
+          <InputField 
+            label="Check in" 
+            type="date" 
+            icon={Calendar}
+            value={checkIn}
+            onChange={setCheckIn}
+          />
         </div>
 
         <div className="flex-1 min-w-[200px]">
-          <InputField label="Checkout" type="date" icon={Calendar} />
+          <InputField 
+            label="Checkout" 
+            type="date" 
+            icon={Calendar}
+            value={checkOut}
+            onChange={setCheckOut}
+          />
         </div>
 
         <div className="flex-1 min-w-[200px]">
@@ -68,11 +105,14 @@ const BookingForm: React.FC = () => {
             type="select"
             icon={Users}
             options={["1 Guest", "2 Guests", "3 Guests", "4 Guests"]}
+            value={guests}
+            onChange={setGuests}
           />
         </div>
 
         {/* Button */}
         <button
+          onClick={handleCheckout}
           className="
             bg-green-400 hover:bg-green-500 text-gray-900 font-semibold
             px-8 py-3 rounded-xl transition

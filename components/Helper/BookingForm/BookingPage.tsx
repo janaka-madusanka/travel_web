@@ -51,14 +51,23 @@ interface BookingPayload {
   };
 }
 
-// Mock Data
+
+// Update the hotelInfo mock data. if no room selected, show hotel info
 const hotelInfo = {
-  name: "The Grand London",
+  name: "Scenic Cottage",
   image:
     "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80",
   contact: "+1 234 567 8900",
-  address: "123 Luxury Street, London, UK",
-  description: "Experience luxury and comfort at The Grand London",
+  address: "123 Paradise Valley, Scenic Hills",
+  description: "Experience tranquility and natural beauty at Scenic Cottage",
+  features: [
+    { name: "Location", detail: "Paradise Valley" },
+    { name: "Rating", detail: "4.8/5 Stars" },
+    { name: "Amenities", detail: "Pool, Spa, Restaurant" },
+    { name: "Parking", detail: "Free Parking" },
+    { name: "Garden", detail: "Beautiful Gardens" },
+    { name: "View", detail: "Mountain & Valley View" },
+  ],
 };
 
 const roomsData = [
@@ -157,7 +166,7 @@ export default function BookingSystem() {
     address: "",
     passportType: "Passport",
     passportNumber: "",
-    room: "1",
+    room: "",
     checkInDate: "",
     checkInTime: "",
     checkOutDate: "",
@@ -178,15 +187,27 @@ export default function BookingSystem() {
   const [isLoadingRooms, setIsLoadingRooms] = useState(true);
   const [bookedSlots, setBookedSlots] = useState<BookedSlot[]>([]);
 
-    useEffect(() => {
-    const roomIdFromUrl = searchParams.get('roomId');
-    if (roomIdFromUrl) {
-      setFormData(prev => ({
-        ...prev,
-        room: roomIdFromUrl
-      }));
-    }
-  }, [searchParams]);
+  const [availableRooms, setAvailableRooms] = useState<any[]>([]);
+  const [showNoRoomsMessage, setShowNoRoomsMessage] = useState(false);
+
+
+ // Set dates and room from URL parameters
+useEffect(() => {
+  const checkInFromUrl = searchParams.get('checkIn');
+  const checkOutFromUrl = searchParams.get('checkOut');
+  const roomIdFromUrl = searchParams.get('roomId');
+  
+  if (checkInFromUrl) {
+    setFormData(prev => ({ ...prev, checkInDate: checkInFromUrl }));
+  }
+  if (checkOutFromUrl) {
+    setFormData(prev => ({ ...prev, checkOutDate: checkOutFromUrl }));
+  }
+  if (roomIdFromUrl && rooms.length > 0) {
+    setFormData(prev => ({ ...prev, room: roomIdFromUrl }));
+  }
+}, [searchParams, rooms]);
+
 
 
   useEffect(() => {
@@ -230,12 +251,12 @@ export default function BookingSystem() {
 
           setRooms(transformedRooms);
           // Set first room as default if no room is selected
-          if (!formData.room) {
+        /*   if (!formData.room) {
             setFormData((prev) => ({
               ...prev,
               room: transformedRooms[0]?.id.toString() || "1",
             }));
-          }
+          } */
         }
       } catch (error) {
         console.error("Failed to fetch rooms:", error);
@@ -549,7 +570,7 @@ export default function BookingSystem() {
                 Room Description
               </h2>
               <h3 className="text-lg md:text-xl text-green-500 mb-3">
-                {selectedRoom ? selectedRoom.name : "The Grand London"}
+                {selectedRoom ? selectedRoom.name :  hotelInfo.name}
               </h3>
 
               {selectedRoom ? (
@@ -572,7 +593,24 @@ export default function BookingSystem() {
                   </div>
                 </div>
               ) : (
-                <p className="text-gray-600">Select a room to view details</p>
+                <div className="space-y-2 pl-3 pr-4">
+    <div className="grid grid-cols-2 gap-6 border-b pb-1 mb-1">
+      <span className="font-semibold text-gray-700 text-sm">
+        Feature
+      </span>
+      <span className="font-semibold text-gray-700 text-sm">
+        Detail
+      </span>
+    </div>
+    <div className="min-h-40">
+      {hotelInfo.features.map((feature, idx) => (
+        <div key={idx} className="grid grid-cols-2 gap-6 text-sm">
+          <span className="text-gray-600">{feature.name}</span>
+          <span className="text-gray-800">{feature.detail}</span>
+        </div>
+      ))}
+    </div>
+  </div>
               )}
             </div>
           </div>
@@ -1327,7 +1365,7 @@ export default function BookingSystem() {
                   <p className="text-gray-700 font-medium text-sm truncate">
                     {selectedRoom
                       ? `Scenic Cottage - ${selectedRoom.name} Room`
-                      : "Scenic Cottage - The Grand London Room"}
+                      : "Scenic Cottage"}
                   </p>
                 </div>
 
