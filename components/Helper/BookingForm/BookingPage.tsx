@@ -169,6 +169,7 @@ export default function BookingSystem() {
 
   const [rooms, setRooms] = useState(roomsData); // Initialize with hardcoded data as fallback
   const [isLoadingRooms, setIsLoadingRooms] = useState(true);
+  const [bookedSlots, setBookedSlots] = useState<BookedSlot[]>([]);
 
   useEffect(() => {
     const fetchRooms = async () => {
@@ -244,6 +245,42 @@ export default function BookingSystem() {
       })
       .catch((err) => console.log("Could not detect country:", err));
   }, []);
+
+  useEffect(() => {
+    const fetchBookedDates = async () => {
+      if (!formData.room) return;
+
+      try {
+        const today = new Date().toISOString().split("T")[0];
+        const response = await fetch(
+          `/api/bookings/available?roomId=${formData.room}&from=${today}`
+        );
+        const data = await response.json();
+
+        if (data.bookedSlots) {
+          setBookedSlots(data.bookedSlots);
+        }
+      } catch (error) {
+        console.error("Failed to fetch booked dates:", error);
+      }
+    };
+
+    fetchBookedDates();
+  }, [formData.room]);
+
+  // Check if a date falls within any booked range
+  const isDateBooked = (date: Date) => {
+  // Format date to YYYY-MM-DD in local timezone
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const checkDate = `${year}-${month}-${day}`;
+  
+  return bookedSlots.some((slot) => {
+    // Date is booked if it falls within the range (inclusive)
+    return checkDate >= slot.checkIn && checkDate <= slot.checkOut;
+  });
+};
 
   const selectedRoom = rooms.find((r) => r.id === Number(formData.room));
 
@@ -832,18 +869,29 @@ export default function BookingSystem() {
                       <DatePicker
                         selected={
                           formData.checkInDate
-                            ? new Date(formData.checkInDate)
+                            ? new Date(formData.checkInDate + "T00:00:00")
                             : null
                         }
-                        onChange={(date) =>
-                          handleChange(
-                            "checkInDate",
-                            date ? date.toISOString().split("T")[0] : ""
-                          )
-                        }
+                        onChange={(date) => {
+                          if (date) {
+                            const year = date.getFullYear();
+                            const month = String(date.getMonth() + 1).padStart(
+                              2,
+                              "0"
+                            );
+                            const day = String(date.getDate()).padStart(2, "0");
+                            handleChange(
+                              "checkInDate",
+                              `${year}-${month}-${day}`
+                            );
+                          } else {
+                            handleChange("checkInDate", "");
+                          }
+                        }}
                         dateFormat="yyyy-MM-dd"
                         placeholderText="Select Check-In Date"
                         minDate={new Date()}
+                        filterDate={(date) => !isDateBooked(date)}
                         className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                         wrapperClassName="w-full"
                         popperProps={{
@@ -866,22 +914,33 @@ export default function BookingSystem() {
                       <DatePicker
                         selected={
                           formData.checkOutDate
-                            ? new Date(formData.checkOutDate)
+                            ? new Date(formData.checkOutDate + "T00:00:00")
                             : null
                         }
-                        onChange={(date) =>
-                          handleChange(
-                            "checkOutDate",
-                            date ? date.toISOString().split("T")[0] : ""
-                          )
+                        onChange={(date) => {
+                          if (date) {
+                            const year = date.getFullYear();
+                            const month = String(date.getMonth() + 1).padStart(
+                              2,
+                              "0"
+                            );
+                            const day = String(date.getDate()).padStart(2, "0");
+                            handleChange(
+                              "checkOutDate",
+                              `${year}-${month}-${day}`
+                            );
+                          } else {
+                            handleChange("checkOutDate", "");
+                          }
+                        }}
+                        minDate={
+                          formData.checkInDate
+                            ? new Date(formData.checkInDate + "T00:00:00")
+                            : new Date()
                         }
                         dateFormat="yyyy-MM-dd"
                         placeholderText="Select Check-Out Date"
-                        minDate={
-                          formData.checkInDate
-                            ? new Date(formData.checkInDate)
-                            : new Date()
-                        }
+                        filterDate={(date) => !isDateBooked(date)}
                         className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                         wrapperClassName="w-full"
                         popperProps={{
