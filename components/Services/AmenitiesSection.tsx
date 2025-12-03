@@ -1,4 +1,3 @@
-// path: components/Services/AmenitiesSection.tsx
 "use client";
 import React from 'react';
 import { amenitiesData } from '@/data/amenities';
@@ -6,15 +5,15 @@ import { motion } from 'framer-motion';
 
 const AmenitiesSection = () => {
   return (
-    <section className="py-24 bg-white relative overflow-hidden">
-      {/* Background Pattern (Optional Subtle Touch) */}
+    // ✅ ADDED id="amenities-section" here
+    <section id="amenities-section" className="py-24 bg-white relative overflow-hidden scroll-mt-24">
+      {/* Background Pattern */}
       <div className="absolute top-0 left-0 w-full h-full opacity-[0.03] pointer-events-none" 
            style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '20px 20px' }}>
       </div>
 
       <div className="w-[90%] md:w-[85%] xl:w-[75%] mx-auto relative z-10">
-        
-        {/* Section Header */}
+        {/* ... rest of your code stays exactly the same ... */}
         <div className="text-center mb-16">
           <p className="text-orange-600 font-bold uppercase tracking-widest text-sm mb-3">
             Everything You Need
@@ -27,7 +26,7 @@ const AmenitiesSection = () => {
           </p>
         </div>
 
-        {/* Amenities Grid */}
+        {/* Grid code... */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {amenitiesData.map((section, index) => (
             <motion.div 

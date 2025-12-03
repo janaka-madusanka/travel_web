@@ -4,6 +4,8 @@ import Image from "next/image";
 import { FaArrowRight, FaCheck, FaTimes, FaUserFriends, FaBed, FaRulerCombined, FaListUl } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { BackendRoom } from "@/types/BackendRoom";
+import { useRouter } from 'next/navigation';
+
 
 type Props = {
   room: BackendRoom;
@@ -11,9 +13,31 @@ type Props = {
 };
 
 const RoomCard = ({ room, index }: Props) => {
+  const router = useRouter();
   const isReversed = index % 2 !== 0;
   const [showDetails, setShowDetails] = useState(false);
-  const toggleDetails = () => setShowDetails(!showDetails);
+
+  const toggleDetails = () => {
+    const nextState = !showDetails;
+    setShowDetails(nextState);
+
+    // ✅ FIX: Only scroll on MOBILE screens (width < 1024px).
+    // On Desktop, the layout is side-by-side, so no scrolling is needed.
+    if (nextState && typeof window !== "undefined" && window.innerWidth < 1024) {
+      setTimeout(() => {
+        const element = document.getElementById(`room-${room.id}`);
+        if (element) {
+          const yOffset = -100; 
+          const y = element.getBoundingClientRect().top + window.scrollY + yOffset;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+      }, 100);
+    }
+  };
+
+   const handleBookNow = () => {
+    router.push(`/booking?roomId=${room.id}`);
+  };
 
   const images = [room.img1, room.img2, room.img3, room.img4].filter(Boolean);
 
@@ -39,37 +63,41 @@ const RoomCard = ({ room, index }: Props) => {
 
   const beds = room.bedrooms.map(b => b.bedType).join(", ");
 
-  // Bathroom features
+  // Bathroom features layout
   const bathroomFeatures = room.bathrooms.length
     ? room.bathrooms.map((b, i) => (
-        <div key={i} className="mb-4">
-          <h5 className="text-orange-400 font-semibold mb-1">Bathroom {i + 1}</h5>
-          <ul className="list-disc list-inside text-gray-300 text-sm">
-            {b.shower === "YES" && <li>Shower</li>}
-            {b.slipper === "YES" && <li>Slipper</li>}
-            {b.soap === "YES" && <li>Soap</li>}
-            {b.bidet === "YES" && <li>Bidet</li>}
-            {b.towels === "YES" && <li>Towels</li>}
-            {b.toiletPaper === "YES" && <li>Toilet Paper</li>}
-            {b.hotWater === "YES" && <li>Hot Water</li>}
-            {b.privateBathroom === "YES" && <li>Private Bathroom</li>}
+        <div key={i} className="mb-4 pt-4 border-t border-gray-700">
+          <h5 className="text-orange-400 font-semibold mb-2 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-orange-400"></span> Bathroom {i + 1}
+          </h5>
+          <ul className="grid grid-cols-2 gap-x-2 gap-y-1 text-gray-300 text-sm pl-4">
+            {b.shower === "YES" && <li>• Shower</li>}
+            {b.slipper === "YES" && <li>• Slipper</li>}
+            {b.soap === "YES" && <li>• Soap</li>}
+            {b.bidet === "YES" && <li>• Bidet</li>}
+            {b.towels === "YES" && <li>• Towels</li>}
+            {b.toiletPaper === "YES" && <li>• Toilet Paper</li>}
+            {b.hotWater === "YES" && <li>• Hot Water</li>}
+            {b.privateBathroom === "YES" && <li>• Private</li>}
           </ul>
         </div>
       ))
     : null;
 
-  // Kitchen features
+  // Kitchen features layout
   const kitchenFeatures = room.kitchen ? (
-    <div className="mb-4">
-      <h5 className="text-orange-400 font-semibold mb-1">Kitchen</h5>
-      <ul className="list-disc list-inside text-gray-300 text-sm">
-        {room.kitchen.diningTable === "YES" && <li>Dining Table</li>}
-        {room.kitchen.gasCooker === "YES" && <li>Gas Cooker</li>}
-        {room.kitchen.riceCooker === "YES" && <li>Rice Cooker</li>}
-        {room.kitchen.woodStove === "YES" && <li>Wood Stove</li>}
-        {room.kitchen.fridge === "YES" && <li>Fridge</li>}
-        {room.kitchen.electricKettle === "YES" && <li>Electric Kettle</li>}
-        {room.kitchen.waterBottle === "YES" && <li>Water Bottle</li>}
+    <div className="mb-4 pt-4 border-t border-gray-700">
+      <h5 className="text-orange-400 font-semibold mb-2 flex items-center gap-2">
+        <span className="w-2 h-2 rounded-full bg-orange-400"></span> Kitchen
+      </h5>
+      <ul className="grid grid-cols-2 gap-x-2 gap-y-1 text-gray-300 text-sm pl-4">
+        {room.kitchen.diningTable === "YES" && <li>• Dining Table</li>}
+        {room.kitchen.gasCooker === "YES" && <li>• Gas Cooker</li>}
+        {room.kitchen.riceCooker === "YES" && <li>• Rice Cooker</li>}
+        {room.kitchen.woodStove === "YES" && <li>• Wood Stove</li>}
+        {room.kitchen.fridge === "YES" && <li>• Fridge</li>}
+        {room.kitchen.electricKettle === "YES" && <li>• Electric Kettle</li>}
+        {room.kitchen.waterBottle === "YES" && <li>• Water Bottle</li>}
       </ul>
     </div>
   ) : null;
@@ -79,11 +107,13 @@ const RoomCard = ({ room, index }: Props) => {
       id={`room-${room.id}`}
       className="scroll-mt-40 group w-full bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-100 relative"
     >
-      <div className={`flex flex-col lg:flex-row ${isReversed ? "lg:flex-row-reverse" : ""} min-h-[500px]`}>
-        {/* IMAGE SECTION */}
-        <div className="w-full lg:w-[55%] relative h-[500px] lg:h-auto overflow-hidden bg-gray-100">
+      <div className={`flex flex-col lg:flex-row ${isReversed ? "lg:flex-row-reverse" : ""} h-auto lg:h-[500px]`}>
+        
+        {/* ============ LEFT SECTION (Image / Details) ============ */}
+        <div className="w-full lg:w-[55%] relative h-[500px] lg:h-full overflow-hidden bg-gray-100">
           <AnimatePresence mode="wait" initial={false}>
             {!showDetails ? (
+              // --- IMAGE VIEW ---
               <motion.div
                 key="image"
                 className="relative w-full h-full"
@@ -112,14 +142,16 @@ const RoomCard = ({ room, index }: Props) => {
                 </div>
               </motion.div>
             ) : (
+              // --- DETAILS VIEW ---
               <motion.div
                 key="details"
-                className="relative w-full h-full p-8 lg:p-14 flex flex-col bg-gray-900 text-white overflow-y-auto"
+                className="relative w-full h-full flex flex-col bg-gray-900 text-white"
                 initial={{ x: isReversed ? "-100%" : "100%", opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 exit={{ x: isReversed ? "-100%" : "100%", opacity: 0 }}
                 transition={{ duration: 0.5, ease: "easeInOut" }}
               >
+                {/* Close Button Fixed at Top Right */}
                 <button
                   onClick={toggleDetails}
                   className="absolute top-6 right-6 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors z-20"
@@ -127,39 +159,42 @@ const RoomCard = ({ room, index }: Props) => {
                   <FaTimes className="text-white" />
                 </button>
 
-                <h4 className="text-3xl font-serif mb-4 text-orange-400">Room Overview</h4>
-                <p className="text-gray-300 leading-relaxed mb-8 font-light text-base">
-                  {room.name} - {room.size}m² - {room.capacity} Guests
-                </p>
+                {/* Scrollable Content Area */}
+                <div className="w-full h-full p-8 lg:p-12 overflow-y-auto custom-scrollbar">
+                  <h4 className="text-3xl font-serif mb-2 text-orange-400">Room Overview</h4>
+                  <p className="text-gray-400 text-sm mb-6 uppercase tracking-widest font-semibold">
+                    {room.name} • {room.size}m²
+                  </p>
 
-                <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
-                  {/* Room Amenities */}
-                  <div className="flex items-center gap-2 mb-4 text-orange-500 sticky top-0 bg-gray-900 py-2 z-10">
-                    <FaListUl />
-                    <span className="text-sm font-bold uppercase tracking-wider">Room Amenities</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-y-4 gap-x-4 mb-6">
-                    {features.map((feature, i) => (
-                      <div key={i} className="flex items-start gap-2 text-sm text-gray-300">
-                        <div className="min-w-[6px] h-[6px] rounded-full bg-orange-500 mt-1.5"></div>
-                        {feature}
+                  <div className="space-y-6">
+                    {/* General Amenities */}
+                    <div>
+                      <div className="flex items-center gap-2 mb-3 text-white font-bold sticky top-0 bg-gray-900 py-2 z-10 border-b border-gray-800">
+                        <FaListUl className="text-orange-500" /> 
+                        <span>General Amenities</span>
                       </div>
-                    ))}
+                      <div className="grid grid-cols-2 gap-y-2 gap-x-4">
+                        {features.map((feature, i) => (
+                          <div key={i} className="flex items-center gap-2 text-sm text-gray-300">
+                            <div className="min-w-[6px] h-[6px] rounded-full bg-orange-500"></div>
+                            {feature}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Dynamic Sections */}
+                    {kitchenFeatures}
+                    {bathroomFeatures}
                   </div>
-
-                  {/* Bathrooms */}
-                  {bathroomFeatures}
-
-                  {/* Kitchen */}
-                  {kitchenFeatures}
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
 
-        {/* STATIC CONTENT */}
-        <div className="w-full lg:w-[45%] flex flex-col justify-center p-8 sm:p-10 lg:p-14 bg-white relative">
+        {/* ============ RIGHT SECTION (Static Info) ============ */}
+        <div className="w-full lg:w-[45%] flex flex-col justify-center p-8 sm:p-10 lg:p-10 bg-white relative h-auto lg:h-full">
           <h3 className="text-4xl sm:text-5xl font-serif font-medium text-gray-900 mb-8 leading-tight">
             {room.name}
           </h3>
@@ -213,7 +248,7 @@ const RoomCard = ({ room, index }: Props) => {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 mt-auto">
-            <button className="flex-1 px-8 py-3.5 bg-gray-900 text-white text-sm font-bold uppercase tracking-wider hover:bg-orange-600 transition-colors duration-300 rounded-sm shadow-lg shadow-gray-200">
+            <button  onClick={handleBookNow} className="flex-1 px-8 py-3.5 bg-gray-900 text-white text-sm font-bold uppercase tracking-wider hover:bg-orange-600 transition-colors duration-300 rounded-sm shadow-lg shadow-gray-200">
               Book Now
             </button>
             <button
