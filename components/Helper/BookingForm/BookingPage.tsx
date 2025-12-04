@@ -53,7 +53,8 @@ const hotelInfo = {
   contact: "+94 74 055 8858",
   address: "Sigiriya Road, Inamaluwa, 21124 Sigiriya, Sri Lanka",
   description: "Experience tranquility and natural beauty at Scenic Cottage.",
-  promoText: "Escape to a sanctuary where nature hugs luxury. Nestled in the heart of Sigiriya, Scenic Cottage offers you a peaceful retreat away from the chaos."
+  promoText:
+    "Escape to a sanctuary where nature hugs luxury. Nestled in the heart of Sigiriya, Scenic Cottage offers you a peaceful retreat away from the chaos.",
 };
 
 export default function BookingPage() {
@@ -71,21 +72,21 @@ export default function BookingPage() {
     email: "",
     country: "",
     contactNumber: "",
-    address: "",
-    passportType: "Passport",
+    /*     address: "",
+     */ passportType: "Passport",
     passportNumber: "",
-    
+
     // Booking
     room: "",
     checkInDate: "",
     checkInTime: "14:00",
     checkOutDate: "",
     checkOutTime: "11:00",
-    
+
     // Other Details
     vehicleNeeded: false,
-    vehicleType: "CAR", // Default
-    driver: false,
+    /* vehicleType: "CAR", // Default
+    driver: false, */
     meal: false,
     guide: false,
   });
@@ -94,6 +95,8 @@ export default function BookingPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [bookedSlots, setBookedSlots] = useState<BookedSlot[]>([]);
   const [loadingRooms, setLoadingRooms] = useState(true);
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [detectedCountry, setDetectedCountry] = useState<string>("GB");
 
   // --- Initialization ---
   useEffect(() => {
@@ -141,15 +144,23 @@ export default function BookingPage() {
         if (data.bookedSlots) {
           setBookedSlots(data.bookedSlots);
           if (formData.checkInDate && formData.checkOutDate) {
-            const isCheckInBooked = data.bookedSlots.some((slot: BookedSlot) =>
-              formData.checkInDate >= slot.checkIn && formData.checkInDate <= slot.checkOut
+            const isCheckInBooked = data.bookedSlots.some(
+              (slot: BookedSlot) =>
+                formData.checkInDate >= slot.checkIn &&
+                formData.checkInDate <= slot.checkOut
             );
-            const isCheckOutBooked = data.bookedSlots.some((slot: BookedSlot) =>
-              formData.checkOutDate >= slot.checkIn && formData.checkOutDate <= slot.checkOut
+            const isCheckOutBooked = data.bookedSlots.some(
+              (slot: BookedSlot) =>
+                formData.checkOutDate >= slot.checkIn &&
+                formData.checkOutDate <= slot.checkOut
             );
 
             if (isCheckInBooked || isCheckOutBooked) {
-              setFormData((prev) => ({ ...prev, checkInDate: "", checkOutDate: "" }));
+              setFormData((prev) => ({
+                ...prev,
+                checkInDate: "",
+                checkOutDate: "",
+              }));
               alert("Selected dates are not available.");
             }
           }
@@ -163,14 +174,36 @@ export default function BookingPage() {
 
   const isDateBooked = (date: Date) => {
     if (!formData.room) return false;
-    const checkDate = date.toISOString().split("T")[0];
+
+    // Get local date string properly (avoid timezone issues)
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const checkDate = `${year}-${month}-${day}`;
+
     return bookedSlots.some(
       (slot) => checkDate >= slot.checkIn && checkDate <= slot.checkOut
     );
   };
 
+  useEffect(() => {
+    fetch("https://ipapi.co/json/")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.country_code) {
+          setFormData((prev) => ({
+            ...prev,
+            country: data.country_name || "",
+          }));
+          setDetectedCountry(data.country_code || "GB");
+        }
+      })
+      .catch((err) => console.error("Could not detect country:", err));
+  }, []);
+
   // --- Calculations ---
-  const selectedRoom = rooms.find((r) => r.id.toString() === formData.room.toString()) || null;
+  const selectedRoom =
+    rooms.find((r) => r.id.toString() === formData.room.toString()) || null;
 
   const calculateDays = () => {
     if (!formData.checkInDate || !formData.checkOutDate) return 0;
@@ -182,10 +215,10 @@ export default function BookingPage() {
 
   const days = calculateDays();
   const roomCost = selectedRoom ? days * Number(selectedRoom.cost) : 0;
-  
+
   // Vehicle Cost
-  const vehicleCost = formData.vehicleNeeded 
-    ? (vehiclePrices[formData.vehicleType] || 0) * (days || 1) 
+  const vehicleCost = formData.vehicleNeeded
+    ? (vehiclePrices[formData.vehicleType] || 0) * (days || 1)
     : 0;
 
   const serviceCharge = (roomCost + vehicleCost) * 0.05;
@@ -228,11 +261,13 @@ export default function BookingPage() {
       // 1. Prepare Customer Data
       const customerData = {
         name: `${formData.title} ${formData.firstName} ${formData.lastName}`.trim(),
-        passportNumber: formData.passportType === "Passport" ? formData.passportNumber : "",
-        nicNumber: formData.passportType === "NIC" ? formData.passportNumber : "",
-        address: formData.address || "N/A",
+        passportNumber:
+          formData.passportType === "Passport" ? formData.passportNumber : "",
+        nicNumber:
+          formData.passportType === "NIC" ? formData.passportNumber : "",
+        address: formData.country || "N/A",
         contactNumber: formData.contactNumber,
-        // Note: Your backend schema (Customer model) doesn't have email/country, 
+        // Note: Your backend schema (Customer model) doesn't have email/country,
         // so we don't send them or they get ignored. If you update Prisma, add them here.
       };
 
@@ -240,8 +275,12 @@ export default function BookingPage() {
       const payload: any = {
         customer: customerData,
         roomId: Number(formData.room),
-        checkIn: `${formData.checkInDate}T${formData.checkInTime || "14:00"}:00.000Z`,
-        checkOut: `${formData.checkOutDate}T${formData.checkOutTime || "11:00"}:00.000Z`,
+        checkIn: `${formData.checkInDate}T${
+          formData.checkInTime || "14:00"
+        }:00.000Z`,
+        checkOut: `${formData.checkOutDate}T${
+          formData.checkOutTime || "11:00"
+        }:00.000Z`,
       };
 
       // 3. Add Other Details (Matches your Prisma Schema)
@@ -251,13 +290,13 @@ export default function BookingPage() {
           vehicleSupport: formData.vehicleNeeded ? "YES" : "NO",
           meal: formData.meal ? "YES" : "NO",
           guide: formData.guide ? "YES" : "NO",
-          
-          // Only include vehicle specifics if vehicleSupport is YES
+
+          /*  // Only include vehicle specifics if vehicleSupport is YES
           ...(formData.vehicleNeeded && {
             vehicleType: formData.vehicleType, // BIKE, CAR, VAN, SUV
             vehicleNumber: 1, // Hardcoded as per your request (no quantity input)
-            driver: formData.driver ? "YES" : "NO"
-          })
+            driver: formData.driver ? "YES" : "NO",
+          }), */
         };
       }
 
@@ -291,7 +330,7 @@ export default function BookingPage() {
   return (
     <AnimatePresence>
       {!isExiting && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -300,14 +339,19 @@ export default function BookingPage() {
           <motion.div
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ 
-              scale: 0.5, opacity: 0, rotate: -15,
-              transition: { duration: 0.5, ease: "anticipate" } 
+            exit={{
+              scale: 0.5,
+              opacity: 0,
+              rotate: -15,
+              transition: { duration: 0.5, ease: "anticipate" },
             }}
             className="bg-white w-full max-w-[1400px] h-[90vh] rounded-[2rem] shadow-2xl overflow-hidden relative flex flex-col lg:flex-row"
           >
             {/* Close Button */}
-            <button onClick={handleClose} className="absolute top-6 right-6 z-[100] p-2 bg-white/80 backdrop-blur hover:bg-red-50 text-gray-600 hover:text-red-500 rounded-full shadow-md transition-all border border-gray-100">
+            <button
+              onClick={handleClose}
+              className="absolute top-6 right-6 z-[100] p-2 bg-white/80 backdrop-blur hover:bg-red-50 text-gray-600 hover:text-red-500 rounded-full shadow-md transition-all border border-gray-100"
+            >
               <X size={24} />
             </button>
 
@@ -315,16 +359,34 @@ export default function BookingPage() {
             <div className="flex-1 overflow-y-auto custom-scrollbar bg-white">
               <div className="p-8 md:p-12 lg:p-16 max-w-4xl mx-auto">
                 <div className="mb-10">
-                  <h1 className="text-4xl md:text-5xl font-serif text-[#003b14] font-bold mb-3">Secure Your Stay</h1>
-                  <p className="text-gray-500 text-lg">Complete the details below to confirm your reservation.</p>
+                  <h1 className="text-4xl md:text-5xl font-serif text-[#003b14] font-bold mb-3">
+                    Secure Your Stay
+                  </h1>
+                  <p className="text-gray-500 text-lg">
+                    Complete the details below to confirm your reservation.
+                  </p>
                 </div>
 
                 {/* Tab Switcher */}
                 <div className="flex p-1 bg-gray-100 rounded-xl mb-8 w-full max-w-md shadow-inner">
-                  <button onClick={() => setActiveTab("contact")} className={`flex-1 py-3 px-4 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${activeTab === "contact" ? "bg-white text-[#007326] shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>
+                  <button
+                    onClick={() => setActiveTab("contact")}
+                    className={`flex-1 py-3 px-4 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${
+                      activeTab === "contact"
+                        ? "bg-white text-[#007326] shadow-sm"
+                        : "text-gray-500 hover:text-gray-700"
+                    }`}
+                  >
                     <User size={18} /> Contact Info
                   </button>
-                  <button onClick={() => setActiveTab("booking")} className={`flex-1 py-3 px-4 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${activeTab === "booking" ? "bg-white text-[#007326] shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>
+                  <button
+                    onClick={() => setActiveTab("booking")}
+                    className={`flex-1 py-3 px-4 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${
+                      activeTab === "booking"
+                        ? "bg-white text-[#007326] shadow-sm"
+                        : "text-gray-500 hover:text-gray-700"
+                    }`}
+                  >
                     <Calendar size={18} /> Booking Details
                   </button>
                 </div>
@@ -333,137 +395,426 @@ export default function BookingPage() {
                   <AnimatePresence mode="wait">
                     {/* CONTACT TAB */}
                     {activeTab === "contact" && (
-                      <motion.div key="contact" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} className="space-y-5">
+                      <motion.div
+                        key="contact"
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 10 }}
+                        className="space-y-5"
+                      >
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                           <div className="md:col-span-1">
-                            <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Title</label>
-                            <select className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#007326] outline-none" value={formData.title} onChange={(e) => handleChange("title", e.target.value)}>
-                              <option>Mr</option><option>Mrs</option><option>Ms</option><option>Dr</option>
+                            <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">
+                              Title
+                            </label>
+                            <select
+                              className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#007326] outline-none"
+                              value={formData.title}
+                              onChange={(e) =>
+                                handleChange("title", e.target.value)
+                              }
+                            >
+                              <option>Mr</option>
+                              <option>Mrs</option>
+                              <option>Ms</option>
+                              <option>Dr</option>
                             </select>
                           </div>
                           <div className="md:col-span-3">
-                            <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">First Name</label>
-                            <input type="text" className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#007326] outline-none" placeholder="Enter your First Name here..." value={formData.firstName} onChange={(e) => handleChange("firstName", e.target.value)} />
+                            <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">
+                              First Name
+                            </label>
+                            <input
+                              type="text"
+                              className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#007326] outline-none"
+                              placeholder="Enter your First Name here..."
+                              value={formData.firstName}
+                              onChange={(e) =>
+                                handleChange("firstName", e.target.value)
+                              }
+                            />
                           </div>
                         </div>
                         <div>
-                          <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Last Name</label>
-                          <input type="text" className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#007326] outline-none" placeholder="Enter your Last Name here..." value={formData.lastName} onChange={(e) => handleChange("lastName", e.target.value)} />
+                          <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">
+                            Last Name
+                          </label>
+                          <input
+                            type="text"
+                            className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#007326] outline-none"
+                            placeholder="Enter your Last Name here..."
+                            value={formData.lastName}
+                            onChange={(e) =>
+                              handleChange("lastName", e.target.value)
+                            }
+                          />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Phone Number</label>
-                            <PhoneInput international defaultCountry="GB" value={formData.contactNumber} onChange={(val) => handleChange("contactNumber", val)} className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus-within:ring-2 focus-within:ring-[#007326] outline-none flex" />
+                            <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">
+                              Phone Number
+                            </label>
+                            {/*  <PhoneInput international defaultCountry="GB" value={formData.contactNumber} onChange={(val) => handleChange("contactNumber", val)} className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus-within:ring-2 focus-within:ring-[#007326] outline-none flex" /> */}
+                            <PhoneInput
+                              international
+                              defaultCountry={detectedCountry}
+                              value={phoneNumber}
+                              onChange={(value) => {
+                                setPhoneNumber(value || "");
+                                handleChange("contactNumber", value || "");
+                              }}
+                              className="w-full [&_.PhoneInputCountry]:px-3 [&_.PhoneInputCountry]:py-2.5 [&_.PhoneInputCountry]:border [&_.PhoneInputCountry]:border-gray-200 [&_.PhoneInputCountry]:rounded-l-xl [&_.PhoneInputCountry]:bg-gray-50 [&_.PhoneInputInput]:flex-1 [&_.PhoneInputInput]:px-3 [&_.PhoneInputInput]:py-2.5 [&_.PhoneInputInput]:text-sm [&_.PhoneInputInput]:border [&_.PhoneInputInput]:border-gray-200 [&_.PhoneInputInput]:rounded-r-xl [&_.PhoneInputInput:focus]:ring-2 [&_.PhoneInputInput:focus]:ring-[#007326] [&_.PhoneInputInput:focus]:border-transparent [&_.PhoneInputInput]:outline-none"
+                            />
                           </div>
                           <div>
-                            <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Email Address</label>
-                            <input type="email" className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#007326] outline-none" placeholder="Enter your email here..." value={formData.email} onChange={(e) => handleChange("email", e.target.value)} />
+                            <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">
+                              Email Address
+                            </label>
+                            <input
+                              type="email"
+                              className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#007326] outline-none"
+                              placeholder="Enter your email here..."
+                              value={formData.email}
+                              onChange={(e) =>
+                                handleChange("email", e.target.value)
+                              }
+                            />
                           </div>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Nationality</label>
-                            <Select options={countryOptions} placeholder="Select Country" onChange={(opt) => handleChange("country", opt?.label)} styles={{ control: (base) => ({ ...base, padding: "6px", borderRadius: "0.75rem", border: "1px solid #e5e7eb" }) }} />
+                            <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">
+                              Nationality
+                            </label>
+                            <Select
+                              options={countryOptions}
+                              value={countryOptions.find(
+                                (c) => c.label === formData.country
+                              )}
+                              placeholder="Select Country"
+                              onChange={(opt) =>
+                                handleChange("country", opt?.label)
+                              }
+                              styles={{
+                                control: (base) => ({
+                                  ...base,
+                                  padding: "6px",
+                                  borderRadius: "0.75rem",
+                                  border: "1px solid #e5e7eb",
+                                }),
+                              }}
+                            />
                           </div>
                           <div>
-                            <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">ID Number</label>
+                            <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">
+                              ID Number
+                            </label>
                             <div className="flex gap-2">
-                              <select className="w-1/3 p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none" value={formData.passportType} onChange={(e) => handleChange("passportType", e.target.value)}>
-                                <option>Passport</option><option>NIC</option>
+                              <select
+                                className="w-1/3 p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none"
+                                value={formData.passportType}
+                                onChange={(e) =>
+                                  handleChange("passportType", e.target.value)
+                                }
+                              >
+                                <option>Passport</option>
+                                <option>NIC</option>
                               </select>
-                              <input type="text" className="w-2/3 p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#007326] outline-none" placeholder="Number" value={formData.passportNumber} onChange={(e) => handleChange("passportNumber", e.target.value)} />
+                              <input
+                                type="text"
+                                className="w-2/3 p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#007326] outline-none"
+                                placeholder="Number"
+                                value={formData.passportNumber}
+                                onChange={(e) =>
+                                  handleChange("passportNumber", e.target.value)
+                                }
+                              />
                             </div>
                           </div>
                         </div>
-                        <button onClick={() => setActiveTab("booking")} className="w-full py-4 mt-4 bg-[#007326] text-white font-bold rounded-xl shadow-lg hover:bg-[#005a1e] transition-transform active:scale-95">Next: Booking Details</button>
+                        <button
+                          onClick={() => setActiveTab("booking")}
+                          className="w-full py-4 mt-4 bg-[#007326] text-white font-bold rounded-xl shadow-lg hover:bg-[#005a1e] transition-transform active:scale-95"
+                        >
+                          Next: Booking Details
+                        </button>
                       </motion.div>
                     )}
 
                     {/* BOOKING TAB */}
                     {activeTab === "booking" && (
-                      <motion.div key="booking" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="space-y-5">
-                        
+                      <motion.div
+                        key="booking"
+                        initial={{ opacity: 0, x: 10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -10 }}
+                        className="space-y-5"
+                      >
                         {/* Room Select */}
                         <div>
-                          <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Select Room</label>
+                          <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">
+                            Select Room
+                          </label>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto custom-scrollbar">
-                            {loadingRooms ? <p className="text-sm text-gray-400">Loading rooms...</p> : rooms.map((room: any) => (
-                              <div key={room.id} onClick={() => handleChange("room", room.id.toString())} className={`cursor-pointer rounded-xl border-2 p-4 transition-all ${formData.room === room.id.toString() ? "border-[#007326] bg-green-50" : "border-gray-200 hover:border-gray-300"}`}>
-                                <div className="flex justify-between items-start mb-2">
-                                  <BedDouble className={formData.room === room.id.toString() ? "text-[#007326]" : "text-gray-400"} />
-                                  <span className="text-xs font-bold bg-white px-2 py-1 rounded shadow-sm">${room.cost}</span>
+                            {loadingRooms ? (
+                              <p className="text-sm text-gray-400">
+                                Loading rooms...
+                              </p>
+                            ) : (
+                              rooms.map((room: any) => (
+                                <div
+                                  key={room.id}
+                                  onClick={() =>
+                                    handleChange("room", room.id.toString())
+                                  }
+                                  className={`cursor-pointer rounded-xl border-2 p-4 transition-all ${
+                                    formData.room === room.id.toString()
+                                      ? "border-[#007326] bg-green-50"
+                                      : "border-gray-200 hover:border-gray-300"
+                                  }`}
+                                >
+                                  <div className="flex justify-between items-start mb-2">
+                                    <BedDouble
+                                      className={
+                                        formData.room === room.id.toString()
+                                          ? "text-[#007326]"
+                                          : "text-gray-400"
+                                      }
+                                    />
+                                    <span className="text-xs font-bold bg-white px-2 py-1 rounded shadow-sm">
+                                      ${room.cost}
+                                    </span>
+                                  </div>
+                                  <p className="font-bold text-sm text-gray-800">
+                                    {room.name}
+                                  </p>
+                                  <p className="text-xs text-gray-500 mt-1">
+                                    {room.capacity} Guests
+                                  </p>
                                 </div>
-                                <p className="font-bold text-sm text-gray-800">{room.name}</p>
-                                <p className="text-xs text-gray-500 mt-1">{room.capacity} Guests</p>
-                              </div>
-                            ))}
+                              ))
+                            )}
                           </div>
                         </div>
 
                         {/* Dates */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Check-in</label>
-                            <DatePicker selected={formData.checkInDate ? new Date(formData.checkInDate) : null} onChange={(date) => handleChange("checkInDate", date?.toISOString().split("T")[0])} placeholderText="Select Date" className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#007326] outline-none" minDate={new Date()} filterDate={(date) => !isDateBooked(date)} />
+                            <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">
+                              Check-in
+                            </label>
+                            <DatePicker
+                              selected={
+                                formData.checkInDate
+                                  ? new Date(formData.checkInDate + "T00:00:00")
+                                  : null
+                              }
+                              onChange={(date) => {
+                                if (date) {
+                                  const year = date.getFullYear();
+                                  const month = String(
+                                    date.getMonth() + 1
+                                  ).padStart(2, "0");
+                                  const day = String(date.getDate()).padStart(
+                                    2,
+                                    "0"
+                                  );
+                                  handleChange(
+                                    "checkInDate",
+                                    `${year}-${month}-${day}`
+                                  );
+                                } else {
+                                  handleChange("checkInDate", "");
+                                }
+                              }}
+                              placeholderText="Select Date"
+                              className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#007326] outline-none"
+                              minDate={new Date()}
+                              filterDate={(date) => !isDateBooked(date)}
+                            />
                           </div>
                           <div>
-                            <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Check-out</label>
-                            <DatePicker selected={formData.checkOutDate ? new Date(formData.checkOutDate) : null} onChange={(date) => handleChange("checkOutDate", date?.toISOString().split("T")[0])} placeholderText="Select Date" className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#007326] outline-none" minDate={formData.checkInDate ? new Date(formData.checkInDate) : new Date()} filterDate={(date) => !isDateBooked(date)} />
+                            <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">
+                              Check-out
+                            </label>
+                            <DatePicker
+                              selected={
+                                formData.checkOutDate
+                                  ? new Date(
+                                      formData.checkOutDate + "T00:00:00"
+                                    )
+                                  : null
+                              }
+                              onChange={(date) => {
+                                if (date) {
+                                  const year = date.getFullYear();
+                                  const month = String(
+                                    date.getMonth() + 1
+                                  ).padStart(2, "0");
+                                  const day = String(date.getDate()).padStart(
+                                    2,
+                                    "0"
+                                  );
+                                  handleChange(
+                                    "checkOutDate",
+                                    `${year}-${month}-${day}`
+                                  );
+                                } else {
+                                  handleChange("checkOutDate", "");
+                                }
+                              }}
+                              placeholderText="Select Date"
+                              className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#007326] outline-none"
+                              minDate={
+                                formData.checkInDate
+                                  ? new Date(formData.checkInDate + "T00:00:00")
+                                  : new Date()
+                              }
+                              filterDate={(date) => !isDateBooked(date)}
+                            />
                           </div>
                         </div>
-                        
+
                         {/* Times */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Check-in Time</label>
+                            <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">
+                              Check-in Time
+                            </label>
                             <div className="relative">
-                               <DatePicker selected={formData.checkInTime ? new Date(`2000-01-01T${formData.checkInTime}`) : null} onChange={(date) => handleChange("checkInTime", date ? date.toTimeString().slice(0, 5) : "")} showTimeSelect showTimeSelectOnly timeIntervals={15} timeCaption="Time" dateFormat="h:mm aa" className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#007326] outline-none" />
-                               <Clock size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                              <DatePicker
+                                selected={
+                                  formData.checkInTime
+                                    ? new Date(
+                                        `2000-01-01T${formData.checkInTime}`
+                                      )
+                                    : null
+                                }
+                                onChange={(date) =>
+                                  handleChange(
+                                    "checkInTime",
+                                    date ? date.toTimeString().slice(0, 5) : ""
+                                  )
+                                }
+                                showTimeSelect
+                                showTimeSelectOnly
+                                timeIntervals={15}
+                                timeCaption="Time"
+                                dateFormat="h:mm aa"
+                                className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#007326] outline-none"
+                              />
+                              <Clock
+                                size={16}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                              />
                             </div>
                           </div>
                           <div>
-                            <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Check-out Time</label>
+                            <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">
+                              Check-out Time
+                            </label>
                             <div className="relative">
-                               <DatePicker selected={formData.checkOutTime ? new Date(`2000-01-01T${formData.checkOutTime}`) : null} onChange={(date) => handleChange("checkOutTime", date ? date.toTimeString().slice(0, 5) : "")} showTimeSelect showTimeSelectOnly timeIntervals={15} timeCaption="Time" dateFormat="h:mm aa" className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#007326] outline-none" />
-                               <Clock size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                              <DatePicker
+                                selected={
+                                  formData.checkOutTime
+                                    ? new Date(
+                                        `2000-01-01T${formData.checkOutTime}`
+                                      )
+                                    : null
+                                }
+                                onChange={(date) =>
+                                  handleChange(
+                                    "checkOutTime",
+                                    date ? date.toTimeString().slice(0, 5) : ""
+                                  )
+                                }
+                                showTimeSelect
+                                showTimeSelectOnly
+                                timeIntervals={15}
+                                timeCaption="Time"
+                                dateFormat="h:mm aa"
+                                className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#007326] outline-none"
+                              />
+                              <Clock
+                                size={16}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                              />
                             </div>
                           </div>
                         </div>
 
                         {/* Add-ons Section */}
                         <div className="pt-4 border-t border-gray-100">
-                          <label className="text-xs font-bold text-gray-500 uppercase mb-3 block">Extra Services</label>
-                          
+                          <label className="text-xs font-bold text-gray-500 uppercase mb-3 block">
+                            Extra Services
+                          </label>
+
                           {/* 1. Meal */}
                           <div className="flex justify-between items-center mb-3 bg-gray-50 p-3 rounded-xl border border-gray-200">
-                             <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center"><Utensils size={16} /></div>
-                                <span className="font-semibold text-gray-700 text-sm">Meals?</span>
-                             </div>
-                             <input type="checkbox" className="w-5 h-5 text-green-600 rounded focus:ring-green-500" checked={formData.meal} onChange={(e) => handleChange("meal", e.target.checked)} />
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center">
+                                <Utensils size={16} />
+                              </div>
+                              <span className="font-semibold text-gray-700 text-sm">
+                                Meals?
+                              </span>
+                            </div>
+                            <input
+                              type="checkbox"
+                              className="w-5 h-5 text-green-600 rounded focus:ring-green-500"
+                              checked={formData.meal}
+                              onChange={(e) =>
+                                handleChange("meal", e.target.checked)
+                              }
+                            />
                           </div>
 
                           {/* 2. Guide */}
                           <div className="flex justify-between items-center mb-3 bg-gray-50 p-3 rounded-xl border border-gray-200">
-                             <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center"><Map size={16} /></div>
-                                <span className="font-semibold text-gray-700 text-sm">Need a Guide?</span>
-                             </div>
-                             <input type="checkbox" className="w-5 h-5 text-green-600 rounded focus:ring-green-500" checked={formData.guide} onChange={(e) => handleChange("guide", e.target.checked)} />
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+                                <Map size={16} />
+                              </div>
+                              <span className="font-semibold text-gray-700 text-sm">
+                                Need a Guide?
+                              </span>
+                            </div>
+                            <input
+                              type="checkbox"
+                              className="w-5 h-5 text-green-600 rounded focus:ring-green-500"
+                              checked={formData.guide}
+                              onChange={(e) =>
+                                handleChange("guide", e.target.checked)
+                              }
+                            />
                           </div>
 
                           {/* 3. Vehicle */}
                           <div className="bg-gray-50 p-3 rounded-xl border border-gray-200">
-                             <div className="flex justify-between items-center mb-3">
-                                <div className="flex items-center gap-3">
-                                   <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center"><Car size={16} /></div>
-                                   <span className="font-semibold text-gray-700 text-sm">Vehicle Rental?</span>
+                            <div className="flex justify-between items-center mb-3">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center">
+                                  <Car size={16} />
                                 </div>
-                                <input type="checkbox" className="w-5 h-5 text-green-600 rounded focus:ring-green-500" checked={formData.vehicleNeeded} onChange={(e) => handleChange("vehicleNeeded", e.target.checked)} />
-                             </div>
-                             
-                             {/* Vehicle Options (Only if checked) */}
-                             {/* {formData.vehicleNeeded && (
+                                <span className="font-semibold text-gray-700 text-sm">
+                                  Vehicle Rental?
+                                </span>
+                              </div>
+                              <input
+                                type="checkbox"
+                                className="w-5 h-5 text-green-600 rounded focus:ring-green-500"
+                                checked={formData.vehicleNeeded}
+                                onChange={(e) =>
+                                  handleChange(
+                                    "vehicleNeeded",
+                                    e.target.checked
+                                  )
+                                }
+                              />
+                            </div>
+
+                            {/* Vehicle Options (Only if checked) */}
+                            {/* {formData.vehicleNeeded && (
                                 <div className="mt-3 space-y-3 pl-2 border-l-2 border-gray-200 ml-4">
                                    <div>
                                       <label className="text-xs font-bold text-gray-500 block mb-1">Vehicle Type</label>
@@ -484,9 +835,19 @@ export default function BookingPage() {
                         </div>
 
                         <div className="flex gap-3 mt-6">
-                          <button onClick={() => setActiveTab("contact")} className="flex-1 py-4 text-gray-500 font-bold hover:bg-gray-100 rounded-xl transition">Back</button>
-                          <button onClick={handleSubmit} disabled={isSubmitting} className="flex-[2] py-4 bg-[#007326] text-white font-bold rounded-xl shadow-lg hover:bg-[#005a1e] transition-transform active:scale-95 flex items-center justify-center gap-2">
-                            {isSubmitting ? "Processing..." : "Confirm Booking"} <CheckCircle size={18} />
+                          <button
+                            onClick={() => setActiveTab("contact")}
+                            className="flex-1 py-4 text-gray-500 font-bold hover:bg-gray-100 rounded-xl transition"
+                          >
+                            Back
+                          </button>
+                          <button
+                            onClick={handleSubmit}
+                            disabled={isSubmitting}
+                            className="flex-[2] py-4 bg-[#007326] text-white font-bold rounded-xl shadow-lg hover:bg-[#005a1e] transition-transform active:scale-95 flex items-center justify-center gap-2"
+                          >
+                            {isSubmitting ? "Processing..." : "Confirm Booking"}{" "}
+                            <CheckCircle size={18} />
                           </button>
                         </div>
                       </motion.div>
@@ -499,42 +860,103 @@ export default function BookingPage() {
             {/* RIGHT SIDE: Sticky Summary */}
             <div className="hidden lg:block w-[450px] bg-[#003b14] text-white p-8 overflow-hidden relative">
               <div className="h-full flex flex-col">
-                <h2 className="text-2xl font-serif font-bold border-b border-green-800 pb-4 mb-6">Your Stay</h2>
+                <h2 className="text-2xl font-serif font-bold border-b border-green-800 pb-4 mb-6">
+                  Your Stay
+                </h2>
                 <div className="flex-1 overflow-y-auto space-y-6 custom-scrollbar pr-2">
                   {selectedRoom ? (
                     <div className="flex flex-col gap-4">
                       <div className="w-full h-48 bg-green-800 rounded-xl overflow-hidden relative shadow-lg">
-                        <img src={selectedRoom.image || selectedRoom.img1 || "/placeholder.png"} alt="Room" className="object-cover w-full h-full" />
+                        <img
+                          src={
+                            selectedRoom.image ||
+                            selectedRoom.img1 ||
+                            "/placeholder.png"
+                          }
+                          alt="Room"
+                          className="object-cover w-full h-full"
+                        />
                       </div>
                       <div>
-                        <p className="font-bold text-2xl font-serif">{selectedRoom.name}</p>
-                        <p className="text-sm text-green-300 mt-1">{selectedRoom.capacity} Guests • {selectedRoom.beds}</p>
+                        <p className="font-bold text-2xl font-serif">
+                          {selectedRoom.name}
+                        </p>
+                        <p className="text-sm text-green-300 mt-1">
+                          {selectedRoom.capacity} Guests • {selectedRoom.beds}
+                        </p>
                       </div>
                       <div className="bg-[#004d1a] rounded-xl p-5 flex justify-between items-center text-sm border border-green-800/50 shadow-inner">
-                        <div><p className="text-green-300 text-xs uppercase font-bold tracking-wider">Check-In</p><p className="font-medium text-lg mt-1">{formData.checkInDate || "--"}</p></div>
-                        <div className="text-right"><p className="text-green-300 text-xs uppercase font-bold tracking-wider">Check-Out</p><p className="font-medium text-lg mt-1">{formData.checkOutDate || "--"}</p></div>
+                        <div>
+                          <p className="text-green-300 text-xs uppercase font-bold tracking-wider">
+                            Check-In
+                          </p>
+                          <p className="font-medium text-lg mt-1">
+                            {formData.checkInDate || "--"}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-green-300 text-xs uppercase font-bold tracking-wider">
+                            Check-Out
+                          </p>
+                          <p className="font-medium text-lg mt-1">
+                            {formData.checkOutDate || "--"}
+                          </p>
+                        </div>
                       </div>
                       <div className="space-y-3 pt-4 border-t border-green-800">
-                        <div className="flex justify-between text-sm text-gray-300"><span>Room ({days} nights)</span><span>${roomCost}</span></div>
-                        {vehicleCost > 0 && <div className="flex justify-between text-sm text-gray-300"><span>Vehicles</span><span>${vehicleCost}</span></div>}
-                        <div className="flex justify-between text-sm text-gray-300"><span>Service Charge (5%)</span><span>${serviceCharge.toFixed(2)}</span></div>
-                        <div className="flex justify-between text-2xl font-bold text-white pt-4 border-t border-green-800 mt-2"><span>Total</span><span>${grandTotal.toFixed(2)}</span></div>
+                        <div className="flex justify-between text-sm text-gray-300">
+                          <span>Room ({days} nights)</span>
+                          <span>${roomCost}</span>
+                        </div>
+                        {vehicleCost > 0 && (
+                          <div className="flex justify-between text-sm text-gray-300">
+                            <span>Vehicles</span>
+                            <span>${vehicleCost}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between text-sm text-gray-300">
+                          <span>Service Charge (5%)</span>
+                          <span>${serviceCharge.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-2xl font-bold text-white pt-4 border-t border-green-800 mt-2">
+                          <span>Total</span>
+                          <span>${grandTotal.toFixed(2)}</span>
+                        </div>
                       </div>
                     </div>
                   ) : (
                     <div className="flex flex-col gap-6 animate-fadeIn">
                       <div className="w-full h-52 bg-green-800 rounded-xl overflow-hidden relative shadow-lg">
-                        <img src={hotelInfo.image} alt="Cottage" className="object-cover w-full h-full opacity-90 hover:scale-105 transition-transform duration-700" />
+                        <img
+                          src={hotelInfo.image}
+                          alt="Cottage"
+                          className="object-cover w-full h-full opacity-90 hover:scale-105 transition-transform duration-700"
+                        />
                       </div>
                       <div className="space-y-2">
-                        <h3 className="text-2xl font-serif font-bold text-white">{hotelInfo.name}</h3>
-                        <div className="flex items-center gap-2 text-green-300 text-sm"><MapPin size={16} /><p>{hotelInfo.address}</p></div>
-                        <div className="flex items-center gap-2 text-green-300 text-sm"><Phone size={16} /><p>{hotelInfo.contact}</p></div>
+                        <h3 className="text-2xl font-serif font-bold text-white">
+                          {hotelInfo.name}
+                        </h3>
+                        <div className="flex items-center gap-2 text-green-300 text-sm">
+                          <MapPin size={16} />
+                          <p>{hotelInfo.address}</p>
+                        </div>
+                        <div className="flex items-center gap-2 text-green-300 text-sm">
+                          <Phone size={16} />
+                          <p>{hotelInfo.contact}</p>
+                        </div>
                       </div>
                       <div className="bg-[#004d1a] p-6 rounded-xl border-l-4 border-green-500">
-                        <p className="text-white/90 italic leading-relaxed text-base">"{hotelInfo.promoText}"</p>
+                        <p className="text-white/90 italic leading-relaxed text-base">
+                          "{hotelInfo.promoText}"
+                        </p>
                       </div>
-                      <div className="flex items-center justify-center gap-2 text-green-400/60 mt-auto pt-10"><Info size={16} /><span className="text-xs uppercase tracking-widest">Select a room to begin</span></div>
+                      <div className="flex items-center justify-center gap-2 text-green-400/60 mt-auto pt-10">
+                        <Info size={16} />
+                        <span className="text-xs uppercase tracking-widest">
+                          Select a room to begin
+                        </span>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -544,7 +966,6 @@ export default function BookingPage() {
                 </div>
               </div>
             </div>
-
           </motion.div>
         </motion.div>
       )}
