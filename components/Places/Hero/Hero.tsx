@@ -1,50 +1,40 @@
-import React from 'react'
+import React from 'react';
 
 const Hero = () => {
   return (
-    <div className='relative w-full h-[120vh] sm:h-[100vh] overflow-hidden'>
+    <div className="relative h-screen flex items-center justify-center overflow-hidden">
 
-      {/* ✅ VIDEO BACKGROUND */}
-      <video
-        src="/video/hero.mp4"
-        autoPlay
-        muted
-        loop
-        preload='metadata'
-        className="absolute top-0 left-0 w-full h-full object-cover"
-      />
+      {/* Background Image */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: "url('/images/places/places.jpg')" }} // 👈 change path if needed
+      >
+        {/* Dark Overlay */}
+        <div className="absolute inset-0 bg-black/60"></div>
+      </div>
 
-      {/* ✅ DARK OVERLAY */}
-      <div className="absolute top-0 left-0 w-full h-full bg-black/50" />
+      {/* Centered Text */}
+      <div className="relative z-10 text-center px-4 max-w-4xl mx-auto pt-[10vh]">
 
-      {/* ✅ MAIN CONTENT */}
-      <div className="relative z-10 flex flex-col justify-center h-full px-6 sm:px-12 md:px-20 lg:px-32 text-white">
+        {/* Sub-Heading */}
+        <p className="text-white/90 text-sm sm:text-base font-sfpro font-bold uppercase tracking-[0.3em] mb-6">
+          Discover Wonders Around Sigiriya
+        </p>
 
-        {/* === Heading === */}
-        <div className="flex flex-col space-y-8 max-w-[900px] items-center">
-          <h1
-          className="font-poppins font-medium text-[96px] leading-[1.1] max-w-[900px]"
-        >
-          Discover Wonders <br />
-          Around <span className="text-[#4CFF88]">Sigiriya</span>
+        {/* Main Heading */}
+        <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-white font-medium leading-tight drop-shadow-lg font-serif">
+          Explore Nature & History
         </h1>
-        </div>
 
-        {/* === Right Column Text (moved down and responsive) === */}
-        <div className="mt-10 lg:mt-0 lg:absolute lg:right-20 lg:bottom-24 max-w-md border-l-4 border-green-500 pl-6 space-y-4">
-          
-          <p className="font-sfpro font-bold text-xl sm:text-2xl md:text-3xl lg:text-[36px] leading-snug drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)]">
-            Explore the best attractions and hidden gems around Sigiriya for locals and tourists alike.
-          </p>
-
-        
-
-        </div>
+        {/* Optional Sub Text (if you want like your previous right-side text) */}
+        <p className="mt-6 text-white/80 text-base sm:text-lg md:text-xl max-w-2xl mx-auto drop-shadow">
+          Explore the best attractions and hidden gems around Sigiriya for locals and tourists alike.
+        </p>
 
       </div>
 
     </div>
-  )
-}
+  );
+};
 
-export default Hero
+export default Hero;
