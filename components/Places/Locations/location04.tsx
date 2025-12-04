@@ -4,9 +4,9 @@ const location04 = {
   title: 'Habarana Lake',
   subtitle: 'A Serene Escape in the Heart of the Cultural Triangle',
   images: [
-    '/images/places/loc4/img1.jpg',
-    '/images/places/loc4/img2.jpg',
-    '/images/places/loc4/img3.jpg',
+    '/images/places/loc4/li1.jpg',
+    '/images/places/loc4/li2.jpg',
+    '/images/places/loc4/li3.jpg',
   ],
   description: [
     "Habarana is a small city in the Anuradhapura District of Sri Lanka. The location has some mid-range and up hotels and is a popular departure point for other nearby locations of greater interest.",

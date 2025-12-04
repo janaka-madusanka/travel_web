@@ -4,9 +4,9 @@ const location03 = {
   title: 'Minneriya National Park',
   subtitle: 'Home of the Famed Elephant Gathering',
   images: [
-    '/images/places/loc3/img1.jpg',
-    '/images/places/loc3/img2.jpg',
-    '/images/places/loc3/img3.jpg',
+    '/images/places/loc3/li1.jpg',
+    '/images/places/loc3/li2.jpg',
+    '/images/places/loc3/li3.jpg',
   ],
   description: [
     "Minneriya National Park is a national park in North Central Province of Sri Lanka. The area was designated as a national park on 12 August 1997, having been originally declared as a wildlife sanctuary in 1938.",

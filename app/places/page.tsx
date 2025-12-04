@@ -1,14 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import Location01 from "./Locations/location01";
-import Location02 from "./Locations/location02";
-import Location03 from "./Locations/location03";
-import Location04 from "./Locations/location04";
-import Location05 from "./Locations/location05";
-import Location06 from "./Locations/location06";
-import Location07 from "./Locations/location07";
-import Hero from "./Hero/Hero"; // ✅ Hero import
+import Location01 from "@/components/Places/Locations/location01";
+import Location02 from "@/components/Places/Locations/location02";
+import Location03 from "@/components/Places/Locations/location03";
+import Location04 from "@/components/Places/Locations/location04";
+import Location05 from "@/components/Places/Locations/location05";
+import Location06 from "@/components/Places/Locations/location06";
+import Location07 from "@/components/Places/Locations/location07";
+import Hero from "@/components/Places/Hero/Hero"; 
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -125,29 +125,25 @@ export default function PlacesPage() {
       <Hero />
 
       {/* Sticky navbar */}
-      <nav className="bg-white border-b sticky top-0 z-50 shadow-sm">
+      <nav className="bg-white sticky top-0 z-50 mt-10 ">
         <div className="max-w-7xl mx-auto px-4 py-2 flex flex-wrap justify-center gap-4">
           {locations.map((l) => (
             <button
               key={l.id}
               onClick={() => setActiveId(l.id)}
-              className={`px-4 py-2 font-medium ${
+              className={`px-4 py-2 font-semibold text-2xl ${
                 activeId === l.id
                   ? "text-green-700"
                   : "text-gray-500 hover:text-gray-900"
               }`}
             >
               {l.name}
-              {activeId === l.id && (
-                <span className="block w-full h-0.5 bg-green-600 rounded-t-full mt-1" />
-              )}
             </button>
           ))}
         </div>
       </nav>
 
-      {/* TEMPORARY top margin to push content below navbar */}
-      <main className="max-w-7xl mx-auto px-4 py-12 mt-20">
+      <main className="max-w-7xl mx-auto px-4 py-12 ">
         <LocationDetail location={activeLocation} />
       </main>
     </div>

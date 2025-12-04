@@ -4,9 +4,9 @@ const location01 = {
   title: 'Pidurangala Rock',
   subtitle: 'The Best Sunrise Viewpoint Near Sigiriya, Sri Lanka',
   images: [
-    '/images/places/loc1/img1.jpg',
-    '/images/places/loc1/img2.jpg',
-    '/images/places/loc1/img3.jpg',
+    '/images/places/loc1/li1.jpg',
+    '/images/places/loc1/li2.jpg',
+    '/images/places/loc1/li3.jpg',
   ],
   description: [
     "Pidurangala Rock is located just a short distance from the world-famous Sigiriya Rock Fortress. It's a popular spot for both sunrise and sunset, offering breathtaking 360-degree views of the surrounding landscape. The climb is an adventurous alternative to its more crowded neighbor.",
