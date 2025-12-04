@@ -4,9 +4,9 @@ const location06 = {
   title: 'Ritigala Monastery & Forest',
   subtitle: 'An Ancient Forest Monastery in a Strict Natural Reserve',
   images: [
-    '/images/places/loc6/img1.jpg',
-    '/images/places/loc6/img2.jpg',
-    '/images/places/loc6/img3.jpg',
+    '/images/places/loc6/li1.jpg',
+    '/images/places/loc6/li2.jpg',
+    '/images/places/loc6/li3.jpg',
   ],
   description: [
     "Ritigala is an ancient Buddhist monastery and mountain in Sri Lanka. The ruins and rock inscriptions of the monastery date back to 1st century BCE. It is located 43 km away from the ancient monastic city of Anuradhapura.",
