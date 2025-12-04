@@ -3,22 +3,13 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Slider from "react-slick";
-import { FaBed, FaUsers } from "react-icons/fa";
+import { 
+  FaBed, FaUsers, FaWifi, FaFan, FaTv, FaParking, FaChair, FaSnowflake, FaDoorOpen 
+} from "react-icons/fa"; // ✅ Added missing imports
 import { motion } from "framer-motion";
-import Link from "next/link"; // ✅ Import Link
-import svgpath from "@/components/Helper/Navbar/svgpath";
-
-interface RoomCardProps {
-  room: {
-    id: number;
-    image: string[];
-    name: string;
-    beds: string;
-    capacity: string | number;
-    price: string;
-  };
-  index: number;
-}
+import Link from "next/link";
+import svgpath from "@/components/Helper/Navbar/svgpath"; 
+import { BackendRoom } from "@/types/BackendRoom";
 
 // ==================== IMAGE SECTION ====================
 const RoomImageSection: React.FC<{
@@ -36,46 +27,37 @@ const RoomImageSection: React.FC<{
     slidesToShow: 1,
     slidesToScroll: 1,
     autoplay: true,
-    autoplaySpeed: 2500,
+    autoplaySpeed: 3000,
     arrows: false,
     beforeChange: (_: number, next: number) => setActiveSlide(next),
     pauseOnHover: true,
   };
 
   return (
-    <motion.div
-      whileHover={{ y: -4 }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      className="relative w-full h-[220px] sm:h-[260px] md:h-[340px] rounded-[24px] overflow-hidden group cursor-pointer shadow-md bg-white"
-    >
-    <Slider {...sliderSettings} className="h-full">
-  {images.map((img, idx) => (
-    <div
-      key={idx}
-      className="relative w-full h-[220px] sm:h-[260px] md:h-[340px]"
-    >
-      <Image
-        src={img}
-        alt={`${name}-${idx}`}
-        fill
-        className="object-cover transition-transform duration-700 group-hover:scale-110 rounded-[24px]"
-      />
-    </div>
-  ))}
-</Slider>
+    <div className="relative w-full h-[240px] overflow-hidden bg-gray-200">
+      <Slider {...sliderSettings} className="h-full">
+        {images.map((img, idx) => (
+          <div key={idx} className="relative w-full h-[240px]">
+            <Image
+              src={img}
+              alt={`${name}-${idx}`}
+              fill
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+          </div>
+        ))}
+      </Slider>
 
-
-      {/* Favorite Icon */}
       <motion.div
         whileHover={{ scale: 1.15 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsFavorited(!isFavorited)}
-        className="absolute right-3 top-3 sm:right-4 sm:top-4 w-9 h-9 flex items-center justify-center cursor-pointer z-10"
+        className="absolute right-3 top-3 w-8 h-8 flex items-center justify-center cursor-pointer z-10 bg-white/80 rounded-full backdrop-blur-sm shadow-sm"
       >
         <svg
-          className="w-6 h-6"
+          className="w-5 h-5"
           fill={isFavorited ? "#ff6b6b" : "none"}
-          stroke="#ffffff"
+          stroke={isFavorited ? "#ff6b6b" : "#4a4a4a"}
           strokeWidth="2"
           viewBox="0 0 24 24"
         >
@@ -83,105 +65,112 @@ const RoomImageSection: React.FC<{
         </svg>
       </motion.div>
 
-      {/* Slider Dots */}
-      <div className="absolute bottom-2 sm:bottom-3 left-1/2 -translate-x-1/2 flex gap-1">
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
         {images.map((_, dot) => (
-          <motion.span
+          <div
             key={dot}
-            className={`block h-1.5 rounded-full transition-all ${
-              activeSlide === dot ? "bg-white w-5 sm:w-6" : "bg-white/60 w-1.5"
+            className={`h-1.5 rounded-full transition-all duration-300 ${
+              activeSlide === dot ? "bg-white w-6" : "bg-white/50 w-1.5"
             }`}
-            whileHover={{ scale: 1.3 }}
           />
         ))}
-      </div>
-    </motion.div>
-  );
-};
-
-// ==================== DATA SECTION ====================
-const RoomDataSection: React.FC<{
-  id: number; // ✅ Added ID to props
-  name: string;
-  beds: string;
-  capacity: string | number;
-  price: string;
-}> = ({ id, name, beds, capacity, price }) => {
-  
-  const formattedCapacity = typeof capacity === 'number' 
-    ? `${capacity} Adult${capacity > 1 ? 's' : ''}` 
-    : capacity;
-
-  return (
-    <div className="mt-4 flex gap-4 bg-transparent">
-      {/* Left Column - Room Name and Details */}
-      <div className="flex-1 flex flex-col gap-2.5">
-        
-        {/* ✅ Room Name wrapped in Link */}
-        <Link href={`/rooms#room-${id}`} scroll={true}>
-          <h3 className="text-lg font-semibold text-gray-800 hover:text-orange-600 transition-colors cursor-pointer">
-            {name}
-          </h3>
-        </Link>
-        
-        {/* Bed & Capacity Info */}
-        <div className="flex flex-col gap-1.5 text-sm text-gray-500">
-          <div className="flex items-center gap-2">
-            <FaBed className="text-gray-400" />
-            <span>{beds}</span>
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <FaUsers className="text-gray-400" />
-            <span>{formattedCapacity}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Right */}
-      <div className="flex items-start sm:items-center justify-start sm:justify-end flex-col sm:flex-row gap-1 sm:gap-2">
-        <span className="text-lg sm:text-xl text-[#C49C74]">$ {price}</span>
-        <span className="text-xs sm:text-sm text-gray-400 whitespace-nowrap">per day</span>
       </div>
     </div>
   );
 };
 
+// ==================== DATA SECTION ====================
+const RoomDataSection: React.FC<{ room: BackendRoom }> = ({ room }) => {
+  const formattedCapacity = `${room.capacity} Adult${room.capacity > 1 ? "s" : ""}`;
+
+  const bedInfo =
+    room.bedrooms && room.bedrooms.length > 0
+      ? room.bedrooms.map(b => `${b.count} ${b.bedType}`).join(" & ")
+      : "Bedding info";
+
+  // ✅ COMPLETE ICON MAPPING
+  // Checks every possible backend key and assigns an icon
+  const allFeatures = [
+    { key: 'ac', icon: <FaSnowflake />, label: "AC" },
+    { key: 'wifi', icon: <FaWifi />, label: "WiFi" },
+    { key: 'tv', icon: <FaTv />, label: "TV" },
+    { key: 'fan', icon: <FaFan />, label: "Fan" },
+    { key: 'parking', icon: <FaParking />, label: "Parking" },
+    { key: 'sittingArea', icon: <FaChair />, label: "Sitting Area" },
+    { key: 'balcony', icon: <FaDoorOpen />, label: "Balcony" },
+  ];
+
+  // Filter: Only show icons where room[key] === "YES" (or "AC" for ac)
+  const activeIcons = allFeatures.filter(f => {
+    // @ts-ignore - Dynamic access to room properties
+    const val = room[f.key]; 
+    return val === "YES" || val === "AC";
+  });
+
+  return (
+    <div className="p-5 flex flex-col gap-3">
+      <div className="flex justify-between items-start gap-2">
+        <Link href={`/rooms#room-${room.id}`} scroll={true} className="hover:text-red-600 transition-colors duration-200">
+          <h3 className="text-xl font-bold text-gray-800 leading-tight line-clamp-1" title={room.name}>
+            {room.name}
+          </h3>
+        </Link>
+        <div className="text-right shrink-0">
+          <span className="text-lg font-bold text-[#C49C74]">${room.cost}</span>
+          <span className="block text-[10px] text-gray-400 uppercase font-medium">/ night</span>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-500 font-medium">
+        <div className="flex items-center gap-1.5">
+          <FaBed className="text-gray-400" />
+          <span>{bedInfo}</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <FaUsers className="text-gray-400" />
+          <span>{formattedCapacity}</span>
+        </div>
+      </div>
+
+      {/* ✅ RENDER ALL ICONS DYNAMICALLY */}
+      {activeIcons.length > 0 && (
+        <div className="pt-3 mt-1 border-t border-gray-100 flex gap-4 text-gray-400 text-lg flex-wrap">
+          {activeIcons.map((feat) => (
+            <div key={feat.key} title={feat.label} className="hover:text-gray-600 transition-colors">
+              {feat.icon}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 // ==================== MAIN ROOM CARD ====================
-const RoomCard: React.FC<RoomCardProps> = ({ room, index }) => {
+const RoomCard: React.FC<{ room: BackendRoom; index: number }> = ({ room, index }) => {
   const [isFavorited, setIsFavorited] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
 
-  if (!room || !room.image || room.image.length === 0) {
-    return null;
-  }
+  const rawImages = [room.img1, room.img2, room.img3, room.img4].filter(Boolean) as string[];
+  const sliderImages = rawImages.length ? rawImages : ["/images/placeholder.png"];
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 50 }}
+      initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.6, delay: index * 0.1 }}
-      className="w-full shrink-0 relative mx-2 sm:mx-4 md:mx-9"
+      transition={{ duration: 0.5, delay: index * 0.1 }}
+      className="w-full shrink-0 relative bg-white rounded-[20px] shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden group mx-auto max-w-[340px]"
     >
-      {/* Image Section */}
       <RoomImageSection
-        images={room.image}
+        images={sliderImages}
         name={room.name}
         isFavorited={isFavorited}
         setIsFavorited={setIsFavorited}
         activeSlide={activeSlide}
         setActiveSlide={setActiveSlide}
       />
-
-      {/* Data Section */}
-      <RoomDataSection
-        id={room.id} // ✅ Passing ID to the data section
-        name={room.name}
-        beds={room.beds}
-        capacity={room.capacity}
-        price={room.price}
-      />
+      <RoomDataSection room={room} />
     </motion.div>
   );
 };
