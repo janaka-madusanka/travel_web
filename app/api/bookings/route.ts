@@ -9,6 +9,7 @@ export async function POST(req: NextRequest) {
 
     const { customer, roomId, checkIn, checkOut, otherDetails } = data;
 
+    // Validate required fields
     if (!customer || !roomId || !checkIn || !checkOut) {
       return NextResponse.json(
         { error: "Customer info, roomId, checkIn, and checkOut are required" },
@@ -16,69 +17,128 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 1️⃣ Check if room exists
-    const roomExists = await prisma.room.findUnique({ where: { id: roomId } });
-    if (!roomExists) {
-      return NextResponse.json({ error: `Room with id ${roomId} does not exist` }, { status: 400 });
+    // Require NIC or Passport
+    if (
+      (!customer.nicNumber || customer.nicNumber.trim() === "") &&
+      (!customer.passportNumber || customer.passportNumber.trim() === "")
+    ) {
+      return NextResponse.json(
+        { error: "Either NIC Number or Passport Number is required" },
+        { status: 400 }
+      );
     }
 
-    // 2️⃣ Check for booking conflicts
+    // 1️⃣ Check if room exists
+    const roomExists = await prisma.room.findUnique({ where: { id: roomId } });
+
+    if (!roomExists) {
+      return NextResponse.json(
+        { error: `Room with id ${roomId} does not exist` },
+        { status: 400 }
+      );
+    }
+
+    // 2️⃣ Check for booking conflict
     const conflictingBooking = await prisma.booking.findFirst({
       where: {
         roomId,
-        OR: [
-          {
-            checkIn: { lte: new Date(checkOut) },
-            checkOut: { gte: new Date(checkIn) },
-          },
-        ],
+        checkIn: { lte: new Date(checkOut) },
+        checkOut: { gte: new Date(checkIn) },
       },
     });
 
     if (conflictingBooking) {
-      return NextResponse.json({
-        error: `Room is already booked from ${conflictingBooking.checkIn.toISOString()} to ${conflictingBooking.checkOut.toISOString()}`,
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: `Room is already booked from ${conflictingBooking.checkIn.toISOString()} to ${conflictingBooking.checkOut.toISOString()}`,
+        },
+        { status: 400 }
+      );
     }
 
-    // 3️⃣ Check if customer exists by NIC or passportNumber
-    let customerRecord = await prisma.customer.findFirst({
-      where: { OR: [{ nicNumber: customer.nicNumber }, { passportNumber: customer.passportNumber }] },
-    });
+    // 3️⃣ SAFE OR filter — prevents Prisma TS error + UNIQUE constraint error
+    const filters: any[] = [];
 
+    if (customer.nicNumber && customer.nicNumber.trim() !== "") {
+      filters.push({ nicNumber: customer.nicNumber });
+    }
+
+    if (customer.passportNumber && customer.passportNumber.trim() !== "") {
+      filters.push({ passportNumber: customer.passportNumber });
+    }
+
+    let customerRecord = null;
+
+    // Only apply OR if we actually have filters
+    if (filters.length > 0) {
+      customerRecord = await prisma.customer.findFirst({
+        where: { OR: filters },
+      });
+    }
+
+    // 4️⃣ Create customer only if not found
     if (!customerRecord) {
-      customerRecord = await prisma.customer.create({ data: customer });
+      customerRecord = await prisma.customer.create({
+        data: {
+          name: customer.name,
+          nicNumber:
+            customer.nicNumber && customer.nicNumber.trim() !== ""
+              ? customer.nicNumber
+              : null, // prevents storing empty string → UNIQUE error
+
+          passportNumber:
+            customer.passportNumber && customer.passportNumber.trim() !== ""
+              ? customer.passportNumber
+              : null,
+
+          address: customer.address,
+          contactNumber: customer.contactNumber,
+        },
+      });
     }
 
-    // 4️⃣ Create booking with otherDetails if provided
+    // 5️⃣ Create booking + otherDetails
     const booking = await prisma.booking.create({
       data: {
         roomId,
         customerId: customerRecord.id,
         checkIn: new Date(checkIn),
         checkOut: new Date(checkOut),
+
         otherDetails: otherDetails
           ? {
               create: {
-                vehicleSupport: otherDetails.vehicleSupport, // YesNo enum: "YES"/"NO"
-                meal: otherDetails.meal,                     // YesNo enum: "YES"/"NO"
-                guide: otherDetails.guide,                   // YesNo enum: "YES"/"NO"
-                vehicleType: otherDetails.vehicleType,      // VehicleType enum
+                vehicleSupport: otherDetails.vehicleSupport,
+                meal: otherDetails.meal,
+                guide: otherDetails.guide,
+                vehicleType: otherDetails.vehicleType,
                 vehicleNumber: otherDetails.vehicleNumber,
-                driver: otherDetails.driver,                // YesNo enum
+                driver: otherDetails.driver,
               },
             }
           : undefined,
       },
-      include: { customer: true, room: true, otherDetails: true },
+
+      include: {
+        customer: true,
+        room: true,
+        otherDetails: true,
+      },
     });
 
-    return NextResponse.json({ message: "Booking created successfully", booking });
+    return NextResponse.json({
+      message: "Booking created successfully",
+      booking,
+    });
   } catch (err) {
     console.error("Booking creation error:", err);
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Something went wrong", details: String(err) },
+      { status: 500 }
+    );
   }
 }
+
 // ---------------- GET ALL BOOKINGS ----------------
 export async function GET() {
   try {
