@@ -1,17 +1,17 @@
 const location02 = {
-  id: 'dambulla',
-  name: 'Dambulla Cave Temple',
-  title: 'Dambulla Cave Temple',
-  subtitle: 'A Sacred Pilgrimage Site for 22 Centuries',
+  id: 'pidurangala',
+  name: 'Pidurangala Rock',
+  title: 'Pidurangala Rock',
+  subtitle: 'The Best Sunrise Viewpoint Near Sigiriya, Sri Lanka',
   images: [
     '/images/places/loc2/li1.jpg',
     '/images/places/loc2/li2.jpg',
     '/images/places/loc2/li3.jpg',
   ],
   description: [
-    "The Dambulla Cave Temple is the largest and best-preserved cave temple complex in Sri Lanka. The rock towers 160 meters over the surrounding plains. There are more than 80 documented caves in the surrounding area.",
-    "Major attractions are spread over five caves, which contain statues and paintings. These paintings and statues are related to Gautama Buddha and his life. There are a total of 153 Buddha statues, three statues of Sri Lankan kings and four statues of gods and goddesses.",
-    "The prehistoric locals would have lived in these cave complexes before the arrival of Buddhism in Sri Lanka as there are burial sites with human skeletons about 2700 years old in this area at Ibbankatuwa near the Dambulla cave complexes.",
+    "Pidurangala Rock is located just a short distance from the world-famous Sigiriya Rock Fortress. It's a popular spot for both sunrise and sunset, offering breathtaking 360-degree views of the surrounding landscape. The climb is an adventurous alternative to its more crowded neighbor.",
+    "The journey to the top takes about 30-45 minutes. Along the way, you'll pass a small temple and a large reclining Buddha statue. The final ascent involves navigating through and around large boulders, adding to the excitement.",
+    "Once at the summit, the vast, open rock surface provides an unparalleled panoramic view. It's the perfect spot for photographers and nature lovers. Watching the sunrise from here as it illuminates the jungle is unforgettable.",
   ],
 };
 
