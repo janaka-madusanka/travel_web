@@ -356,7 +356,7 @@ export default function BookingPage() {
             </button>
 
             {/* LEFT SIDE: Form */}
-            <div className="flex-1 p-6 md:p-12 lg:p-16 bg-white lg:overflow-y-auto lg:h-full custom-scrollbar">
+            <div className="w-full lg:flex-1 p-6 md:p-12 lg:p-16 bg-white lg:overflow-y-auto lg:h-full custom-scrollbar">
               <div className="p-8 md:p-12 lg:p-16 max-w-4xl mx-auto">
                 <div className="mb-10">
                   <h1 className="text-4xl md:text-5xl font-serif text-[#003b14] font-bold mb-3">
@@ -372,7 +372,7 @@ export default function BookingPage() {
                   <button
                     onClick={() => setActiveTab("contact")}
                     // Fixed: Reduced padding (px-2) and text size (text-xs) on mobile to prevent overlap
-                    className={`flex-1 py-3 px-2 md:px-4 rounded-lg text-xs md:text-sm font-bold transition-all flex items-center justify-center gap-2 ${
+                    className={`flex-1 py-3 px-2 md:px-4 rounded-lg text-xs md:text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                       activeTab === "contact"
                         ? "bg-white text-[#007326] shadow-sm"
                         : "text-gray-500 hover:text-gray-700"
@@ -383,7 +383,7 @@ export default function BookingPage() {
                   <button
                     onClick={() => setActiveTab("booking")}
                     // Fixed: Reduced padding (px-2) and text size (text-xs) on mobile to prevent overlap
-                    className={`flex-1 py-3 px-2 md:px-4 rounded-lg text-xs md:text-sm font-bold transition-all flex items-center justify-center gap-2 ${
+                    className={`flex-1 py-3 px-2 md:px-4 rounded-lg text-xs md:text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                       activeTab === "booking"
                         ? "bg-white text-[#007326] shadow-sm"
                         : "text-gray-500 hover:text-gray-700"
@@ -410,7 +410,7 @@ export default function BookingPage() {
                               Title
                             </label>
                             <select
-                              className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#007326] outline-none"
+                              className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#007326] outline-none cursor-pointer"
                               value={formData.title}
                               onChange={(e) =>
                                 handleChange("title", e.target.value)
@@ -513,7 +513,7 @@ export default function BookingPage() {
                             </label>
                             <div className="flex gap-2">
                               <select
-                                className="w-1/3 p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none"
+                                className="w-1/3 p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none cursor-pointer"
                                 value={formData.passportType}
                                 onChange={(e) =>
                                   handleChange("passportType", e.target.value)
@@ -536,7 +536,7 @@ export default function BookingPage() {
                         </div>
                         <button
                           onClick={() => setActiveTab("booking")}
-                          className="w-full py-4 mt-4 bg-[#007326] text-white font-bold rounded-xl shadow-lg hover:bg-[#005a1e] transition-transform active:scale-95"
+                          className="w-full py-4 mt-4 bg-[#007326] text-white font-bold rounded-xl shadow-lg hover:bg-[#005a1e] transition-transform active:scale-95 cursor-pointer"
                         >
                           Next: Booking Details
                         </button>
@@ -557,19 +557,20 @@ export default function BookingPage() {
                           <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">
                             Select Room
                           </label>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto custom-scrollbar">
+                          {/* Fixed: Added min-h-[100px] and border to ensure visibility even when empty */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 min-h-[100px] overflow-y-auto custom-scrollbar border border-transparent">
                             {loadingRooms ? (
-                              <p className="text-sm text-gray-400">
-                                Loading rooms...
-                              </p>
-                            ) : (
+                              <div className="col-span-full flex items-center justify-center h-20">
+                                <p className="text-sm text-gray-400">Loading rooms...</p>
+                              </div>
+                            ) : rooms.length > 0 ? (
                               rooms.map((room: any) => (
                                 <div
                                   key={room.id}
                                   onClick={() =>
                                     handleChange("room", room.id.toString())
                                   }
-                                  className={`cursor-pointer rounded-xl border-2 p-4 transition-all ${
+                                  className={`cursor-pointer rounded-xl border-2 p-4 transition-all bg-white ${
                                     formData.room === room.id.toString()
                                       ? "border-[#007326] bg-green-50"
                                       : "border-gray-200 hover:border-gray-300"
@@ -595,6 +596,11 @@ export default function BookingPage() {
                                   </p>
                                 </div>
                               ))
+                            ) : (
+                              // Fixed: Added explicit empty state message
+                              <div className="col-span-full flex items-center justify-center h-20 border-2 border-dashed border-gray-200 rounded-xl">
+                                <p className="text-sm text-gray-400">No rooms available.</p>
+                              </div>
                             )}
                           </div>
                         </div>
@@ -763,7 +769,7 @@ export default function BookingPage() {
                             </div>
                             <input
                               type="checkbox"
-                              className="w-5 h-5 text-green-600 rounded focus:ring-green-500"
+                              className="w-5 h-5 text-green-600 rounded focus:ring-green-500 cursor-pointer"
                               checked={formData.meal}
                               onChange={(e) =>
                                 handleChange("meal", e.target.checked)
@@ -783,7 +789,7 @@ export default function BookingPage() {
                             </div>
                             <input
                               type="checkbox"
-                              className="w-5 h-5 text-green-600 rounded focus:ring-green-500"
+                              className="w-5 h-5 text-green-600 rounded focus:ring-green-500 cursor-pointer"
                               checked={formData.guide}
                               onChange={(e) =>
                                 handleChange("guide", e.target.checked)
@@ -804,7 +810,7 @@ export default function BookingPage() {
                               </div>
                               <input
                                 type="checkbox"
-                                className="w-5 h-5 text-green-600 rounded focus:ring-green-500"
+                                className="w-5 h-5 text-green-600 rounded focus:ring-green-500 cursor-pointer"
                                 checked={formData.vehicleNeeded}
                                 onChange={(e) =>
                                   handleChange(
@@ -839,20 +845,11 @@ export default function BookingPage() {
                         <div className="flex gap-3 mt-6">
                           <button
                             onClick={() => setActiveTab("contact")}
-                            // Fixed: Added bg-gray-100 so it is not white
-                            className="flex-1 py-4 bg-gray-100 text-gray-600 font-bold hover:bg-gray-200 rounded-xl transition"
+                            className="w-full py-4 bg-gray-100 text-gray-600 font-bold hover:bg-gray-200 rounded-xl transition cursor-pointer"
                           >
                             Back
                           </button>
-                          <button
-                            onClick={handleSubmit}
-                            disabled={isSubmitting}
-                            // Fixed: Increased py-4 to py-5 to give it more height
-                            className="flex-[2] py-5 bg-[#007326] text-white font-bold rounded-xl shadow-lg hover:bg-[#005a1e] transition-transform active:scale-95 flex items-center justify-center gap-2"
-                          >
-                            {isSubmitting ? "Processing..." : "Confirm Booking"}{" "}
-                            <CheckCircle size={18} />
-                          </button>
+                          {/* Confirm Button removed from here and moved to Summary */}
                         </div>
                       </motion.div>
                     )}
@@ -862,15 +859,18 @@ export default function BookingPage() {
             </div>
 
             {/* RIGHT SIDE: Sticky Summary */}
-            <div className="w-full lg:w-[450px] bg-[#003b14] text-white p-8 overflow-hidden relative lg:h-full h-auto flex-shrink-0 order-last">
+            <div className="w-full lg:flex-1 bg-[#003b14] text-white p-6 md:p-8 overflow-hidden relative lg:h-full h-auto flex-shrink-0 order-last">
               <div className="h-full flex flex-col">
-                <h2 className="text-2xl font-serif font-bold border-b border-green-800 pb-4 mb-6">
+                <h2 className="text-xl md:text-2xl font-serif font-bold border-b border-green-800 pb-4 mb-4">
                   Your Stay
                 </h2>
-                <div className="flex-1 overflow-y-auto space-y-6 custom-scrollbar pr-2">
+                
+                {/* Fixed: Removed overflow-y-auto to stop scrolling */}
+                <div className="flex-1 flex flex-col gap-3">
                   {selectedRoom ? (
-                    <div className="flex flex-col gap-4">
-                      <div className="w-full h-48 bg-green-800 rounded-xl overflow-hidden relative shadow-lg">
+                    <div className="flex flex-col gap-3 h-full">
+                      {/* Fixed: Reduced image height to h-32 (128px) */}
+                      <div className="w-full h-32 bg-green-800 rounded-xl overflow-hidden relative shadow-lg shrink-0">
                         <img
                           src={
                             selectedRoom.image ||
@@ -881,81 +881,111 @@ export default function BookingPage() {
                           className="object-cover w-full h-full"
                         />
                       </div>
-                      <div>
-                        <p className="font-bold text-2xl font-serif">
+                      
+                      {/* Room Title & Capacity */}
+                      <div className="shrink-0">
+                        <p className="font-bold text-xl font-serif leading-tight">
                           {selectedRoom.name}
                         </p>
-                        <p className="text-sm text-green-300 mt-1">
+                        <p className="text-xs text-green-300 mt-1">
                           {selectedRoom.capacity} Guests • {selectedRoom.beds}
                         </p>
                       </div>
-                      <div className="bg-[#004d1a] rounded-xl p-5 flex justify-between items-center text-sm border border-green-800/50 shadow-inner">
+
+                      {/* Check-In/Out Box - Fixed: Compacted padding (p-3) */}
+                      <div className="bg-[#004d1a] rounded-xl p-3 flex justify-between items-center text-sm border border-green-800/50 shadow-inner shrink-0">
                         <div>
-                          <p className="text-green-300 text-xs uppercase font-bold tracking-wider">
+                          <p className="text-green-300 text-[10px] uppercase font-bold tracking-wider">
                             Check-In
                           </p>
-                          <p className="font-medium text-lg mt-1">
+                          <p className="font-medium text-base mt-0.5">
                             {formData.checkInDate || "--"}
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="text-green-300 text-xs uppercase font-bold tracking-wider">
+                          <p className="text-green-300 text-[10px] uppercase font-bold tracking-wider">
                             Check-Out
                           </p>
-                          <p className="font-medium text-lg mt-1">
+                          <p className="font-medium text-base mt-0.5">
                             {formData.checkOutDate || "--"}
                           </p>
                         </div>
                       </div>
-                      <div className="space-y-3 pt-4 border-t border-green-800">
-                        <div className="flex justify-between text-sm text-gray-300">
+
+                      {/* Price Breakdown - Fixed: Compacted spacing */}
+                      <div className="space-y-2 pt-2 border-t border-green-800 text-sm mt-auto">
+                        <div className="flex justify-between text-green-100/80">
                           <span>Room ({days} nights)</span>
                           <span>${roomCost}</span>
                         </div>
                         {vehicleCost > 0 && (
-                          <div className="flex justify-between text-sm text-gray-300">
+                          <div className="flex justify-between text-green-100/80">
                             <span>Vehicles</span>
                             <span>${vehicleCost}</span>
                           </div>
                         )}
-                        <div className="flex justify-between text-sm text-gray-300">
+                        <div className="flex justify-between text-green-100/80">
                           <span>Service Charge (5%)</span>
                           <span>${serviceCharge.toFixed(2)}</span>
                         </div>
-                        <div className="flex justify-between text-2xl font-bold text-white pt-4 border-t border-green-800 mt-2">
+                        
+                        <div className="flex justify-between text-xl font-bold text-white pt-2 border-t border-green-800 mt-1">
                           <span>Total</span>
                           <span>${grandTotal.toFixed(2)}</span>
                         </div>
+
+                        {/* Confirm Button */}
+                        <button
+                          onClick={handleSubmit}
+                          disabled={isSubmitting || !isContactComplete || !isBookingComplete}
+                          className={`w-full mt-4 py-4 font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                            isContactComplete && isBookingComplete && !isSubmitting
+                              ? "bg-white text-[#003b14] hover:bg-green-50 active:scale-95 cursor-pointer"
+                              : "bg-green-900/50 text-green-200/50 cursor-not-allowed"
+                          }`}
+                        >
+                          {isSubmitting ? "Processing..." : "Confirm Booking"}
+                          <CheckCircle size={18} />
+                        </button>
+
+                         {/* Validation Message */}
+                         {(!isContactComplete || !isBookingComplete) && (
+                           <p className="text-center text-[10px] text-red-300 mt-1 font-medium bg-red-900/20 py-1 rounded-lg">
+                             * Please complete all fields.
+                           </p>
+                        )}
                       </div>
                     </div>
                   ) : (
-                    <div className="flex flex-col gap-6 animate-fadeIn">
-                      <div className="w-full h-52 bg-green-800 rounded-xl overflow-hidden relative shadow-lg">
+                    // Empty State
+                    <div className="flex flex-col gap-4 animate-fadeIn h-full">
+                      {/* Fixed: Reduced image height to h-40 */}
+                      <div className="w-full h-40 bg-green-800 rounded-xl overflow-hidden relative shadow-lg shrink-0">
                         <img
                           src={hotelInfo.image}
                           alt="Cottage"
                           className="object-cover w-full h-full opacity-90 hover:scale-105 transition-transform duration-700"
                         />
                       </div>
-                      <div className="space-y-2">
-                        <h3 className="text-2xl font-serif font-bold text-white">
+                      <div className="space-y-1">
+                        <h3 className="text-xl font-serif font-bold text-white">
                           {hotelInfo.name}
                         </h3>
-                        <div className="flex items-center gap-2 text-green-300 text-sm">
-                          <MapPin size={16} />
+                        <div className="flex items-center gap-2 text-green-300 text-xs">
+                          <MapPin size={14} />
                           <p>{hotelInfo.address}</p>
                         </div>
-                        <div className="flex items-center gap-2 text-green-300 text-sm">
-                          <Phone size={16} />
+                        <div className="flex items-center gap-2 text-green-300 text-xs">
+                          <Phone size={14} />
                           <p>{hotelInfo.contact}</p>
                         </div>
                       </div>
-                      <div className="bg-[#004d1a] p-6 rounded-xl border-l-4 border-green-500">
-                        <p className="text-white/90 italic leading-relaxed text-base">
+                      <div className="bg-[#004d1a] p-4 rounded-xl border-l-4 border-green-500">
+                        <p className="text-white/90 italic leading-relaxed text-sm">
                           "{hotelInfo.promoText}"
                         </p>
                       </div>
-                      <div className="flex items-center justify-center gap-2 text-green-400/60 mt-auto pt-10">
+                      <div className="flex items-center justify-center gap-2 text-green-400/60 mt-auto pb-4">
                         <Info size={16} />
                         <span className="text-xs uppercase tracking-widest">
                           Select a room to begin
@@ -964,9 +994,13 @@ export default function BookingPage() {
                     </div>
                   )}
                 </div>
-                <div className="mt-auto pt-6 border-t border-green-800 flex items-center gap-3 text-xs text-green-300/60">
-                  <CreditCard size={16} />
-                  <p>No payment required today. Pay at property.</p>
+
+                {/* Footer Notes */}
+                <div className="mt-auto pt-4 border-t border-green-800 flex flex-col gap-1 text-[10px] text-green-300/60">
+                  <div className="flex items-center gap-2">
+                    <CreditCard size={12} />
+                    <p>No payment required today, Pay at property.</p>
+                  </div>
                   <p>Extra charges will be charged for Extra services.</p>
                 </div>
               </div>
