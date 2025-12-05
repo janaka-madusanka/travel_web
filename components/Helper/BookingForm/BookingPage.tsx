@@ -345,7 +345,7 @@ export default function BookingPage() {
               rotate: -15,
               transition: { duration: 0.5, ease: "anticipate" },
             }}
-            className="bg-white w-full max-w-[1400px] h-[90vh] rounded-[2rem] shadow-2xl overflow-hidden relative flex flex-col lg:flex-row"
+            className="bg-white w-full max-w-[1400px] h-[90vh] rounded-[2rem] shadow-2xl relative flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden"
           >
             {/* Close Button */}
             <button
@@ -356,7 +356,7 @@ export default function BookingPage() {
             </button>
 
             {/* LEFT SIDE: Form */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar bg-white">
+            <div className="flex-1 p-6 md:p-12 lg:p-16 bg-white lg:overflow-y-auto lg:h-full custom-scrollbar">
               <div className="p-8 md:p-12 lg:p-16 max-w-4xl mx-auto">
                 <div className="mb-10">
                   <h1 className="text-4xl md:text-5xl font-serif text-[#003b14] font-bold mb-3">
@@ -368,10 +368,11 @@ export default function BookingPage() {
                 </div>
 
                 {/* Tab Switcher */}
-                <div className="flex p-1 bg-gray-100 rounded-xl mb-8 w-full max-w-md shadow-inner">
+                <div className="flex p-1 bg-gray-100 rounded-xl mb-8 w-full shadow-inner">
                   <button
                     onClick={() => setActiveTab("contact")}
-                    className={`flex-1 py-3 px-4 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${
+                    // Fixed: Reduced padding (px-2) and text size (text-xs) on mobile to prevent overlap
+                    className={`flex-1 py-3 px-2 md:px-4 rounded-lg text-xs md:text-sm font-bold transition-all flex items-center justify-center gap-2 ${
                       activeTab === "contact"
                         ? "bg-white text-[#007326] shadow-sm"
                         : "text-gray-500 hover:text-gray-700"
@@ -381,7 +382,8 @@ export default function BookingPage() {
                   </button>
                   <button
                     onClick={() => setActiveTab("booking")}
-                    className={`flex-1 py-3 px-4 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${
+                    // Fixed: Reduced padding (px-2) and text size (text-xs) on mobile to prevent overlap
+                    className={`flex-1 py-3 px-2 md:px-4 rounded-lg text-xs md:text-sm font-bold transition-all flex items-center justify-center gap-2 ${
                       activeTab === "booking"
                         ? "bg-white text-[#007326] shadow-sm"
                         : "text-gray-500 hover:text-gray-700"
@@ -837,14 +839,16 @@ export default function BookingPage() {
                         <div className="flex gap-3 mt-6">
                           <button
                             onClick={() => setActiveTab("contact")}
-                            className="flex-1 py-4 text-gray-500 font-bold hover:bg-gray-100 rounded-xl transition"
+                            // Fixed: Added bg-gray-100 so it is not white
+                            className="flex-1 py-4 bg-gray-100 text-gray-600 font-bold hover:bg-gray-200 rounded-xl transition"
                           >
                             Back
                           </button>
                           <button
                             onClick={handleSubmit}
                             disabled={isSubmitting}
-                            className="flex-[2] py-4 bg-[#007326] text-white font-bold rounded-xl shadow-lg hover:bg-[#005a1e] transition-transform active:scale-95 flex items-center justify-center gap-2"
+                            // Fixed: Increased py-4 to py-5 to give it more height
+                            className="flex-[2] py-5 bg-[#007326] text-white font-bold rounded-xl shadow-lg hover:bg-[#005a1e] transition-transform active:scale-95 flex items-center justify-center gap-2"
                           >
                             {isSubmitting ? "Processing..." : "Confirm Booking"}{" "}
                             <CheckCircle size={18} />
@@ -858,7 +862,7 @@ export default function BookingPage() {
             </div>
 
             {/* RIGHT SIDE: Sticky Summary */}
-            <div className="hidden lg:block w-[450px] bg-[#003b14] text-white p-8 overflow-hidden relative">
+            <div className="w-full lg:w-[450px] bg-[#003b14] text-white p-8 overflow-hidden relative lg:h-full h-auto flex-shrink-0 order-last">
               <div className="h-full flex flex-col">
                 <h2 className="text-2xl font-serif font-bold border-b border-green-800 pb-4 mb-6">
                   Your Stay
@@ -963,6 +967,7 @@ export default function BookingPage() {
                 <div className="mt-auto pt-6 border-t border-green-800 flex items-center gap-3 text-xs text-green-300/60">
                   <CreditCard size={16} />
                   <p>No payment required today. Pay at property.</p>
+                  <p>Extra charges will be charged for Extra services.</p>
                 </div>
               </div>
             </div>
