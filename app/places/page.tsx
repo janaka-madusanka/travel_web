@@ -128,12 +128,12 @@ export default function PlacesPage() {
 
       {/* Sticky navbar */}
       <nav className="bg-white sticky top-0 z-50 mt-10 ">
-        <div className="max-w-7xl mx-auto px-4 py-2 flex flex-wrap justify-center gap-4">
+        <div className="max-w-7xl mx-auto px-4 py-2 flex flex-wrap justify-center gap-2 md:gap-4">
           {locations.map((l) => (
             <button
               key={l.id}
               onClick={() => setActiveId(l.id)}
-              className={`px-4 py-2 font-semibold text-2xl ${
+              className={`px-2 py-1 md:px-4 md:py-2 font-semibold text-sm md:text-2xl ${
                 activeId === l.id
                   ? "text-green-700"
                   : "text-gray-500 hover:text-gray-900"
