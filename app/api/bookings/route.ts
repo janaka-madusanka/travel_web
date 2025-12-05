@@ -1,6 +1,7 @@
 // app/api/bookings/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { sendBookingNotification } from "@/lib/email";
 
 // ---------------- CREATE BOOKING ----------------
 export async function POST(req: NextRequest) {
@@ -19,7 +20,10 @@ export async function POST(req: NextRequest) {
     // 1️⃣ Check if room exists
     const roomExists = await prisma.room.findUnique({ where: { id: roomId } });
     if (!roomExists) {
-      return NextResponse.json({ error: `Room with id ${roomId} does not exist` }, { status: 400 });
+      return NextResponse.json(
+        { error: `Room with id ${roomId} does not exist` },
+        { status: 400 }
+      );
     }
 
     // 2️⃣ Check for booking conflicts
@@ -36,14 +40,22 @@ export async function POST(req: NextRequest) {
     });
 
     if (conflictingBooking) {
-      return NextResponse.json({
-        error: `Room is already booked from ${conflictingBooking.checkIn.toISOString()} to ${conflictingBooking.checkOut.toISOString()}`,
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: `Room is already booked from ${conflictingBooking.checkIn.toISOString()} to ${conflictingBooking.checkOut.toISOString()}`,
+        },
+        { status: 400 }
+      );
     }
 
     // 3️⃣ Check if customer exists by NIC or passportNumber
     let customerRecord = await prisma.customer.findFirst({
-      where: { OR: [{ nicNumber: customer.nicNumber }, { passportNumber: customer.passportNumber }] },
+      where: {
+        OR: [
+          { nicNumber: customer.nicNumber },
+          { passportNumber: customer.passportNumber },
+        ],
+      },
     });
 
     if (!customerRecord) {
@@ -61,22 +73,34 @@ export async function POST(req: NextRequest) {
           ? {
               create: {
                 vehicleSupport: otherDetails.vehicleSupport, // YesNo enum: "YES"/"NO"
-                meal: otherDetails.meal,                     // YesNo enum: "YES"/"NO"
-                guide: otherDetails.guide,                   // YesNo enum: "YES"/"NO"
-                vehicleType: otherDetails.vehicleType,      // VehicleType enum
+                meal: otherDetails.meal, // YesNo enum: "YES"/"NO"
+                guide: otherDetails.guide, // YesNo enum: "YES"/"NO"
+                vehicleType: otherDetails.vehicleType, // VehicleType enum
                 vehicleNumber: otherDetails.vehicleNumber,
-                driver: otherDetails.driver,                // YesNo enum
+                driver: otherDetails.driver, // YesNo enum
               },
             }
           : undefined,
       },
       include: { customer: true, room: true, otherDetails: true },
     });
+    await sendBookingNotification(
+      customer.name,
+      roomExists.name,
+      checkIn,
+      checkOut
+    );
 
-    return NextResponse.json({ message: "Booking created successfully", booking });
+    return NextResponse.json({
+      message: "Booking created successfully",
+      booking,
+    });
   } catch (err) {
     console.error("Booking creation error:", err);
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Something went wrong" },
+      { status: 500 }
+    );
   }
 }
 // ---------------- GET ALL BOOKINGS ----------------
@@ -103,7 +127,10 @@ export async function GET() {
     return NextResponse.json({ bookings: bookingsFormatted });
   } catch (err) {
     console.error("Fetch bookings error:", err);
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Something went wrong" },
+      { status: 500 }
+    );
   }
 }
 // ---------------- DELETE BOOKING ----------------
@@ -113,7 +140,10 @@ export async function DELETE(req: NextRequest) {
     const id = searchParams.get("id");
 
     if (!id) {
-      return NextResponse.json({ error: "Booking id is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Booking id is required" },
+        { status: 400 }
+      );
     }
 
     // Check if booking exists
@@ -122,7 +152,10 @@ export async function DELETE(req: NextRequest) {
     });
 
     if (!bookingExists) {
-      return NextResponse.json({ error: `Booking with id ${id} does not exist` }, { status: 404 });
+      return NextResponse.json(
+        { error: `Booking with id ${id} does not exist` },
+        { status: 404 }
+      );
     }
 
     // Delete the booking (also deletes otherDetails because of Prisma relation)
@@ -133,6 +166,9 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ message: "Booking deleted successfully" });
   } catch (err) {
     console.error("Delete booking error:", err);
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Something went wrong" },
+      { status: 500 }
+    );
   }
 }
