@@ -13,8 +13,22 @@ export interface Place {
 }
 
 export const placesToVisit: Place[] = [
+
+    {
+  id: 1,
+  name: "Sigiriya Lion Rock",
+  image: "/images/Places/Sigiriya.jpeg",
+  lat: 7.9571127,
+  lng: 80.760257,
+  rating: 4.7,
+  reviews: 230,
+  type: "Rock / Hiking",
+  open: "8 AM",
+  close: "6 PM"
+},
+
   {
-    id: 1,
+    id: 2,
     name: "Pidurangala Rock",
     image: "/images/Places/pidurangala.jpg",
     lat: 7.9663886,
@@ -26,7 +40,7 @@ export const placesToVisit: Place[] = [
     close: "6 PM"
   },
   {
-    id: 2,
+    id: 3,
     name: "Minneriya National Park",
     image: "/images/Places/minneriya.jpg",
     lat: 8.0156443,
@@ -38,11 +52,11 @@ export const placesToVisit: Place[] = [
     close: "5 PM"
   },
   {
-    id: 3,
+    id: 4,
     name: "Dambulla Cave Temple",
     image: "/images/Places/dambulla.jpg",
-    lat: 7.8549141,
-    lng: 80.6505699,
+    lat: 7.8554813,
+    lng: 80.6513862,
     rating: 4.6,
     reviews: 320,
     type: "Buddhist Temple",
@@ -50,7 +64,7 @@ export const placesToVisit: Place[] = [
     close: "7 PM"
   },
   {
-    id: 4,
+    id: 5,
     name: "Polonnaruwa Ancient City",
     image: "/images/Places/polonnaruwa.jpg",
     lat: 7.9519597,
@@ -62,7 +76,7 @@ export const placesToVisit: Place[] = [
     close: "6 PM"
   },
   {
-    id: 5,
+    id: 6,
     name: "Kaudulla National Park",
     image: "/images/Places/kaudulla.jpg",
     lat: 8.1107185,
@@ -74,7 +88,7 @@ export const placesToVisit: Place[] = [
     close: "5 PM"
   },
   {
-    id: 6,
+    id: 7,
     name: "Ritigala Forest Monastery",
     image: "/images/Places/ritigala.jpg",
     lat: 8.1063997,
