@@ -8,6 +8,7 @@ import Location04 from "@/components/Places/Locations/location04";
 import Location05 from "@/components/Places/Locations/location05";
 import Location06 from "@/components/Places/Locations/location06";
 import Location07 from "@/components/Places/Locations/location07";
+import Location08 from "@/components/Places/Locations/location08";
 import Hero from "@/components/Places/Hero/Hero"; 
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -113,6 +114,7 @@ export default function PlacesPage() {
     Location05,
     Location06,
     Location07,
+    Location08,
   ];
 
   const [activeId, setActiveId] = useState(locations[0].id);
