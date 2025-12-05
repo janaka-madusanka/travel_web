@@ -167,7 +167,7 @@ const Nav = ({ openNav }: Props) => {
             height:
               windowWidth >= 1536
                 ? scrolled
-                  ? "120px"
+                  ? "105px"
                   : "100px"
                 : windowWidth >= 1280
                 ? scrolled
