@@ -1,17 +1,17 @@
 const location05 = {
-  id: 'kaudulla',
-  name: 'Kaudulla National Park',
-  title: 'Kaudulla National Park',
-  subtitle: "Another Haven for Sri Lanka's Majestic Elephants",
+  id: 'habarana',
+  name: 'Habarana Lake',
+  title: 'Habarana Lake',
+  subtitle: 'A Serene Escape in the Heart of the Cultural Triangle',
   images: [
     '/images/places/loc5/li1.jpg',
     '/images/places/loc5/li2.jpg',
     '/images/places/loc5/li3.jpg',
   ],
   description: [
-    "Kaudulla National Park is a national park on the island of Sri Lanka located 197 kilometers away from the largest city, Colombo. It was designated a national park on April 1, 2002 becoming the 15th such area on the island.",
-    "In the 2004-2005 season, more than 10,000 people visited the National Park, generating an income of Rs.100,000 from entrance fees. Along with Minneriya and Girithale Birdlife International have identified Kaudulla as an Important Bird Area.",
-    "Historically Kaudulla was one of the 16 irrigation tanks built by King Mahasen. Following a period of abandonment it was reconstructed in 1959. It now attracts and supports a variety of plant and animal life, including large mammals, fish and reptiles.",
+    "Habarana is a small city in the Anuradhapura District of Sri Lanka. The location has some mid-range and up hotels and is a popular departure point for other nearby locations of greater interest.",
+    "Habarana is a popular tourist destination for safari lovers as it is the starting point for safaris in the nearby Minneriya sanctuary and the Kaudulla National Park.",
+    "The lake itself offers peaceful boat rides and is a great place for bird watching. You can experience the traditional village life and enjoy the calm atmosphere away from the bustling city life.",
   ],
 };
 

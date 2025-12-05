@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { placesToVisit } from "@/data/destination";
+import { aboutUsImageGrid } from "@/data/aboutUsImageGrid";
 
 interface ImageCardProps {
   src: string;
@@ -23,9 +23,9 @@ const ImageCard: React.FC<ImageCardProps> = ({ src, alt, className = "", index }
 };
 
 const AboutSection = () => {
-  const images = [...placesToVisit];
+  const images = [...aboutUsImageGrid];
   while (images.length < 8) {
-    images.push(placesToVisit[images.length % placesToVisit.length]);
+    images.push(aboutUsImageGrid[images.length % aboutUsImageGrid.length]);
   }
 
   return (

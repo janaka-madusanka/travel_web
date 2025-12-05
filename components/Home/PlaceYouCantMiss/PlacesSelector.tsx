@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import React, { useState } from "react";
 import PlaceMapCard from "./PlaceMapCard";
 
@@ -42,9 +43,13 @@ export default function PlacesSelector({ places }: Props) {
           </button>
         ))}
 
-        <p className="text-green-700 font-semibold cursor-pointer mt-6 hover:underline text-lg">
-          Explore More ...
-        </p>
+       <Link
+  href="/places"
+  className="text-green-700 font-semibold cursor-pointer mt-6 hover:underline text-lg w-fit block"
+>
+  Explore More ...
+</Link>
+
       </div>
 
       {/* Map + Card */}
