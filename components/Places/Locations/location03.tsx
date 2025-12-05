@@ -1,17 +1,17 @@
 const location03 = {
-  id: 'minneriya',
-  name: 'Minneriya National Park',
-  title: 'Minneriya National Park',
-  subtitle: 'Home of the Famed Elephant Gathering',
+  id: 'dambulla',
+  name: 'Dambulla Cave Temple',
+  title: 'Dambulla Cave Temple',
+  subtitle: 'A Sacred Pilgrimage Site for 22 Centuries',
   images: [
     '/images/places/loc3/li1.jpg',
     '/images/places/loc3/li2.jpg',
     '/images/places/loc3/li3.jpg',
   ],
   description: [
-    "Minneriya National Park is a national park in North Central Province of Sri Lanka. The area was designated as a national park on 12 August 1997, having been originally declared as a wildlife sanctuary in 1938.",
-    "The reason for declaring the area as protected is to protect the catchment of Minneriya tank and the wildlife of the surrounding area. The tank is of historical importance, having been built by King Mahasen in third century AD.",
-    "Large numbers of Sri Lankan elephants are attracted to grass fields on the edges of the reservoir during the dry season. The Minneriya tank contributes to sustain a large herd. Elephants gathered here is numbering around 150-200.",
+    "The Dambulla Cave Temple is the largest and best-preserved cave temple complex in Sri Lanka. The rock towers 160 meters over the surrounding plains. There are more than 80 documented caves in the surrounding area.",
+    "Major attractions are spread over five caves, which contain statues and paintings. These paintings and statues are related to Gautama Buddha and his life. There are a total of 153 Buddha statues, three statues of Sri Lankan kings and four statues of gods and goddesses.",
+    "The prehistoric locals would have lived in these cave complexes before the arrival of Buddhism in Sri Lanka as there are burial sites with human skeletons about 2700 years old in this area at Ibbankatuwa near the Dambulla cave complexes.",
   ],
 };
 

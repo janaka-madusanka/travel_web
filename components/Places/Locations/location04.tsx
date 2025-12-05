@@ -1,17 +1,17 @@
 const location04 = {
-  id: 'habarana',
-  name: 'Habarana Lake',
-  title: 'Habarana Lake',
-  subtitle: 'A Serene Escape in the Heart of the Cultural Triangle',
+  id: 'minneriya',
+  name: 'Minneriya National Park',
+  title: 'Minneriya National Park',
+  subtitle: 'Home of the Famed Elephant Gathering',
   images: [
     '/images/places/loc4/li1.jpg',
     '/images/places/loc4/li2.jpg',
     '/images/places/loc4/li3.jpg',
   ],
   description: [
-    "Habarana is a small city in the Anuradhapura District of Sri Lanka. The location has some mid-range and up hotels and is a popular departure point for other nearby locations of greater interest.",
-    "Habarana is a popular tourist destination for safari lovers as it is the starting point for safaris in the nearby Minneriya sanctuary and the Kaudulla National Park.",
-    "The lake itself offers peaceful boat rides and is a great place for bird watching. You can experience the traditional village life and enjoy the calm atmosphere away from the bustling city life.",
+    "Minneriya National Park is a national park in North Central Province of Sri Lanka. The area was designated as a national park on 12 August 1997, having been originally declared as a wildlife sanctuary in 1938.",
+    "The reason for declaring the area as protected is to protect the catchment of Minneriya tank and the wildlife of the surrounding area. The tank is of historical importance, having been built by King Mahasen in third century AD.",
+    "Large numbers of Sri Lankan elephants are attracted to grass fields on the edges of the reservoir during the dry season. The Minneriya tank contributes to sustain a large herd. Elephants gathered here is numbering around 150-200.",
   ],
 };
 
