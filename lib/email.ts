@@ -46,3 +46,47 @@ Check-Out: ${checkOutDate} at ${checkOutTime}
     throw error;
   }
 }
+
+export async function sendBookingConfirmationToCustomer(
+  customerName: string,
+  customerEmail: string,
+  roomName: string,
+  checkIn: string,
+  checkOut: string
+) {
+  const checkInDate = checkIn.split("T")[0];
+  const checkInTime = checkIn.split("T")[1]?.substring(0, 5);
+
+  const checkOutDate = checkOut.split("T")[0];
+  const checkOutTime = checkOut.split("T")[1]?.substring(0, 5);
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: customerEmail,
+    subject: `Booking Confirmation - Scenic Cottage`,
+    text: `
+Dear ${customerName},
+
+Your booking has been confirmed!
+
+Room: ${roomName}
+Check-In: ${checkInDate} at ${checkInTime}
+Check-Out: ${checkOutDate} at ${checkOutTime}
+
+Payment will be collected at the property.
+
+Contact us: +94 74 055 8858
+
+Thank you,
+Scenic Cottage
+    `,
+  };
+
+  try {
+    const result = await transporter.sendMail(mailOptions);
+    console.log("✅ Customer email sent:", result.messageId);
+    return result;
+  } catch (error) {
+    console.error("❌ Customer email failed:", error);
+  }
+}
