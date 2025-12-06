@@ -3,7 +3,7 @@
 export const serviceGridData = [
   {
     id: 1,
-    image: "/images/Services/IMG_9962.JPG", 
+    image: "/images/Services/IMG_9962.jpg", 
     alt: "Comfortable Accomadation",
     span: "col-span-1 md:col-span-2 row-span-2", 
   },
@@ -15,7 +15,7 @@ export const serviceGridData = [
   },
   {
     id: 3,
-    image: "/images/Services/IMG_9928.JPG",
+    image: "/images/Services/IMG_9928.jpg",
     alt: "Ensuite Bathrooms",
     span: "col-span-1 row-span-2", 
   },
@@ -29,7 +29,7 @@ export const serviceGridData = [
   },
   {
     id: 4,
-    image: "/images/Services/IMG_0015.JPG",
+    image: "/images/Services/IMG_0015.jpg",
     alt: "Dining Area",
     span: "col-span-1 md:col-span-2", 
   },
@@ -41,7 +41,7 @@ export const serviceGridData = [
   },
   {
     id: 6,
-    image: "/images/Services/IMG_9890.JPG",
+    image: "/images/Services/IMG_9890.jpg",
     alt: "Perfect Coffee Moments",
     span: "col-span-1", 
   },
