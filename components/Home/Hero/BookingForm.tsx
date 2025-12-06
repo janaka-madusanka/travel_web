@@ -99,17 +99,7 @@ const BookingForm: React.FC = () => {
           />
         </div>
 
-        <div className="flex-1 min-w-[200px]">
-          <InputField
-            label="Guests"
-            type="select"
-            icon={Users}
-            options={["1 Guest", "2 Guests", "3 Guests", "4 Guests"]}
-            value={guests}
-            onChange={setGuests}
-          />
-        </div>
-
+       
         {/* Button */}
         <button
           onClick={handleCheckout}

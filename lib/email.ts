@@ -1,8 +1,8 @@
-import nodemailer from 'nodemailer';
+import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.EMAIL_PORT || '587'),
+  host: process.env.EMAIL_HOST || "smtp.gmail.com",
+  port: parseInt(process.env.EMAIL_PORT || "587"),
   secure: false,
   auth: {
     user: process.env.EMAIL_USER,
@@ -14,8 +14,16 @@ export async function sendBookingNotification(
   customerName: string,
   roomName: string,
   checkIn: string,
-  checkOut: string
+  checkOut: string,
+   customerPhone: string
 ) {
+  // Extract date and time
+  const checkInDate = checkIn.split("T")[0];
+  const checkInTime = checkIn.split("T")[1]?.substring(0, 5);
+
+  const checkOutDate = checkOut.split("T")[0];
+  const checkOutTime = checkOut.split("T")[1]?.substring(0, 5);
+
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: process.env.ADMIN_EMAIL,
@@ -24,18 +32,17 @@ export async function sendBookingNotification(
 New Booking Received
 
 Customer: ${customerName}
+Phone: ${customerPhone}
 Room: ${roomName}
-Check-In: ${checkIn}
-Check-Out: ${checkOut}
+Check-In: ${checkInDate} at ${checkInTime}
+Check-Out: ${checkOutDate} at ${checkOutTime}
     `,
   };
 
   try {
     const result = await transporter.sendMail(mailOptions);
-    console.log('✅ Email sent successfully:', result.messageId);
     return result;
   } catch (error) {
-    console.error('❌ Email sending failed:', error);
-    throw error; // This will show the error in terminal
+    throw error;
   }
 }

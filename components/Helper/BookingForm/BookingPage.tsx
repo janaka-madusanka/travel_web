@@ -25,7 +25,7 @@ import {
   Phone,
   Info,
 } from "lucide-react";
-
+import CustomAlert from "@/components/Common/CustomAlert";
 // --- Types ---
 interface BookedSlot {
   checkIn: string;
@@ -79,7 +79,7 @@ export default function BookingPage() {
     // Booking
     room: "",
     checkInDate: "",
-    checkInTime: "14:00",
+    checkInTime: "09:00",
     checkOutDate: "",
     checkOutTime: "11:00",
 
@@ -97,6 +97,17 @@ export default function BookingPage() {
   const [loadingRooms, setLoadingRooms] = useState(true);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [detectedCountry, setDetectedCountry] = useState<string>("GB");
+  const [alert, setAlert] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: "success" | "error" | "warning" | "info";
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    type: "info",
+  });
 
   // --- Initialization ---
   useEffect(() => {
@@ -161,7 +172,11 @@ export default function BookingPage() {
                 checkInDate: "",
                 checkOutDate: "",
               }));
-              alert("Selected dates are not available.");
+              showAlert(
+                "Dates Unavailable",
+                "Selected dates are not available for this room.",
+                "warning"
+              );
             }
           }
         }
@@ -207,10 +222,22 @@ export default function BookingPage() {
 
   const calculateDays = () => {
     if (!formData.checkInDate || !formData.checkOutDate) return 0;
-    const start = new Date(formData.checkInDate);
-    const end = new Date(formData.checkOutDate);
-    const diff = end.getTime() - start.getTime();
-    return Math.max(0, Math.ceil(diff / (1000 * 3600 * 24)));
+
+    const checkInDateTime = new Date(
+      `${formData.checkInDate}T${formData.checkInTime || "09:00"}:00`
+    );
+    const checkOutDateTime = new Date(
+      `${formData.checkOutDate}T${formData.checkOutTime || "11:00"}:00`
+    );
+
+    const diffMs = checkOutDateTime.getTime() - checkInDateTime.getTime();
+
+    if (diffMs <= 0) return 0;
+
+    const diffHours = diffMs / (1000 * 60 * 60);
+
+    // Calculate days: every 24 hours = 1 day, round up
+    return Math.max(1, Math.ceil(diffHours / 24));
   };
 
   const days = calculateDays();
@@ -223,7 +250,17 @@ export default function BookingPage() {
 
   const serviceCharge = (roomCost + vehicleCost) * 0.05;
   const grandTotal = roomCost + vehicleCost + serviceCharge;
+  const showAlert = (
+    title: string,
+    message: string,
+    type: "success" | "error" | "warning" | "info" = "info"
+  ) => {
+    setAlert({ isOpen: true, title, message, type });
+  };
 
+  const closeAlert = () => {
+    setAlert({ ...alert, isOpen: false });
+  };
   const isContactComplete =
     formData.firstName &&
     formData.lastName &&
@@ -251,7 +288,11 @@ export default function BookingPage() {
 
   const handleSubmit = async () => {
     if (!isContactComplete || !isBookingComplete) {
-      alert("Please complete all required fields");
+      showAlert(
+        "Incomplete Form",
+        "Please complete all required fields before booking.",
+        "warning"
+      );
       return;
     }
 
@@ -276,7 +317,7 @@ export default function BookingPage() {
         customer: customerData,
         roomId: Number(formData.room),
         checkIn: `${formData.checkInDate}T${
-          formData.checkInTime || "14:00"
+          formData.checkInTime || "09:00"
         }:00.000Z`,
         checkOut: `${formData.checkOutDate}T${
           formData.checkOutTime || "11:00"
@@ -312,11 +353,19 @@ export default function BookingPage() {
         throw new Error(result.error || "Booking failed");
       }
 
-      alert("Booking completed successfully!");
+      showAlert(
+        "Booking Confirmed! 🎉",
+        "Your booking has been completed successfully. We look forward to hosting you!",
+        "success"
+      );
       router.push("/");
     } catch (error: any) {
       console.error("Booking error:", error);
-      alert(error.message || "Failed to create booking");
+      showAlert(
+        "Booking Failed",
+        error.message || "Failed to create booking. Please try again.",
+        "error"
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -331,6 +380,7 @@ export default function BookingPage() {
     <AnimatePresence>
       {!isExiting && (
         <motion.div
+        key="booking-modal"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -561,7 +611,9 @@ export default function BookingPage() {
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 min-h-[100px] overflow-y-auto custom-scrollbar border border-transparent">
                             {loadingRooms ? (
                               <div className="col-span-full flex items-center justify-center h-20">
-                                <p className="text-sm text-gray-400">Loading rooms...</p>
+                                <p className="text-sm text-gray-400">
+                                  Loading rooms...
+                                </p>
                               </div>
                             ) : rooms.length > 0 ? (
                               rooms.map((room: any) => (
@@ -599,7 +651,9 @@ export default function BookingPage() {
                             ) : (
                               // Fixed: Added explicit empty state message
                               <div className="col-span-full flex items-center justify-center h-20 border-2 border-dashed border-gray-200 rounded-xl">
-                                <p className="text-sm text-gray-400">No rooms available.</p>
+                                <p className="text-sm text-gray-400">
+                                  No rooms available.
+                                </p>
                               </div>
                             )}
                           </div>
@@ -663,10 +717,26 @@ export default function BookingPage() {
                                     2,
                                     "0"
                                   );
-                                  handleChange(
-                                    "checkOutDate",
-                                    `${year}-${month}-${day}`
-                                  );
+                                  const selectedDate = `${year}-${month}-${day}`;
+
+                                  // Validate: if same day selected, check times
+                                  if (selectedDate === formData.checkInDate) {
+                                    const checkInTime =
+                                      formData.checkInTime || "09:00";
+                                    const checkOutTime =
+                                      formData.checkOutTime || "11:00";
+
+                                    if (checkOutTime <= checkInTime) {
+                                      showAlert(
+                                        "Invalid Time Range",
+                                        "Check-out time must be after check-in time on the same day, or select a later date.",
+                                        "warning"
+                                      );
+                                      return;
+                                    }
+                                  }
+
+                                  handleChange("checkOutDate", selectedDate);
                                 } else {
                                   handleChange("checkOutDate", "");
                                 }
@@ -730,12 +800,34 @@ export default function BookingPage() {
                                       )
                                     : null
                                 }
-                                onChange={(date) =>
-                                  handleChange(
-                                    "checkOutTime",
-                                    date ? date.toTimeString().slice(0, 5) : ""
-                                  )
-                                }
+                                onChange={(date) => {
+                                  if (date) {
+                                    const timeStr = date
+                                      .toTimeString()
+                                      .slice(0, 5);
+
+                                    // Validate: if same day, check-out time must be after check-in time
+                                    if (
+                                      formData.checkInDate ===
+                                      formData.checkOutDate
+                                    ) {
+                                      const checkInTime =
+                                        formData.checkInTime || "09:00";
+                                      if (timeStr <= checkInTime) {
+                                        showAlert(
+                                          "Invalid Time",
+                                          "Check-out time must be after check-in time on the same day.",
+                                          "warning"
+                                        );
+                                        return;
+                                      }
+                                    }
+
+                                    handleChange("checkOutTime", timeStr);
+                                  } else {
+                                    handleChange("checkOutTime", "");
+                                  }
+                                }}
                                 showTimeSelect
                                 showTimeSelectOnly
                                 timeIntervals={15}
@@ -864,7 +956,7 @@ export default function BookingPage() {
                 <h2 className="text-xl md:text-2xl font-serif font-bold border-b border-green-800 pb-4 mb-4">
                   Your Stay
                 </h2>
-                
+
                 {/* Fixed: Removed overflow-y-auto to stop scrolling */}
                 <div className="flex-1 flex flex-col gap-3">
                   {selectedRoom ? (
@@ -881,7 +973,7 @@ export default function BookingPage() {
                           className="object-cover w-full h-full"
                         />
                       </div>
-                      
+
                       {/* Room Title & Capacity */}
                       <div className="shrink-0">
                         <p className="font-bold text-xl font-serif leading-tight">
@@ -928,7 +1020,7 @@ export default function BookingPage() {
                           <span>Service Charge (5%)</span>
                           <span>${serviceCharge.toFixed(2)}</span>
                         </div>
-                        
+
                         <div className="flex justify-between text-xl font-bold text-white pt-2 border-t border-green-800 mt-1">
                           <span>Total</span>
                           <span>${grandTotal.toFixed(2)}</span>
@@ -937,9 +1029,15 @@ export default function BookingPage() {
                         {/* Confirm Button */}
                         <button
                           onClick={handleSubmit}
-                          disabled={isSubmitting || !isContactComplete || !isBookingComplete}
+                          disabled={
+                            isSubmitting ||
+                            !isContactComplete ||
+                            !isBookingComplete
+                          }
                           className={`w-full mt-4 py-4 font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                            isContactComplete && isBookingComplete && !isSubmitting
+                            isContactComplete &&
+                            isBookingComplete &&
+                            !isSubmitting
                               ? "bg-white text-[#003b14] hover:bg-green-50 active:scale-95 cursor-pointer"
                               : "bg-green-900/50 text-green-200/50 cursor-not-allowed"
                           }`}
@@ -948,11 +1046,11 @@ export default function BookingPage() {
                           <CheckCircle size={18} />
                         </button>
 
-                         {/* Validation Message */}
-                         {(!isContactComplete || !isBookingComplete) && (
-                           <p className="text-center text-[10px] text-red-300 mt-1 font-medium bg-red-900/20 py-1 rounded-lg">
-                             * Please complete all fields.
-                           </p>
+                        {/* Validation Message */}
+                        {(!isContactComplete || !isBookingComplete) && (
+                          <p className="text-center text-[10px] text-red-300 mt-1 font-medium bg-red-900/20 py-1 rounded-lg">
+                            * Please complete all fields.
+                          </p>
                         )}
                       </div>
                     </div>
@@ -1008,6 +1106,15 @@ export default function BookingPage() {
           </motion.div>
         </motion.div>
       )}
+      
+          <CustomAlert
+            key="custom-alert"
+      isOpen={alert.isOpen}
+      onClose={closeAlert}
+      title={alert.title}
+      message={alert.message}
+      type={alert.type}
+    />
     </AnimatePresence>
   );
 }
