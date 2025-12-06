@@ -54,7 +54,7 @@ model Room {
   cost      Float
   offer     Float?
   size      String
-  capacity    Int      @default(1)  // ✅ add default
+  capacity  Int      @default(1)
 
   // basic amenities
   ac           ACType
@@ -124,8 +124,8 @@ model Kitchen {
 model Customer {
   id            Int       @id @default(autoincrement())
   name          String
-  passportNumber String
-  nicNumber     String
+  passportNumber String?  @unique
+  nicNumber      String?  @unique
   address       String
   contactNumber String
 

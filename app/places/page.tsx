@@ -8,13 +8,32 @@ import Location04 from "@/components/Places/Locations/location04";
 import Location05 from "@/components/Places/Locations/location05";
 import Location06 from "@/components/Places/Locations/location06";
 import Location07 from "@/components/Places/Locations/location07";
+import Location08 from "@/components/Places/Locations/location08";
 import Hero from "@/components/Places/Hero/Hero"; 
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
+//===================== INTERFACES =====================//
+interface LocationType {
+  id: string;
+  name: string;
+  title: string;
+  subtitle: string;
+  images: string[];
+  description: string[];
+}
+
+interface LocationSliderProps {
+  images: string[];
+}
+
+interface LocationDetailProps {
+  location: LocationType;
+}
+
 //===================== COMPONENTS (Slider + Detail) =====================//
 
-function LocationSlider({ images }) {
+function LocationSlider({ images }: LocationSliderProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const nextSlide = () =>
@@ -25,7 +44,7 @@ function LocationSlider({ images }) {
   React.useEffect(() => {
     const timer = setTimeout(nextSlide, 5000);
     return () => clearTimeout(timer);
-  }, [currentIndex]);
+  }, [currentIndex, images.length]);
 
   return (
     <div className="relative w-full overflow-hidden rounded-2xl shadow-2xl group">
@@ -74,7 +93,7 @@ function LocationSlider({ images }) {
   );
 }
 
-function LocationDetail({ location }) {
+function LocationDetail({ location }: LocationDetailProps) {
   return (
     <div className="transition-all duration-500 transform opacity-100 translate-y-0">
       <div className="text-center mb-12 space-y-4">
@@ -105,7 +124,7 @@ function LocationDetail({ location }) {
 //===================== PLACES PAGE =====================//
 
 export default function PlacesPage() {
-  const locations = [
+  const locations: LocationType[] = [
     Location01,
     Location02,
     Location03,
@@ -113,6 +132,7 @@ export default function PlacesPage() {
     Location05,
     Location06,
     Location07,
+    Location08,
   ];
 
   const [activeId, setActiveId] = useState(locations[0].id);
@@ -126,12 +146,12 @@ export default function PlacesPage() {
 
       {/* Sticky navbar */}
       <nav className="bg-white sticky top-0 z-50 mt-10 ">
-        <div className="max-w-7xl mx-auto px-4 py-2 flex flex-wrap justify-center gap-4">
+        <div className="max-w-7xl mx-auto px-4 py-2 flex flex-wrap justify-center gap-2 md:gap-4 ">
           {locations.map((l) => (
             <button
               key={l.id}
               onClick={() => setActiveId(l.id)}
-              className={`px-4 py-2 font-semibold text-2xl ${
+              className={`px-2 py-1 md:px-4 md:py-2 font-semibold text-sm md:text-2xl cursor-pointer ${
                 activeId === l.id
                   ? "text-green-700"
                   : "text-gray-500 hover:text-gray-900"

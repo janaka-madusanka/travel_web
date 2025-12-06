@@ -36,7 +36,7 @@ export default function BookingCalendarPage() {
       data.bookings.forEach((b: Booking) => {
         const start = new Date(b.checkIn);
         const end = new Date(b.checkOut);
-        let curr = new Date(start);
+        const curr = new Date(start);
         while (curr <= end) {
           const key = curr.toISOString().split("T")[0]; // YYYY-MM-DD
           dateCount[key] = (dateCount[key] || 0) + 1;
