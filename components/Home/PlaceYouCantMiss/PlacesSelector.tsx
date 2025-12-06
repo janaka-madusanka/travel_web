@@ -13,38 +13,40 @@ export default function PlacesSelector({ places }: Props) {
   const [activePlace, setActivePlace] = useState<Place>(places[0]);
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 px-4 md:px-12 py-8 max-w-7xl mx-auto">
+    <div className="flex flex-col lg:flex-row items-start justify-center gap-12 px-6 md:px-16 py-16 max-w-7xl mx-auto">
       
-      {/* Left Side: List of Places */}
-      <div className="w-full lg:w-1/3 flex flex-col gap-2">
-        {places.map((place) => (
-          <button
-            key={place.id}
-            onClick={() => setActivePlace(place)}
-            // Reverted text size: text-lg md:text-xl
-            className={`text-left w-full px-4 py-3 rounded-xl transition-all duration-200 border-l-4 text-lg md:text-xl font-medium ${
-              activePlace.id === place.id
-                ? "border-green-600 bg-green-50 text-green-800 font-bold shadow-sm"
-                : "border-transparent text-gray-600 hover:bg-gray-50 hover:pl-5"
-            }`}
-          >
-            {place.name}
-          </button>
-        ))}
+      {/* Left Side: Clean Text List */}
+      <div className="w-full lg:w-1/3 flex flex-col gap-1">
+        {places.map((place) => {
+          const isActive = activePlace.id === place.id;
+          
+          return (
+            <button
+              key={place.id}
+              onClick={() => setActivePlace(place)}
+              className={`text-left w-full py-3 px-4 transition-all duration-200 border-l-4 text-lg ${
+                isActive
+                  ? "border-green-600 text-green-800 font-bold pl-6" // Active: Bold + Indent
+                  : "border-transparent text-gray-500 hover:text-green-600 hover:pl-6 font-medium" // Inactive: Grey
+              }`}
+            >
+              {place.name}
+            </button>
+          );
+        })}
 
         <Link
           href="/places"
-          className="mt-6 inline-block text-green-700 font-semibold hover:underline hover:text-green-800 transition-colors px-4"
+          className="mt-8 ml-4 text-green-700 font-bold text-lg hover:underline hover:text-green-900 transition-colors w-fit"
         >
-          Explore More Locations →
+          Explore More Locations ➝
         </Link>
       </div>
 
-      {/* Right Side: Map */}
-      <div className="w-full lg:w-2/3">
+      {/* Right Side: Map + Card (Unchanged) */}
+      <div className="w-full lg:w-2/3 sticky top-8">
         <PlaceMapCard place={activePlace} />
       </div>
-      
     </div>
   );
 }
