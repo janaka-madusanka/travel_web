@@ -16,6 +16,13 @@ export async function sendBookingNotification(
   checkIn: string,
   checkOut: string
 ) {
+  // Extract date and time
+  const checkInDate = checkIn.split('T')[0];
+  const checkInTime = checkIn.split('T')[1]?.substring(0, 5);
+  
+  const checkOutDate = checkOut.split('T')[0];
+  const checkOutTime = checkOut.split('T')[1]?.substring(0, 5);
+
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: process.env.ADMIN_EMAIL,
@@ -25,8 +32,8 @@ New Booking Received
 
 Customer: ${customerName}
 Room: ${roomName}
-Check-In: ${checkIn}
-Check-Out: ${checkOut}
+Check-In: ${checkInDate} at ${checkInTime}
+Check-Out: ${checkOutDate} at ${checkOutTime}
     `,
   };
 
@@ -36,6 +43,6 @@ Check-Out: ${checkOut}
     return result;
   } catch (error) {
     console.error('❌ Email sending failed:', error);
-    throw error; // This will show the error in terminal
+    throw error;
   }
 }

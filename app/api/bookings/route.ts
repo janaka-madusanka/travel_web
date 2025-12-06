@@ -1,6 +1,7 @@
 // app/api/bookings/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { sendBookingNotification } from '@/lib/email';
 
 // ---------------- CREATE BOOKING ----------------
 export async function POST(req: NextRequest) {
@@ -125,6 +126,13 @@ export async function POST(req: NextRequest) {
         otherDetails: true,
       },
     });
+
+    await sendBookingNotification(
+      customer.name,
+      roomExists.name,
+      checkIn,
+      checkOut
+    );
 
     return NextResponse.json({
       message: "Booking created successfully",
