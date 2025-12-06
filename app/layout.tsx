@@ -11,8 +11,8 @@ const font = Poppins({
 })
 
 export const metadata: Metadata = {
-  title: "Travel for you",
-  description: "Travel Landing Page",
+  title: "Scenic Cottage",
+  description: "Your Travel Destination"
 };
 
 export default function RootLayout({

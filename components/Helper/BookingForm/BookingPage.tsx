@@ -102,11 +102,13 @@ export default function BookingPage() {
     title: string;
     message: string;
     type: "success" | "error" | "warning" | "info";
+    onCloseCallback?: () => void;
   }>({
     isOpen: false,
     title: "",
     message: "",
     type: "info",
+    onCloseCallback: undefined,
   });
 
   // --- Initialization ---
@@ -253,13 +255,20 @@ export default function BookingPage() {
   const showAlert = (
     title: string,
     message: string,
-    type: "success" | "error" | "warning" | "info" = "info"
+    type: "success" | "error" | "warning" | "info" = "info",
+    onCloseCallback?: () => void
   ) => {
-    setAlert({ isOpen: true, title, message, type });
+    setAlert({ isOpen: true, title, message, type, onCloseCallback });
   };
 
   const closeAlert = () => {
-    setAlert({ ...alert, isOpen: false });
+    const callback = alert.onCloseCallback;
+    setAlert({ ...alert, isOpen: false, onCloseCallback: undefined });
+
+    // Execute callback after closing if it exists
+    if (callback) {
+      setTimeout(() => callback(), 300);
+    }
   };
   const isContactComplete =
     formData.firstName &&
@@ -308,7 +317,6 @@ export default function BookingPage() {
           formData.passportType === "NIC" ? formData.passportNumber : "",
         address: formData.country || "N/A",
         contactNumber: formData.contactNumber,
-     
       };
 
       // 2. Prepare Booking Payload
@@ -330,8 +338,6 @@ export default function BookingPage() {
           vehicleSupport: formData.vehicleNeeded ? "YES" : "NO",
           meal: formData.meal ? "YES" : "NO",
           guide: formData.guide ? "YES" : "NO",
-
-       
         };
       }
 
@@ -349,10 +355,10 @@ export default function BookingPage() {
 
       showAlert(
         "Booking Confirmed! 🎉",
-        "Your booking has been completed successfully. We look forward to hosting you!",
-        "success"
+        "Your booking has been completed successfully. We look forward to hosting you! A confirmation email has been sent to your provided email address.",
+        "success",
+        () => router.push("/")
       );
-      router.push("/");
     } catch (error: any) {
       console.error("Booking error:", error);
       showAlert(
