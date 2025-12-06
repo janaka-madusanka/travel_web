@@ -25,7 +25,7 @@ import {
   Phone,
   Info,
 } from "lucide-react";
-
+import CustomAlert from "@/components/Common/CustomAlert";
 // --- Types ---
 interface BookedSlot {
   checkIn: string;
@@ -97,6 +97,17 @@ export default function BookingPage() {
   const [loadingRooms, setLoadingRooms] = useState(true);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [detectedCountry, setDetectedCountry] = useState<string>("GB");
+  const [alert, setAlert] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: "success" | "error" | "warning" | "info";
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    type: "info",
+  });
 
   // --- Initialization ---
   useEffect(() => {
@@ -161,7 +172,11 @@ export default function BookingPage() {
                 checkInDate: "",
                 checkOutDate: "",
               }));
-              alert("Selected dates are not available.");
+              showAlert(
+                "Dates Unavailable",
+                "Selected dates are not available for this room.",
+                "warning"
+              );
             }
           }
         }
@@ -235,7 +250,17 @@ export default function BookingPage() {
 
   const serviceCharge = (roomCost + vehicleCost) * 0.05;
   const grandTotal = roomCost + vehicleCost + serviceCharge;
+  const showAlert = (
+    title: string,
+    message: string,
+    type: "success" | "error" | "warning" | "info" = "info"
+  ) => {
+    setAlert({ isOpen: true, title, message, type });
+  };
 
+  const closeAlert = () => {
+    setAlert({ ...alert, isOpen: false });
+  };
   const isContactComplete =
     formData.firstName &&
     formData.lastName &&
@@ -263,7 +288,11 @@ export default function BookingPage() {
 
   const handleSubmit = async () => {
     if (!isContactComplete || !isBookingComplete) {
-      alert("Please complete all required fields");
+      showAlert(
+        "Incomplete Form",
+        "Please complete all required fields before booking.",
+        "warning"
+      );
       return;
     }
 
@@ -324,11 +353,19 @@ export default function BookingPage() {
         throw new Error(result.error || "Booking failed");
       }
 
-      alert("Booking completed successfully!");
+      showAlert(
+        "Booking Confirmed! 🎉",
+        "Your booking has been completed successfully. We look forward to hosting you!",
+        "success"
+      );
       router.push("/");
     } catch (error: any) {
       console.error("Booking error:", error);
-      alert(error.message || "Failed to create booking");
+      showAlert(
+        "Booking Failed",
+        error.message || "Failed to create booking. Please try again.",
+        "error"
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -343,6 +380,7 @@ export default function BookingPage() {
     <AnimatePresence>
       {!isExiting && (
         <motion.div
+        key="booking-modal"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -689,8 +727,10 @@ export default function BookingPage() {
                                       formData.checkOutTime || "11:00";
 
                                     if (checkOutTime <= checkInTime) {
-                                      alert(
-                                        "Check-out time must be after check-in time on the same day, or select a later date."
+                                      showAlert(
+                                        "Invalid Time Range",
+                                        "Check-out time must be after check-in time on the same day, or select a later date.",
+                                        "warning"
                                       );
                                       return;
                                     }
@@ -774,8 +814,10 @@ export default function BookingPage() {
                                       const checkInTime =
                                         formData.checkInTime || "09:00";
                                       if (timeStr <= checkInTime) {
-                                        alert(
-                                          "Check-out time must be after check-in time on the same day."
+                                        showAlert(
+                                          "Invalid Time",
+                                          "Check-out time must be after check-in time on the same day.",
+                                          "warning"
                                         );
                                         return;
                                       }
@@ -1064,6 +1106,15 @@ export default function BookingPage() {
           </motion.div>
         </motion.div>
       )}
+      
+          <CustomAlert
+            key="custom-alert"
+      isOpen={alert.isOpen}
+      onClose={closeAlert}
+      title={alert.title}
+      message={alert.message}
+      type={alert.type}
+    />
     </AnimatePresence>
   );
 }
