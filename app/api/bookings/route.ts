@@ -131,7 +131,8 @@ export async function POST(req: NextRequest) {
       customer.name,
       roomExists.name,
       checkIn,
-      checkOut
+      checkOut,
+      customer.contactNumber
     );
 
     return NextResponse.json({
