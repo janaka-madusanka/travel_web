@@ -4,7 +4,9 @@ import React from "react";
 import { FaPhoneAlt, FaTiktok, FaFacebookF, FaInstagram } from "react-icons/fa";
 import { IoLocationSharp } from "react-icons/io5";
 import { motion } from "framer-motion";
-import { usePathname } from "next/navigation"; // <-- added
+import { usePathname } from "next/navigation"; 
+import { navLinks } from "@/constant/navLinks";
+import { socialLinks } from "@/constant/socialLinks";
 
 const Footer: React.FC = () => {
   const pathname = usePathname();
@@ -50,37 +52,62 @@ const Footer: React.FC = () => {
       <div className="w-10/12 mx-auto h-[1px] bg-gray-300 my-6"></div>
 
       {/* Bottom Row */}
-      <div className="flex flex-col md:flex-row items-center justify-between w-10/12 mx-auto text-sm md:text-base text-gray-600 gap-4 md:gap-0">
-        {/* Copyright */}
-        <p>© 2026 Scenic Cottage</p>
+<div className="flex flex-col md:flex-row items-center justify-between w-10/12 mx-auto text-sm md:text-base text-gray-600 gap-4 md:gap-0">
 
-        {/* Links */}
-        <div className="flex gap-6 text-[#007326]">
-          {["Home", "Booking", "Nearby Places", "About Us"].map((link, idx) => (
-            <motion.a
-              key={idx}
-              href="#"
-              whileHover={{ y: -2, color: "#005a1b" }}
-              className="cursor-pointer transition-colors"
-            >
-              {link}
-            </motion.a>
-          ))}
-        </div>
+  {/* Social Icons */}
+<div className="flex gap-3 order-1 md:order-3">
+  {socialLinks.map((social) => {
+    const Icon = social.Icon;
+    return (
+      <motion.a
+        key={social.id}
+        href={social.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        whileHover={{ scale: 1.2, y: -2 }}
+        className="p-2 border border-gray-200 rounded-full cursor-pointer"
+      >
+        <Icon className="text-[#007326]" />
+      </motion.a>
+    );
+  })}
+</div>
 
-        {/* Social Icons */}
-        <div className="flex gap-3">
-          {[FaTiktok, FaFacebookF, FaInstagram].map((Icon, idx) => (
-            <motion.div
-              key={idx}
-              whileHover={{ scale: 1.2, y: -2 }}
-              className="p-2 border border-gray-200 rounded-full cursor-pointer"
-            >
-              <Icon className="text-[#007326]" />
-            </motion.div>
-          ))}
-        </div>
-      </div>
+  {/* Links */}
+  <div className="flex gap-6 text-[#007326] order-2 md:order-2 ">
+    {navLinks.slice(0, 5).map((link) => (
+      <motion.a
+        key={link.id}
+        href={link.url}
+        whileHover={{ y: -2, color: "#005a1b" }}
+        className="cursor-pointer transition-colors"
+      >
+        {link.label}
+      </motion.a>
+    ))}
+  </div>
+
+  {/* Copyright + Credits */}
+  <div className="py-6 text-center text-gray-600 text-sm md:text-base order-3 md:order-1">
+ <p>
+  © 2026 Scenic Cottage.<br />
+  All rights reserved.
+</p>
+
+    <p className="mt-1 text-xs sm:text-sm text-gray-500">
+      Crafted with care by{" "}
+      <a
+        href="https://pentarixlabs.com"
+        target="_blank"
+        className="underline hover:text-[#005a1b] transition-colors"
+      >
+        Pentarix Labs
+      </a>
+    </p>
+  </div>
+
+</div>
+
     </footer>
   );
 };

@@ -86,7 +86,7 @@ export default function BookingForm({
     bookedDates
       .filter((b: any) => b.roomId === roomId)
       .forEach((range: any) => {
-        let current = new Date(range.start);
+        const current = new Date(range.start);
         const end = new Date(range.end);
         while (current <= end) {
           dates.push(new Date(current));
