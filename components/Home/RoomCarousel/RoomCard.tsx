@@ -91,7 +91,7 @@ const RoomDataSection: React.FC<{ room: BackendRoom }> = ({ room }) => {
   // ✅ COMPLETE ICON MAPPING
   // Checks every possible backend key and assigns an icon
   const allFeatures = [
-    { key: 'ac', icon: <FaSnowflake />, label: "AC" },
+    { key: 'ac', icon: <FaSnowflake />, label: "A/C" },
     { key: 'wifi', icon: <FaWifi />, label: "WiFi" },
     { key: 'tv', icon: <FaTv />, label: "TV" },
     { key: 'fan', icon: <FaFan />, label: "Fan" },
