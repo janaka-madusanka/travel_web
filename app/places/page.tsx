@@ -10,6 +10,7 @@ import Location06 from "@/components/Places/Locations/location06";
 import Location07 from "@/components/Places/Locations/location07";
 import Location08 from "@/components/Places/Locations/location08";
 import Hero from "@/components/Places/Hero/Hero"; 
+import Image from "next/image";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -54,7 +55,7 @@ function LocationSlider({ images }: LocationSliderProps) {
       >
         {images.map((img, idx) => (
           <div key={idx} className="w-full flex-shrink-0">
-            <img
+            <Image
               src={img}
               alt="Location View"
               className="w-full h-[400px] md:h-[500px] object-cover"

@@ -1,6 +1,8 @@
 "use client";
 import React from "react";
 import { aboutUsImageGrid } from "@/data/aboutUsImageGrid";
+import Image from "next/image";
+
 
 interface ImageCardProps {
   src: string;
@@ -17,7 +19,7 @@ const ImageCard: React.FC<ImageCardProps> = ({ src, alt, className = "", index }
         animation: `fadeInUp 0.6s ease-out ${index ? index * 0.1 : 0}s backwards`,
       }}
     >
-      <img src={src} alt={alt} className="w-full h-full object-cover" />
+      <Image src={src} alt={alt} className="w-full h-full object-cover" />
     </div>
   );
 };
