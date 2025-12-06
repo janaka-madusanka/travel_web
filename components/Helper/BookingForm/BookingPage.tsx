@@ -308,13 +308,13 @@ export default function BookingPage() {
           formData.passportType === "NIC" ? formData.passportNumber : "",
         address: formData.country || "N/A",
         contactNumber: formData.contactNumber,
-        // Note: Your backend schema (Customer model) doesn't have email/country,
-        // so we don't send them or they get ignored. If you update Prisma, add them here.
+     
       };
 
       // 2. Prepare Booking Payload
       const payload: any = {
         customer: customerData,
+        customerEmail: formData.email,
         roomId: Number(formData.room),
         checkIn: `${formData.checkInDate}T${
           formData.checkInTime || "09:00"
@@ -325,19 +325,13 @@ export default function BookingPage() {
       };
 
       // 3. Add Other Details (Matches your Prisma Schema)
-      // Only add 'otherDetails' if at least one option is selected
       if (formData.vehicleNeeded || formData.meal || formData.guide) {
         payload.otherDetails = {
           vehicleSupport: formData.vehicleNeeded ? "YES" : "NO",
           meal: formData.meal ? "YES" : "NO",
           guide: formData.guide ? "YES" : "NO",
 
-          /*  // Only include vehicle specifics if vehicleSupport is YES
-          ...(formData.vehicleNeeded && {
-            vehicleType: formData.vehicleType, // BIKE, CAR, VAN, SUV
-            vehicleNumber: 1, // Hardcoded as per your request (no quantity input)
-            driver: formData.driver ? "YES" : "NO",
-          }), */
+       
         };
       }
 
@@ -380,7 +374,7 @@ export default function BookingPage() {
     <AnimatePresence>
       {!isExiting && (
         <motion.div
-        key="booking-modal"
+          key="booking-modal"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -1106,15 +1100,15 @@ export default function BookingPage() {
           </motion.div>
         </motion.div>
       )}
-      
-          <CustomAlert
-            key="custom-alert"
-      isOpen={alert.isOpen}
-      onClose={closeAlert}
-      title={alert.title}
-      message={alert.message}
-      type={alert.type}
-    />
+
+      <CustomAlert
+        key="custom-alert"
+        isOpen={alert.isOpen}
+        onClose={closeAlert}
+        title={alert.title}
+        message={alert.message}
+        type={alert.type}
+      />
     </AnimatePresence>
   );
 }
