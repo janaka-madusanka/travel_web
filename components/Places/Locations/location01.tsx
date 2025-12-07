@@ -4,9 +4,9 @@ const location01 = {
   title: 'Sigiriya – The Lion Rock',
   subtitle: 'A UNESCO World Heritage Fortress Rising Above the Heart of Sri Lanka',
   images: [
-    '/images/places/loc1/li1.jpg',
-    '/images/places/loc1/li2.jpg',
-    '/images/places/loc1/li3.jpg',
+    '/images/Places/loc1/li1.jpg',
+    '/images/Places/loc1/li2.jpg',
+    '/images/Places/loc1/li3.jpg',
   ],
   description: [
     "Sigiriya, also known as The Lion Rock, is one of Sri Lanka’s most iconic landmarks. This ancient rock fortress is located in the Cultural Triangle and stands majestically above the surrounding jungles. Built during the reign of King Kashyapa in the 5th century, the site is both historically significant and visually breathtaking.",
