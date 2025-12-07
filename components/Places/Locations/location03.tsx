@@ -4,9 +4,9 @@ const location03 = {
   title: 'Dambulla Cave Temple',
   subtitle: 'A Sacred Pilgrimage Site for 22 Centuries',
   images: [
-    '/images/places/loc3/li1.jpg',
-    '/images/places/loc3/li2.jpg',
-    '/images/places/loc3/li3.jpg',
+    '/images/Places/loc3/li1.jpg',
+    '/images/Places/loc3/li2.jpg',
+    '/images/Places/loc3/li3.jpg',
   ],
   description: [
     "The Dambulla Cave Temple is the largest and best-preserved cave temple complex in Sri Lanka. The rock towers 160 meters over the surrounding plains. There are more than 80 documented caves in the surrounding area.",

@@ -1,5 +1,6 @@
 // path: app/services/page.tsx
 import React from 'react';
+import Image from 'next/image';
 import { servicesData } from '@/data/services';
 import ServiceCard from '@/components/Services/ServiceCard';
 // import ResponsiveNav from '@/components/Helper/Navbar/ResponsiveNav'; // Uncomment if needed locally
@@ -14,12 +15,15 @@ const ServicesPage = () => {
       
       {/* Hero Section */}
       <div className="relative h-screen flex items-center justify-center">
-        <div 
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url('/images/Services/service-hero.jpg')" }}
-        >
+        <Image 
+            src="/images/Services/service-hero.jpg"
+            alt="Services Hero"
+            fill
+            priority // ⚡ Loads immediately
+            className="object-cover object-center"
+            quality={90}
+          />
           <div className="absolute inset-0 bg-black/50"></div>
-        </div>
         <div className="relative z-10 text-center px-4 max-w-4xl mx-auto pt-[10vh]">
           <p className="text-white/90 text-sm sm:text-base font-bold uppercase tracking-[0.3em] mb-6 animate-fadeIn">
             Indulge & Explore
