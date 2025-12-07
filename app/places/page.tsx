@@ -149,7 +149,7 @@ export default function PlacesPage() {
       <Hero />
 
       {/* Sticky navbar */}
-      <nav className="bg-white sticky top-0 z-50 mt-10 ">
+      <nav className="bg-white  z-50 mt-10 ">
         <div className="max-w-7xl mx-auto px-4 py-2 flex flex-wrap justify-center gap-2 md:gap-4 ">
           {locations.map((l) => (
             <button
