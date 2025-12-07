@@ -1,42 +1,42 @@
 export const aboutUsImageGrid = [
   {
     id: 1,
-    name: "Private Cabana",
-    image: "/images/About/grid1.jpg",
+    name: "Dining Area",
+    image: "/images/About/grid1.JPG",
   },
   {
     id: 2,
-    name: "Outdoor Pool",
-    image: "/images/About/grid2.jpg",
+    name: "Coffee Time",
+    image: "/images/About/grid2.JPG",
   },
   {
     id: 3,
-    name: "Beautiful Nature",
-    image: "/images/About/grid3.jpg",
+    name: "Enjoy the Night",
+    image: "/images/About/grid3.JPG",
   },
   {
     id: 4,
-    name: "Luxury Rooms",
-    image: "/images/About/grid4.jpg",
+    name: "Morning Breakfast",
+    image: "/images/About/grid4.JPG",
   },
   {
     id: 5,
-    name: "Authentic Sri Lankan Food",
-    image: "/images/About/grid5.jpg",
+    name: "Luxury Rooms",
+    image: "/images/About/grid5.JPG",
   },
   {
     id: 6,
-    name: "Relaxing Environment",
-    image: "/images/About/grid6.jpg",
+    name: "Hygiene Standards",
+    image: "/images/About/grid6.JPG",
   },
   {
     id: 7,
-    name: "Garden Views",
-    image: "/images/About/grid7.jpg",
+    name: "Comfortable Stay",
+    image: "/images/About/grid7.JPG",
   },
   {
     id: 8,
     name: "Evening Vibes",
-    image: "/images/About/grid8.jpg",
+    image: "/images/About/grid8.JPG",
   },
 ];

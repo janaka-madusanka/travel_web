@@ -3,7 +3,7 @@
 export const serviceGridData = [
   {
     id: 1,
-    image: "/images/Services/IMG_9962.jpg", 
+    image: "/images/Services/IMG_9962.JPG", 
     alt: "Comfortable Accomadation",
     span: "col-span-1 md:col-span-2 row-span-2", 
   },
