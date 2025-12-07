@@ -16,11 +16,11 @@ const PhilosophySection = () => {
 
   // 3. Define Color Transforms based on scroll position (0 to 1)
   
-  // Title: Starts Gray -> Turns White (Center) -> Turns Orange (End)
+  // Title: Starts Gray -> Turns White (Center) -> Turns Green (End)
   const titleColor = useTransform(
     scrollYProgress,
     [0.2, 0.5, 0.8], 
-    ["#6b7280", "#ffffff", "#ea580c"] // Tailwind colors: gray-500 -> white -> orange-600
+    ["#6b7280", "#ffffff", "#8fce00"] // Tailwind colors: gray-500 -> white -> green
   );
 
   // Description: Starts Dark -> Turns Light Gray
@@ -40,7 +40,7 @@ const PhilosophySection = () => {
         {/* Text Side */}
         <div className="w-full lg:w-1/2 z-10">
           <motion.p 
-            className="text-orange-400 font-bold uppercase tracking-widest text-sm mb-4"
+            className="text-[#007326] font-bold uppercase tracking-widest text-sm mb-4"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}

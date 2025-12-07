@@ -15,7 +15,7 @@ const AmenitiesSection = () => {
       <div className="w-[90%] md:w-[85%] xl:w-[75%] mx-auto relative z-10">
         {/* ... rest of your code stays exactly the same ... */}
         <div className="text-center mb-16">
-          <p className="text-orange-600 font-bold uppercase tracking-widest text-sm mb-3">
+          <p className="text-[#007326] font-bold uppercase tracking-widest text-sm mb-3">
             Everything You Need
           </p>
           <h2 className="text-4xl md:text-5xl font-serif text-gray-900 mb-6">
@@ -39,7 +39,7 @@ const AmenitiesSection = () => {
             >
               {/* Icon Header */}
               <div className="flex items-center gap-4 mb-6">
-                <div className="w-12 h-12 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-xl group-hover:bg-orange-600 group-hover:text-white transition-colors duration-300">
+                <div className="w-12 h-12 rounded-full bg-[#D1E7DD] text-[#007326] flex items-center justify-center text-xl group-hover:bg-[#007326] group-hover:text-white transition-colors duration-300">
                   <section.icon />
                 </div>
                 <h3 className="text-xl font-serif font-bold text-gray-900">
@@ -51,7 +51,7 @@ const AmenitiesSection = () => {
               <ul className="space-y-3">
                 {section.items.map((item, i) => (
                   <li key={i} className="flex items-start gap-3 text-gray-600 text-sm">
-                    <span className="w-1.5 h-1.5 rounded-full bg-orange-400 mt-2 flex-shrink-0" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#007326] mt-2 flex-shrink-0" />
                     <span className="leading-relaxed">{item}</span>
                   </li>
                 ))}
