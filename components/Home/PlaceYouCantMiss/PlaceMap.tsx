@@ -20,7 +20,9 @@ interface Props {
 }
 
 const PlaceMap: React.FC<Props> = ({ place }) => {
-  const mapSrc = `https://maps.google.com/maps?q=${place.lat},${place.lng}&t=m&z=14&output=embed&iwloc=near`;
+  // We use &iwloc=near to center the pin.
+  // We use &z=15 for a slightly closer look suitable for the bottom-pin layout.
+  const mapSrc = `https://maps.google.com/maps?q=${place.lat},${place.lng}&t=m&z=12&output=embed&iwloc=near`;
 
   return (
     <iframe
@@ -29,7 +31,9 @@ const PlaceMap: React.FC<Props> = ({ place }) => {
       height="100%"
       style={{ 
         border: 0,
-        filter: "invert(90%) hue-rotate(180deg) contrast(90%)"
+        // Dark Mode + Contrast Fix
+        // We saturate slightly more because the custom pin is colorful
+        filter: "invert(90%) hue-rotate(180deg) contrast(90%) saturate(110%)"
       }}
       allowFullScreen
       loading="lazy"
