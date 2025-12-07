@@ -4,9 +4,9 @@ const location08 = {
   title: 'Ancient City of Polonnaruwa',
   subtitle: 'The Second Ancient Kingdom of Sri Lanka',
   images: [
-    '/images/places/loc8/li1.jpg',
-    '/images/places/loc8/li2.jpg',
-    '/images/places/loc8/li3.jpg',
+    '/images/Places/loc8/li1.jpg',
+    '/images/Places/loc8/li2.jpg',
+    '/images/Places/loc8/li3.jpg',
   ],
   description: [
     "Polonnaruwa was the second capital of Sri Lanka after the destruction of Anuradhapura in 993. It comprises, besides the Brahmanic monuments built by the Cholas, the monumental ruins of the fabulous garden-city created by Parakramabahu I in the 12th century.",
