@@ -5,9 +5,7 @@ export const roomsData: HotelRoom[] = [
   {
     id: 1,
     image: [
-      "/images/Rooms/IMG_9872.JPG",
-      "/images/Rooms/IMG_9891.JPG",
-      "/images/Rooms/IMG_9887.JPG",
+      "/images/Rooms/deluxe double room.jpg",
     ],
     name: "Deluxe Double Room",
     price: "72",
@@ -29,9 +27,7 @@ export const roomsData: HotelRoom[] = [
   {
     id: 2,
     image: [
-      "/images/Rooms/IMG_9916.JPG",
-      "/images/Rooms/IMG_9911.JPG",
-      "/images/Rooms/IMG_9934.JPG",
+      "/images/Rooms/deluxe triple room.jpg",
     ],
     name: "Deluxe Triple Room",
     price: "85",
@@ -53,9 +49,7 @@ export const roomsData: HotelRoom[] = [
   {
     id: 3,
     image: [
-      "/images/Rooms/IMG_9896.JPG",
-      "/images/Rooms/IMG_9898.JPG",
-      "/images/Rooms/IMG_9899.JPG",
+      "/images/Rooms/deluxe family room.jpg",
     ],
     name: "Deluxe Family Room",
     price: "95",
@@ -77,9 +71,7 @@ export const roomsData: HotelRoom[] = [
   {
     id: 4,
     image: [
-      "/images/Rooms/IMG_9985.JPG",
-      "/images/Rooms/IMG_9976.JPG",
-      "/images/Rooms/IMG_9978.JPG",
+      "/images/Rooms/triple room garden view.jpg",
     ],
     name: "Triple Room with Garden View",
     price: "68",
@@ -101,9 +93,7 @@ export const roomsData: HotelRoom[] = [
   {
     id: 5,
     image: [
-      "/images/Rooms/IMG_9964.JPG",
-      "/images/Rooms/R2.png",
-      "/images/Rooms/R3.png",
+      "/images/Rooms/double room garden view.jpg",
     ],
     name: "Double Room with Garden View",
     price: "68",
