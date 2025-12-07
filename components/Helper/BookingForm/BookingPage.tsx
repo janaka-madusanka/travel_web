@@ -611,6 +611,7 @@ export default function BookingPage() {
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 min-h-[100px] overflow-y-auto custom-scrollbar border border-transparent">
                             {loadingRooms ? (
                               <div className="col-span-full flex items-center justify-center h-20">
+                                <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-green-600 mb-4"></div>
                                 <p className="text-sm text-gray-400">
                                   Loading rooms...
                                 </p>

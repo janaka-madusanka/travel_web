@@ -110,7 +110,14 @@ const RoomCarousel: React.FC = () => {
           className="flex gap-4 sm:gap-6 md:gap-10 overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar py-4 w-full"
         >
           {rooms.length === 0 ? (
-            <p className="text-center w-full text-gray-500">No rooms available.</p>
+          <div className="w-full flex flex-col items-center justify-center min-h-[250px]">
+      
+      {/* The Spinner */}
+      <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-green-600 mb-4"></div>
+      
+      {/* The Text */}
+      <p className="text-gray-500 font-medium">Loading rooms details...</p>
+    </div>
           ) : (
             rooms.map((room, idx) => (
               <div

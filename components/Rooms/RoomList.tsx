@@ -27,9 +27,15 @@ export default function RoomList() {
 
   if (loading)
     return (
-      <div className="text-center py-32 text-xl font-semibold">
-        Loading rooms...
+      <div className="flex flex-col items-center justify-center py-32">
+      {/* The Spinner Animation */}
+      <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-green-600 mb-4"></div>
+      
+      {/* The Text */}
+      <div className="text-xl font-semibold">
+        Loading rooms details...
       </div>
+    </div>
     );
 
   if (error)
