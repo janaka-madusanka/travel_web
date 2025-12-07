@@ -80,6 +80,7 @@ const PhilosophySection = () => {
               alt="Design Philosophy"
               fill
               className="object-cover"
+              quality={90}
             />
           </div>
         </motion.div>

@@ -19,12 +19,15 @@ const ServiceCard = ({ service, index }: Props) => {
         
         {/* ============ IMAGE SECTION ============ */}
         <div className="w-full lg:w-1/2 relative h-[300px] lg:h-auto overflow-hidden group">
-          <Image
-            src={service.image} 
-            alt={service.title}
-            fill
-            className="object-cover transition-transform duration-700 group-hover:scale-110"
-          />
+         <Image
+  src={service.image}
+  alt={service.title}
+  fill
+  sizes="(max-width: 1024px) 100vw, 50vw"
+  quality={90}
+  className="object-cover transition-transform duration-700 group-hover:scale-110"
+/>
+
           <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors duration-500"></div>
         </div>
 
