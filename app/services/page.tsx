@@ -5,7 +5,6 @@ import { servicesData } from '@/data/services';
 import ServiceCard from '@/components/Services/ServiceCard';
 // import ResponsiveNav from '@/components/Helper/Navbar/ResponsiveNav'; // Uncomment if needed locally
 import NewsletterSignup from '@/components/Home/NewsletterSignup/NewsletterSignup';
-import ServiceImageGrid from '@/components/Services/ServiceImageGrid';
 // ✅ Import the new Amenities Section
 import AmenitiesSection from '@/components/Services/AmenitiesSection';
 
@@ -45,7 +44,7 @@ const ServicesPage = () => {
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif text-gray-900 mb-6">
               Curated Experiences
             </h2>
-            <div className="w-24 h-1 bg-orange-500 mx-auto rounded-full"></div>
+            <div className="w-24 h-1 bg-[#007326] mx-auto rounded-full"></div>
           </div>
           {servicesData.map((service, index) => (
             <ServiceCard key={service.id} service={service} index={index} />
@@ -56,8 +55,6 @@ const ServicesPage = () => {
       {/* 2. ✅ NEW: Detailed Amenities Section */}
       <AmenitiesSection />
 
-      {/* 3. Visual Journey (Image Grid) */}
-      <ServiceImageGrid />
 
       {/* 4. Newsletter */}
       <NewsletterSignup />
