@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import RoomList from '@/components/Rooms/RoomList';
 //import ResponsiveNav from '@/components/Helper/Navbar/ResponsiveNav'; 
 import NewsletterSignup from '@/components/Home/NewsletterSignup/NewsletterSignup';
@@ -15,10 +16,15 @@ const RoomsPage = () => {
       <div className="relative h-screen flex items-center justify-center">
         
         {/* Background Image */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url('/images/Rooms/IMG_0004.JPG')" }}
-        >
+        <div className="absolute inset-0 -z-10">
+           <Image 
+            src="/images/Rooms/IMG_0004.JPG"
+            alt="Rooms Hero Sanctuary"
+            fill
+            priority // ⚡ Loads immediately
+            className="object-cover object-center"
+            quality={90}
+          />
           {/* Dark Overlay */}
           <div className="absolute inset-0 bg-black/60"></div>
         </div>

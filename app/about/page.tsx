@@ -1,5 +1,6 @@
 // path: app/about/page.tsx
 import React from "react";
+import Image from "next/image";
 import { aboutData } from "@/data/about";
 import MissionSection from "@/components/About/MissionSection";
 import ValuesGrid from "@/components/About/ValuesGrid";
@@ -14,10 +15,17 @@ const AboutPage = () => {
       {/* ============ HERO SECTION ============ */}
       {/* ✅ CHANGE: Changed 'h-[80vh]' to 'h-screen' for full screen height */}
       <div className="relative h-screen flex items-center justify-center">
-        <div 
-          className="absolute inset-0 bg-cover bg-center fixed-bg" 
-          style={{ backgroundImage: `url('${aboutData.hero.image}')` }}
-        >
+        
+        {/* ✅ FIXED: Replaced CSS background with Next/Image */}
+        <div className="absolute inset-0">
+          <Image
+            src={aboutData.hero.image} // ✅ Using the variable from your data file
+            alt={aboutData.hero.title}
+            fill // Make it stretch to fill the container
+            priority // ⚡ Load this immediately (crucial for hero images)
+            className="object-cover object-center" // Replaces bg-cover bg-center
+            quality={90}
+          />
           {/* Dark Overlay - Adjusted opacity for readability */}
           <div className="absolute inset-0 bg-black/50"></div>
         </div>
