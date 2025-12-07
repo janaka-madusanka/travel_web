@@ -5,7 +5,11 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   typescript: {
-    ignoreBuildErrors: true, // optional, ignore TS errors during build
+    ignoreBuildErrors: true,
+  },
+
+  images: {
+    qualities: [90], // Add any custom qualities used in your Image components
   },
 };
 

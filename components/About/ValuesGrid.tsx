@@ -17,7 +17,7 @@ const ValuesGrid = () => {
               transition={{ duration: 0.5, delay: index * 0.2 }}
               className="text-center group"
             >
-              <div className="w-16 h-16 mx-auto bg-gray-50 rounded-full flex items-center justify-center text-orange-600 text-2xl mb-6 group-hover:bg-orange-600 group-hover:text-white transition-colors duration-500">
+              <div className="w-16 h-16 mx-auto bg-gray-50 rounded-full flex items-center justify-center text-[#007326] text-2xl mb-6 group-hover:bg-[#007326] group-hover:text-white transition-colors duration-500">
                 <item.icon />
               </div>
               <h3 className="text-2xl font-serif text-gray-900 mb-4">{item.title}</h3>

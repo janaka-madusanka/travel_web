@@ -47,7 +47,7 @@ const ScrollRevealParagraph = ({ text }: { text: string }) => {
 
 const MissionSection = () => {
   return (
-    <section className="py-24 lg:py-32 bg-[#f9f7f4] text-center px-6">
+    <section className="py-24 lg:py-32 bg-[#f4f9f5] text-center px-6">
       <div className="max-w-4xl mx-auto">
         
         {/* Title */}
@@ -56,7 +56,7 @@ const MissionSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-orange-600 font-bold uppercase tracking-[0.2em] mb-6 text-sm"
+          className="text-[#007326] font-bold uppercase tracking-[0.2em] mb-6 text-sm"
         >
           {aboutData.mission.title}
         </motion.p>
@@ -72,7 +72,7 @@ const MissionSection = () => {
           transition={{ duration: 0.8, delay: 0.4 }}
           className="relative inline-block"
         >
-          <span className="text-6xl text-orange-200 absolute -top-8 -left-8 font-serif">“</span>
+          <span className="text-6xl text-green-300 absolute -top-8 -left-8 font-serif">“</span>
           <p className="text-xl md:text-2xl text-gray-600 font-light italic relative z-10">
             {aboutData.mission.quote}
           </p>
