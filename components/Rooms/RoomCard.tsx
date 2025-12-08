@@ -67,8 +67,8 @@ const RoomCard = ({ room, index }: Props) => {
   const bathroomFeatures = room.bathrooms.length
     ? room.bathrooms.map((b, i) => (
         <div key={i} className="mb-4 pt-4 border-t border-gray-700">
-          <h5 className="text-orange-400 font-semibold mb-2 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-orange-400"></span> Bathroom {i + 1}
+          <h5 className="text-green-400 font-semibold mb-2 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-green-400"></span> Bathroom {i + 1}
           </h5>
           <ul className="grid grid-cols-2 gap-x-2 gap-y-1 text-gray-300 text-sm pl-4">
             {b.shower === "YES" && <li>• Shower</li>}
@@ -87,8 +87,8 @@ const RoomCard = ({ room, index }: Props) => {
   // Kitchen features layout
   const kitchenFeatures = room.kitchen ? (
     <div className="mb-4 pt-4 border-t border-gray-700">
-      <h5 className="text-orange-400 font-semibold mb-2 flex items-center gap-2">
-        <span className="w-2 h-2 rounded-full bg-orange-400"></span> Kitchen
+      <h5 className="text-green-400 font-semibold mb-2 flex items-center gap-2">
+        <span className="w-2 h-2 rounded-full bg-green-400"></span> Kitchen
       </h5>
       <ul className="grid grid-cols-2 gap-x-2 gap-y-1 text-gray-300 text-sm pl-4">
         {room.kitchen.diningTable === "YES" && <li>• Dining Table</li>}
@@ -134,9 +134,9 @@ const RoomCard = ({ room, index }: Props) => {
                     No Image
                   </div>
                 )}
-                <div className="absolute bottom-6 left-6 bg-white/95 backdrop-blur-md px-6 py-3 rounded-lg shadow-lg z-10 border-l-4 border-orange-500">
+                <div className="absolute bottom-6 left-6 bg-white/95 backdrop-blur-md px-6 py-3 rounded-lg shadow-lg z-10 border-l-4 border-green-500">
                   <p className="text-xs text-gray-500 uppercase tracking-wider font-bold">Starting from</p>
-                  <p className="text-2xl font-serif text-gray-900 font-bold">
+                  <p className="text-2xl font-poppins text-gray-900 font-bold">
                     ${room.cost} <span className="text-sm font-sans font-medium text-gray-400">/night</span>
                   </p>
                 </div>
@@ -161,7 +161,7 @@ const RoomCard = ({ room, index }: Props) => {
 
                 {/* Scrollable Content Area */}
                 <div className="w-full h-full p-8 lg:p-12 overflow-y-auto custom-scrollbar">
-                  <h4 className="text-3xl font-serif mb-2 text-orange-400">Room Overview</h4>
+                  <h4 className="text-3xl font-serif mb-2 text-green-400">Room Overview</h4>
                   <p className="text-gray-400 text-sm mb-6 uppercase tracking-widest font-semibold">
                     {room.name} • {room.size}m²
                   </p>
@@ -170,13 +170,13 @@ const RoomCard = ({ room, index }: Props) => {
                     {/* General Amenities */}
                     <div>
                       <div className="flex items-center gap-2 mb-3 text-white font-bold sticky top-0 bg-gray-900 py-2 z-10 border-b border-gray-800">
-                        <FaListUl className="text-orange-500" /> 
+                        <FaListUl className="text-green-500" /> 
                         <span>General Amenities</span>
                       </div>
                       <div className="grid grid-cols-2 gap-y-2 gap-x-4">
                         {features.map((feature, i) => (
                           <div key={i} className="flex items-center gap-2 text-sm text-gray-300">
-                            <div className="min-w-[6px] h-[6px] rounded-full bg-orange-500"></div>
+                            <div className="min-w-[6px] h-[6px] rounded-full bg-green-500"></div>
                             {feature}
                           </div>
                         ))}
@@ -248,13 +248,13 @@ const RoomCard = ({ room, index }: Props) => {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 mt-auto">
-            <button  onClick={handleBookNow} className="flex-1 px-8 py-3.5 bg-gray-900 text-white text-sm font-bold uppercase tracking-wider hover:bg-orange-600 transition-colors duration-300 rounded-sm shadow-lg shadow-gray-200">
+            <button  onClick={handleBookNow} className="flex-1 px-8 py-3.5 bg-gray-900 text-white text-sm font-bold uppercase tracking-wider hover:bg-green-600 transition-colors duration-300 rounded-sm shadow-lg shadow-gray-200">
               Book Now
             </button>
             <button
               onClick={toggleDetails}
               className={`flex-1 px-8 py-3.5 border text-sm font-bold uppercase tracking-wider transition-all duration-300 rounded-sm flex items-center justify-center gap-2 ${
-                showDetails ? "border-orange-500 bg-orange-50 text-orange-600" : "border-gray-200 text-gray-900 hover:border-gray-900 hover:bg-gray-50"
+                showDetails ? "border-green-500 bg-green-50 text-green-600" : "border-gray-200 text-gray-900 hover:border-gray-900 hover:bg-gray-50"
               }`}
             >
               {showDetails ? "Close" : "Details"} {showDetails ? <FaTimes /> : <FaArrowRight />}
