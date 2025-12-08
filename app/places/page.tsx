@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import Location01 from "@/components/Places/Locations/location01";
 import Location02 from "@/components/Places/Locations/location02";
 import Location03 from "@/components/Places/Locations/location03";
@@ -37,28 +37,31 @@ interface LocationDetailProps {
 function LocationSlider({ images }: LocationSliderProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const nextSlide = () =>
+  const nextSlide = useCallback(() => {
     setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  }, [images.length]);
+
   const prevSlide = () =>
     setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
 
   React.useEffect(() => {
     const timer = setTimeout(nextSlide, 5000);
     return () => clearTimeout(timer);
-  }, [currentIndex, images.length]);
+  }, [currentIndex, nextSlide]);
 
   return (
-    <div className="relative w-full overflow-hidden rounded-2xl shadow-2xl group">
+    <div className="relative w-full h-[500px] overflow-hidden rounded-2xl shadow-2xl group">
       <div
-        className="flex transition-transform duration-1000 ease-in-out"
+        className="flex h-full transition-transform duration-1000 ease-in-out"
         style={{ transform: `translateX(-${currentIndex * 100}%)` }}
       >
         {images.map((img, idx) => (
-          <div key={idx} className="w-full flex-shrink-0">
+          <div key={idx} className="relative w-full h-full flex-shrink-0">
             <Image
               src={img}
               alt="Location View"
-              className="w-full h-[400px] md:h-[500px] object-cover"
+              fill
+              className="object-cover"
             />
           </div>
         ))}
@@ -146,7 +149,7 @@ export default function PlacesPage() {
       <Hero />
 
       {/* Sticky navbar */}
-      <nav className="bg-white sticky top-0 z-50 mt-10 ">
+      <nav className="bg-white  z-50 mt-10 ">
         <div className="max-w-7xl mx-auto px-4 py-2 flex flex-wrap justify-center gap-2 md:gap-4 ">
           {locations.map((l) => (
             <button

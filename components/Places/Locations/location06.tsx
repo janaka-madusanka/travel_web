@@ -4,9 +4,9 @@ const location06 = {
   title: 'Kaudulla National Park',
   subtitle: "Another Haven for Sri Lanka's Majestic Elephants",
   images: [
-    '/images/places/loc6/li1.jpg',
-    '/images/places/loc6/li2.jpg',
-    '/images/places/loc6/li3.jpg',
+    '/images/Places/loc6/li1.jpg',
+    '/images/Places/loc6/li2.jpg',
+    '/images/Places/loc6/li3.jpg',
   ],
   description: [
     "Kaudulla National Park is a national park on the island of Sri Lanka located 197 kilometers away from the largest city, Colombo. It was designated a national park on April 1, 2002 becoming the 15th such area on the island.",

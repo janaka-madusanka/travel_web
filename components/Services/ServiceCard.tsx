@@ -19,12 +19,15 @@ const ServiceCard = ({ service, index }: Props) => {
         
         {/* ============ IMAGE SECTION ============ */}
         <div className="w-full lg:w-1/2 relative h-[300px] lg:h-auto overflow-hidden group">
-          <Image
-            src={service.image} 
-            alt={service.title}
-            fill
-            className="object-cover transition-transform duration-700 group-hover:scale-110"
-          />
+         <Image
+  src={service.image}
+  alt={service.title}
+  fill
+  sizes="(max-width: 1024px) 100vw, 50vw"
+  quality={90}
+  className="object-cover transition-transform duration-700 group-hover:scale-110"
+/>
+
           <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors duration-500"></div>
         </div>
 
@@ -35,7 +38,7 @@ const ServiceCard = ({ service, index }: Props) => {
             0{service.id}
           </p>
 
-          <p className="text-orange-600 font-bold uppercase tracking-widest text-xs mb-4">
+          <p className="text-[#007326] font-bold uppercase tracking-widest text-xs mb-4">
             Scenic Experiences
           </p>
 
@@ -51,7 +54,7 @@ const ServiceCard = ({ service, index }: Props) => {
           <div className="space-y-3 mb-10">
             {service.features.map((feature, i) => (
               <div key={i} className="flex items-center gap-3 text-gray-600 font-medium text-sm">
-                <div className="w-6 h-6 rounded-full bg-orange-100 flex items-center justify-center text-orange-600">
+                <div className="w-6 h-6 rounded-full bg-[#D1E7DD] flex items-center justify-center text-[#007326]">
                   <FaCheck className="text-[10px]" />
                 </div>
                 {feature}
@@ -62,7 +65,7 @@ const ServiceCard = ({ service, index }: Props) => {
           {/* ✅ Changed button to Link pointing to #amenities-section */}
           <Link 
             href="#amenities-section"
-            className="self-start flex items-center gap-2 text-gray-900 border-b-2 border-gray-200 pb-1 hover:border-orange-500 hover:text-orange-600 transition-all duration-300 font-semibold text-sm uppercase tracking-wider cursor-pointer"
+            className="self-start flex items-center gap-2 text-gray-900 border-b-2 border-gray-200 pb-1 hover:border-[#007326] hover:text-[#007326] transition-all duration-300 font-semibold text-sm uppercase tracking-wider cursor-pointer"
           >
             Explore More <FaArrowRight className="text-xs" />
           </Link>

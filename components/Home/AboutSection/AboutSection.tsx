@@ -19,7 +19,16 @@ const ImageCard: React.FC<ImageCardProps> = ({ src, alt, className = "", index }
         animation: `fadeInUp 0.6s ease-out ${index ? index * 0.1 : 0}s backwards`,
       }}
     >
-      <Image src={src} alt={alt} fill className="object-cover" />
+  <Image
+  src={src}
+  alt={alt}
+  fill
+  sizes="(max-width: 639px) 50vw, (max-width: 1023px) 33vw, (max-width: 1279px) 25vw, 20vw"
+  className="object-cover"
+  quality={90}
+/>
+      
+
     </div>
   );
 };

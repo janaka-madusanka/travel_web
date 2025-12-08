@@ -4,7 +4,7 @@ import { aboutData } from "@/data/about";
 
 const StatsSection = () => {
   return (
-    <section className="py-20 bg-[#f4f2ed] border-t border-gray-200">
+    <section className="py-20 bg-[#f4f9f5] border-t border-gray-200">
       <div className="w-[90%] md:w-[85%] xl:w-[75%] mx-auto">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-gray-300/50">
           {aboutData.stats.map((stat) => (

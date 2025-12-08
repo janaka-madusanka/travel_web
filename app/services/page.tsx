@@ -1,10 +1,10 @@
 // path: app/services/page.tsx
 import React from 'react';
+import Image from 'next/image';
 import { servicesData } from '@/data/services';
 import ServiceCard from '@/components/Services/ServiceCard';
 // import ResponsiveNav from '@/components/Helper/Navbar/ResponsiveNav'; // Uncomment if needed locally
 import NewsletterSignup from '@/components/Home/NewsletterSignup/NewsletterSignup';
-import ServiceImageGrid from '@/components/Services/ServiceImageGrid';
 // ✅ Import the new Amenities Section
 import AmenitiesSection from '@/components/Services/AmenitiesSection';
 
@@ -14,12 +14,15 @@ const ServicesPage = () => {
       
       {/* Hero Section */}
       <div className="relative h-screen flex items-center justify-center">
-        <div 
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url('/images/Services/service-hero.jpg')" }}
-        >
+        <Image 
+            src="/images/Services/service-hero.jpg"
+            alt="Services Hero"
+            fill
+            priority // ⚡ Loads immediately
+            className="object-cover object-center"
+            quality={90}
+          />
           <div className="absolute inset-0 bg-black/50"></div>
-        </div>
         <div className="relative z-10 text-center px-4 max-w-4xl mx-auto pt-[10vh]">
           <p className="text-white/90 text-sm sm:text-base font-bold uppercase tracking-[0.3em] mb-6 animate-fadeIn">
             Indulge & Explore
@@ -41,7 +44,7 @@ const ServicesPage = () => {
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif text-gray-900 mb-6">
               Curated Experiences
             </h2>
-            <div className="w-24 h-1 bg-orange-500 mx-auto rounded-full"></div>
+            <div className="w-24 h-1 bg-[#007326] mx-auto rounded-full"></div>
           </div>
           {servicesData.map((service, index) => (
             <ServiceCard key={service.id} service={service} index={index} />
@@ -52,8 +55,6 @@ const ServicesPage = () => {
       {/* 2. ✅ NEW: Detailed Amenities Section */}
       <AmenitiesSection />
 
-      {/* 3. Visual Journey (Image Grid) */}
-      <ServiceImageGrid />
 
       {/* 4. Newsletter */}
       <NewsletterSignup />
