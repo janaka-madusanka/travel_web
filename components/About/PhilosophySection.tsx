@@ -75,13 +75,15 @@ const PhilosophySection = () => {
         >
           <div className="absolute inset-0 border border-white/20 translate-x-4 translate-y-4 rounded-lg z-0"></div>
           <div className="relative w-full h-full rounded-lg overflow-hidden z-10">
-            <Image
-              src={aboutData.philosophy.image}
-              alt="Design Philosophy"
-              fill
-              className="object-cover"
-              quality={90}
-            />
+           <Image
+  src={aboutData.philosophy.image}
+  alt="Design Philosophy"
+  fill
+  className="object-cover"
+  quality={90}
+  sizes="(max-width: 768px) 100vw, 50vw"
+/>
+
           </div>
         </motion.div>
 
