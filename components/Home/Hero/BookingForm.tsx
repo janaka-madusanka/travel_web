@@ -63,8 +63,7 @@ const BookingForm: React.FC = () => {
     if (checkIn) params.append('checkIn', checkIn);
     if (checkOut) params.append('checkOut', checkOut);
     
-    router.push(`/booking?${params.toString()}`);
-  };
+router.push(`/rooms?${params.toString()}`);  };
 
   return (
     <div className="flex items-center justify-center px-4 w-full">
