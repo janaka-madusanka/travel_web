@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
+import Head from "next/head";
+import Hero from "@/components/Places/Hero/Hero";
 import Location01 from "@/components/Places/Locations/location01";
 import Location02 from "@/components/Places/Locations/location02";
 import Location03 from "@/components/Places/Locations/location03";
@@ -9,9 +11,7 @@ import Location05 from "@/components/Places/Locations/location05";
 import Location06 from "@/components/Places/Locations/location06";
 import Location07 from "@/components/Places/Locations/location07";
 import Location08 from "@/components/Places/Locations/location08";
-import Hero from "@/components/Places/Hero/Hero"; 
 import Image from "next/image";
-
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 //===================== INTERFACES =====================//
@@ -33,7 +33,6 @@ interface LocationDetailProps {
 }
 
 //===================== COMPONENTS (Slider + Detail) =====================//
-
 function LocationSlider({ images }: LocationSliderProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -59,7 +58,7 @@ function LocationSlider({ images }: LocationSliderProps) {
           <div key={idx} className="relative w-full h-full flex-shrink-0">
             <Image
               src={img}
-              alt="Location View"
+              alt={`View of location ${idx + 1}`}
               fill
               className="object-cover"
             />
@@ -126,7 +125,6 @@ function LocationDetail({ location }: LocationDetailProps) {
 }
 
 //===================== PLACES PAGE =====================//
-
 export default function PlacesPage() {
   const locations: LocationType[] = [
     Location01,
@@ -145,12 +143,56 @@ export default function PlacesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* SEO Meta Tags */}
+      <Head>
+        <title>Places to Visit Near Sigiriya - Scenic Cottage Sri Lanka</title>
+        <meta
+          name="description"
+          content="Explore the top attractions near Sigiriya including Sigiriya Rock Fortress, Pidurangala Rock, Dambulla Cave Temple, Minneriya National Park, Kaudulla National Park, Polonnaruwa, and more. Plan your stay at Scenic Cottage for a perfect Sri Lanka getaway."
+        />
+        <meta
+          name="keywords"
+          content="
+          Sigiriya attractions, best things to do Sigiriya, places to visit Sigiriya, Sigiriya tourism, hotels near Sigiriya Rock, Scenic Cottage Sigiriya,
+          Dambulla Cave Temple, Pidurangala Rock sunrise, Minneriya National Park elephants, Kaudulla National Park safari, Polonnaruwa ancient city,
+          Sri Lanka travel guide, tour Sigiriya, Sigiriya cultural triangle, stay near Sigiriya, Sigiriya guided tours, Sigiriya sightseeing, Sri Lanka nature trips
+          "
+        />
+        <link rel="canonical" href="https://www.sceniccottage.com/places" />
+
+        {/* Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "TouristDestination",
+              "name": "Sigiriya and Surrounding Attractions",
+              "description":
+                "Discover top attractions near Sigiriya including Sigiriya Rock Fortress, Pidurangala Rock, Dambulla Cave Temple, Minneriya National Park, Kaudulla National Park, and Polonnaruwa ancient city. Stay at Scenic Cottage for a perfect trip.",
+              "url": "https://www.sceniccottage.com/places",
+              "geo": {
+                "@type": "GeoCoordinates",
+                "latitude": 7.9569,
+                "longitude": 80.7608,
+              },
+              "image": [
+                locations[0].images[0],
+                locations[1].images[0],
+                locations[2].images[0],
+              ],
+              "touristType": "Cultural and Nature Tourism",
+            }),
+          }}
+        />
+      </Head>
+
       {/* Hero Section */}
       <Hero />
 
       {/* Sticky navbar */}
-      <nav className="bg-white  z-50 mt-10 ">
-        <div className="max-w-7xl mx-auto px-4 py-2 flex flex-wrap justify-center gap-2 md:gap-4 ">
+      <nav className="bg-white z-50 mt-10">
+        <div className="max-w-7xl mx-auto px-4 py-2 flex flex-wrap justify-center gap-2 md:gap-4">
           {locations.map((l) => (
             <button
               key={l.id}
@@ -167,7 +209,7 @@ export default function PlacesPage() {
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-4 py-12 ">
+      <main className="max-w-7xl mx-auto px-4 py-12">
         <LocationDetail location={activeLocation} />
       </main>
     </div>
