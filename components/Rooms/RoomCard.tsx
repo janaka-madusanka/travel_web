@@ -10,9 +10,11 @@ import { useRouter } from 'next/navigation';
 type Props = {
   room: BackendRoom;
   index: number;
+   checkIn?: string;
+  checkOut?: string;
 };
 
-const RoomCard = ({ room, index }: Props) => {
+const RoomCard = ({ room, index,checkIn, checkOut }: Props) => {
   const router = useRouter();
   const isReversed = index % 2 !== 0;
   const [showDetails, setShowDetails] = useState(false);
@@ -35,9 +37,16 @@ const RoomCard = ({ room, index }: Props) => {
     }
   };
 
-   const handleBookNow = () => {
-    router.push(`/booking?roomId=${room.id}`);
-  };
+const handleBookNow = () => {
+  const params = new URLSearchParams();
+  params.append('roomId', room.id.toString());
+  
+  // Use dates from props (which come from RoomList's state - either URL or manual input)
+  if (checkIn) params.append('checkIn', checkIn);
+  if (checkOut) params.append('checkOut', checkOut);
+  
+  router.push(`/booking?${params.toString()}`);
+};
 
   const images = [room.img1, room.img2, room.img3, room.img4].filter(Boolean);
 
