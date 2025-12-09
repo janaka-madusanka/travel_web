@@ -42,6 +42,6 @@ export const HotelDetails: HotelInfo = {
 
   address: "123 Marine Drive, Colombo 03, Sri Lanka",
 
-  website: "https://www.grandresort.lk",
-  whatsapp: "+94768402570",
+  website: "https://www.sceniccottage.com",
+  whatsapp: "+94 740558858",
 };
