@@ -10,41 +10,24 @@ import "react-datepicker/dist/react-datepicker.css";
 import { useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  X,
-  Calendar,
-  User,
-  CheckCircle,
-  Car,
-  BedDouble,
-  CreditCard,
-  Clock,
-  Utensils,
-  Map,
-  UserCheck,
-  MapPin,
-  Phone,
-  Info,
+  X, Calendar, User, CheckCircle, Car, BedDouble,
+  CreditCard, Clock, Utensils, Map, Phone, Info, MapPin
 } from "lucide-react";
 import CustomAlert from "@/components/Common/CustomAlert";
+
 // --- Types ---
 interface BookedSlot {
   checkIn: string;
   checkOut: string;
 }
 
-// --- Constants ---
-const vehicleOptions = [
-  { value: "BIKE", label: "Bike ($15)" },
-  { value: "CAR", label: "Car ($45)" },
-  { value: "VAN", label: "Van ($65)" },
-  { value: "SUV", label: "SUV ($20)" },
-];
+// ✅ Props Definition
+interface BookingPageProps {
+  initialRooms: any[]; // Data passed from the server
+}
 
 const vehiclePrices: Record<string, number> = {
-  BIKE: 15,
-  CAR: 45,
-  VAN: 65,
-  SUV: 20,
+  BIKE: 15, CAR: 45, VAN: 65, SUV: 20,
 };
 
 const hotelInfo = {
@@ -53,11 +36,10 @@ const hotelInfo = {
   contact: "+94 74 055 8858",
   address: "Sigiriya Road, Inamaluwa, 21124 Sigiriya, Sri Lanka",
   description: "Experience tranquility and natural beauty at Scenic Cottage.",
-  promoText:
-    "Escape to a sanctuary where nature hugs luxury. Nestled in the heart of Sigiriya, Scenic Cottage offers you a peaceful retreat away from the chaos.",
+  promoText: "Escape to a sanctuary where nature hugs luxury...",
 };
 
-export default function BookingPage() {
+export default function BookingPage({ initialRooms }: BookingPageProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<"contact" | "booking">("contact");
@@ -65,36 +47,31 @@ export default function BookingPage() {
 
   // --- Form State ---
   const [formData, setFormData] = useState({
-    // Customer
     title: "Mr",
     firstName: "",
     lastName: "",
     email: "",
     country: "",
     contactNumber: "",
-    /*     address: "",
-     */ passportType: "Passport",
+    passportType: "Passport",
     passportNumber: "",
-
-    // Booking
     room: "",
     checkInDate: "",
     checkInTime: "09:00",
     checkOutDate: "",
     checkOutTime: "11:00",
-
-    // Other Details
     vehicleNeeded: false,
-    /* vehicleType: "CAR", // Default
-    driver: false, */
     meal: false,
     guide: false,
+    vehicleType: "CAR",
   });
 
-  const [rooms, setRooms] = useState<any[]>([]);
+  // ✅ OPTIMIZATION: Use the rooms passed from the server immediately.
+  // No loading state or fetch needed for this.
+  const rooms = initialRooms; 
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [bookedSlots, setBookedSlots] = useState<BookedSlot[]>([]);
-  const [loadingRooms, setLoadingRooms] = useState(true);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [detectedCountry, setDetectedCountry] = useState<string>("GB");
   const [alert, setAlert] = useState<{
@@ -111,25 +88,9 @@ export default function BookingPage() {
     onCloseCallback: undefined,
   });
 
-  // --- Initialization ---
-  useEffect(() => {
-    const fetchRooms = async () => {
-      try {
-        setLoadingRooms(true);
-        const res = await fetch("/api/rooms");
-        const data = await res.json();
-        if (data.rooms) {
-          setRooms(data.rooms);
-        }
-      } catch (err) {
-        console.error("Error fetching rooms:", err);
-      } finally {
-        setLoadingRooms(false);
-      }
-    };
-    fetchRooms();
-  }, []);
-
+  // ---------------------------------------------------------
+  // 1. URL PARAMETER HANDLING (Must be Client Side)
+  // ---------------------------------------------------------
   useEffect(() => {
     const checkInFromUrl = searchParams.get("checkIn");
     const checkOutFromUrl = searchParams.get("checkOut");
@@ -143,12 +104,17 @@ export default function BookingPage() {
     }));
   }, [searchParams]);
 
-  // Fetch Availability
+  // ---------------------------------------------------------
+  // 2. CHECK AVAILABILITY (Must be Client Side & Interactive)
+  // ---------------------------------------------------------
+  // This ONLY runs when the user changes the Room or Dates.
+  // It checks if the *specific dates* they picked are taken.
   useEffect(() => {
     const fetchBookedDates = async () => {
       if (!formData.room) return;
       try {
         const today = new Date().toISOString().split("T")[0];
+        // This is a lightweight JSON call, NOT a heavy image fetch
         const response = await fetch(
           `/api/bookings/available?roomId=${formData.room}&from=${today}`
         );
@@ -156,6 +122,7 @@ export default function BookingPage() {
 
         if (data.bookedSlots) {
           setBookedSlots(data.bookedSlots);
+          // Validation logic...
           if (formData.checkInDate && formData.checkOutDate) {
             const isCheckInBooked = data.bookedSlots.some(
               (slot: BookedSlot) =>
@@ -189,20 +156,9 @@ export default function BookingPage() {
     fetchBookedDates();
   }, [formData.room, formData.checkInDate, formData.checkOutDate]);
 
-  const isDateBooked = (date: Date) => {
-    if (!formData.room) return false;
-
-    // Get local date string properly (avoid timezone issues)
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const checkDate = `${year}-${month}-${day}`;
-
-    return bookedSlots.some(
-      (slot) => checkDate >= slot.checkIn && checkDate <= slot.checkOut
-    );
-  };
-
+  // ---------------------------------------------------------
+  // 3. AUTO-DETECT COUNTRY (Must be Client Side)
+  // ---------------------------------------------------------
   useEffect(() => {
     fetch("https://ipapi.co/json/")
       .then((res) => res.json())
@@ -218,40 +174,45 @@ export default function BookingPage() {
       .catch((err) => console.error("Could not detect country:", err));
   }, []);
 
-  // --- Calculations ---
+
+  // --- Helper Functions ---
+  const isDateBooked = (date: Date) => {
+    if (!formData.room) return false;
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const checkDate = `${year}-${month}-${day}`;
+
+    return bookedSlots.some(
+      (slot) => checkDate >= slot.checkIn && checkDate <= slot.checkOut
+    );
+  };
+
   const selectedRoom =
     rooms.find((r) => r.id.toString() === formData.room.toString()) || null;
 
   const calculateDays = () => {
     if (!formData.checkInDate || !formData.checkOutDate) return 0;
-
     const checkInDateTime = new Date(
       `${formData.checkInDate}T${formData.checkInTime || "09:00"}:00`
     );
     const checkOutDateTime = new Date(
       `${formData.checkOutDate}T${formData.checkOutTime || "11:00"}:00`
     );
-
     const diffMs = checkOutDateTime.getTime() - checkInDateTime.getTime();
-
     if (diffMs <= 0) return 0;
-
     const diffHours = diffMs / (1000 * 60 * 60);
-
-    // Calculate days: every 24 hours = 1 day, round up
     return Math.max(1, Math.ceil(diffHours / 24));
   };
 
   const days = calculateDays();
   const roomCost = selectedRoom ? days * Number(selectedRoom.cost) : 0;
-
-  // Vehicle Cost
   const vehicleCost = formData.vehicleNeeded
     ? (vehiclePrices[formData.vehicleType] || 0) * (days || 1)
     : 0;
-
   const serviceCharge = (roomCost + vehicleCost) * 0.05;
   const grandTotal = roomCost + vehicleCost + serviceCharge;
+
   const showAlert = (
     title: string,
     message: string,
@@ -264,12 +225,9 @@ export default function BookingPage() {
   const closeAlert = () => {
     const callback = alert.onCloseCallback;
     setAlert({ ...alert, isOpen: false, onCloseCallback: undefined });
-
-    // Execute callback after closing if it exists
-    if (callback) {
-      setTimeout(() => callback(), 300);
-    }
+    if (callback) setTimeout(() => callback(), 300);
   };
+
   const isContactComplete =
     formData.firstName &&
     formData.lastName &&
@@ -279,7 +237,6 @@ export default function BookingPage() {
   const isBookingComplete =
     formData.room && formData.checkInDate && formData.checkOutDate;
 
-  // --- Handlers ---
   const handleClose = () => {
     setIsExiting(true);
     setTimeout(() => {
@@ -297,42 +254,29 @@ export default function BookingPage() {
 
   const handleSubmit = async () => {
     if (!isContactComplete || !isBookingComplete) {
-      showAlert(
-        "Incomplete Form",
-        "Please complete all required fields before booking.",
-        "warning"
-      );
+      showAlert("Incomplete Form", "Please complete all required fields.", "warning");
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      // 1. Prepare Customer Data
       const customerData = {
         name: `${formData.title} ${formData.firstName} ${formData.lastName}`.trim(),
-        passportNumber:
-          formData.passportType === "Passport" ? formData.passportNumber : "",
-        nicNumber:
-          formData.passportType === "NIC" ? formData.passportNumber : "",
+        passportNumber: formData.passportType === "Passport" ? formData.passportNumber : "",
+        nicNumber: formData.passportType === "NIC" ? formData.passportNumber : "",
         address: formData.country || "N/A",
         contactNumber: formData.contactNumber,
       };
 
-      // 2. Prepare Booking Payload
       const payload: any = {
         customer: customerData,
         customerEmail: formData.email,
         roomId: Number(formData.room),
-        checkIn: `${formData.checkInDate}T${
-          formData.checkInTime || "09:00"
-        }:00.000Z`,
-        checkOut: `${formData.checkOutDate}T${
-          formData.checkOutTime || "11:00"
-        }:00.000Z`,
+        checkIn: `${formData.checkInDate}T${formData.checkInTime || "09:00"}:00.000Z`,
+        checkOut: `${formData.checkOutDate}T${formData.checkOutTime || "11:00"}:00.000Z`,
       };
 
-      // 3. Add Other Details (Matches your Prisma Schema)
       if (formData.vehicleNeeded || formData.meal || formData.guide) {
         payload.otherDetails = {
           vehicleSupport: formData.vehicleNeeded ? "YES" : "NO",
@@ -355,17 +299,13 @@ export default function BookingPage() {
 
       showAlert(
         "Booking Confirmed! 🎉",
-        "Your booking has been completed successfully. We look forward to hosting you! A confirmation email has been sent to your provided email address.",
+        "Your booking has been completed successfully.",
         "success",
         () => router.push("/")
       );
     } catch (error: any) {
       console.error("Booking error:", error);
-      showAlert(
-        "Booking Failed",
-        error.message || "Failed to create booking. Please try again.",
-        "error"
-      );
+      showAlert("Booking Failed", error.message || "Failed to create booking.", "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -390,10 +330,7 @@ export default function BookingPage() {
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{
-              scale: 0.5,
-              opacity: 0,
-              rotate: -15,
-              transition: { duration: 0.5, ease: "anticipate" },
+              scale: 0.5, opacity: 0, rotate: -15, transition: { duration: 0.5, ease: "anticipate" },
             }}
             className="bg-white w-full max-w-[1400px] h-[90vh] rounded-[2rem] shadow-2xl relative flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden"
           >
@@ -417,11 +354,10 @@ export default function BookingPage() {
                   </p>
                 </div>
 
-                {/* Tab Switcher */}
-                <div className="flex p-1 bg-gray-100 rounded-xl mb-8 w-full shadow-inner">
+                 {/* Tab Switcher */}
+                 <div className="flex p-1 bg-gray-100 rounded-xl mb-8 w-full shadow-inner">
                   <button
                     onClick={() => setActiveTab("contact")}
-                    // Fixed: Reduced padding (px-2) and text size (text-xs) on mobile to prevent overlap
                     className={`flex-1 py-3 px-2 md:px-4 rounded-lg text-xs md:text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                       activeTab === "contact"
                         ? "bg-white text-[#007326] shadow-sm"
@@ -432,7 +368,6 @@ export default function BookingPage() {
                   </button>
                   <button
                     onClick={() => setActiveTab("booking")}
-                    // Fixed: Reduced padding (px-2) and text size (text-xs) on mobile to prevent overlap
                     className={`flex-1 py-3 px-2 md:px-4 rounded-lg text-xs md:text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                       activeTab === "booking"
                         ? "bg-white text-[#007326] shadow-sm"
@@ -447,14 +382,14 @@ export default function BookingPage() {
                   <AnimatePresence mode="wait">
                     {/* CONTACT TAB */}
                     {activeTab === "contact" && (
-                      <motion.div
+                        <motion.div
                         key="contact"
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 10 }}
                         className="space-y-5"
                       >
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                           <div className="md:col-span-1">
                             <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">
                               Title
@@ -462,9 +397,7 @@ export default function BookingPage() {
                             <select
                               className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#007326] outline-none cursor-pointer"
                               value={formData.title}
-                              onChange={(e) =>
-                                handleChange("title", e.target.value)
-                              }
+                              onChange={(e) => handleChange("title", e.target.value)}
                             >
                               <option>Mr</option>
                               <option>Mrs</option>
@@ -481,9 +414,7 @@ export default function BookingPage() {
                               className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#007326] outline-none"
                               placeholder="Enter your First Name here..."
                               value={formData.firstName}
-                              onChange={(e) =>
-                                handleChange("firstName", e.target.value)
-                              }
+                              onChange={(e) => handleChange("firstName", e.target.value)}
                             />
                           </div>
                         </div>
@@ -496,9 +427,7 @@ export default function BookingPage() {
                             className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#007326] outline-none"
                             placeholder="Enter your Last Name here..."
                             value={formData.lastName}
-                            onChange={(e) =>
-                              handleChange("lastName", e.target.value)
-                            }
+                            onChange={(e) => handleChange("lastName", e.target.value)}
                           />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -506,7 +435,6 @@ export default function BookingPage() {
                             <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">
                               Phone Number
                             </label>
-                            {/*  <PhoneInput international defaultCountry="GB" value={formData.contactNumber} onChange={(val) => handleChange("contactNumber", val)} className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus-within:ring-2 focus-within:ring-[#007326] outline-none flex" /> */}
                             <PhoneInput
                               international
                               defaultCountry={detectedCountry}
@@ -527,9 +455,7 @@ export default function BookingPage() {
                               className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#007326] outline-none"
                               placeholder="Enter your email here..."
                               value={formData.email}
-                              onChange={(e) =>
-                                handleChange("email", e.target.value)
-                              }
+                              onChange={(e) => handleChange("email", e.target.value)}
                             />
                           </div>
                         </div>
@@ -540,19 +466,12 @@ export default function BookingPage() {
                             </label>
                             <Select
                               options={countryOptions}
-                              value={countryOptions.find(
-                                (c) => c.label === formData.country
-                              )}
+                              value={countryOptions.find((c) => c.label === formData.country)}
                               placeholder="Select Country"
-                              onChange={(opt) =>
-                                handleChange("country", opt?.label)
-                              }
+                              onChange={(opt) => handleChange("country", opt?.label)}
                               styles={{
                                 control: (base) => ({
-                                  ...base,
-                                  padding: "6px",
-                                  borderRadius: "0.75rem",
-                                  border: "1px solid #e5e7eb",
+                                  ...base, padding: "6px", borderRadius: "0.75rem", border: "1px solid #e5e7eb",
                                 }),
                               }}
                             />
@@ -565,9 +484,7 @@ export default function BookingPage() {
                               <select
                                 className="w-1/3 p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none cursor-pointer"
                                 value={formData.passportType}
-                                onChange={(e) =>
-                                  handleChange("passportType", e.target.value)
-                                }
+                                onChange={(e) => handleChange("passportType", e.target.value)}
                               >
                                 <option>Passport</option>
                                 <option>NIC</option>
@@ -577,9 +494,7 @@ export default function BookingPage() {
                                 className="w-2/3 p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#007326] outline-none"
                                 placeholder="Number"
                                 value={formData.passportNumber}
-                                onChange={(e) =>
-                                  handleChange("passportNumber", e.target.value)
-                                }
+                                onChange={(e) => handleChange("passportNumber", e.target.value)}
                               />
                             </div>
                           </div>
@@ -607,22 +522,13 @@ export default function BookingPage() {
                           <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">
                             Select Room
                           </label>
-                          {/* Fixed: Added min-h-[100px] and border to ensure visibility even when empty */}
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 min-h-[100px] overflow-y-auto custom-scrollbar border border-transparent">
-                            {loadingRooms ? (
-                              <div className="col-span-full flex items-center justify-center h-20">
-                                <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-green-600 mb-4"></div>
-                                <p className="text-sm text-gray-400">
-                                  Loading rooms...
-                                </p>
-                              </div>
-                            ) : rooms.length > 0 ? (
+                            {/* ✅ Updated: Use 'rooms' from props */}
+                            {rooms.length > 0 ? (
                               rooms.map((room: any) => (
                                 <div
                                   key={room.id}
-                                  onClick={() =>
-                                    handleChange("room", room.id.toString())
-                                  }
+                                  onClick={() => handleChange("room", room.id.toString())}
                                   className={`cursor-pointer rounded-xl border-2 p-4 transition-all bg-white ${
                                     formData.room === room.id.toString()
                                       ? "border-[#007326] bg-green-50"
@@ -650,7 +556,6 @@ export default function BookingPage() {
                                 </div>
                               ))
                             ) : (
-                              // Fixed: Added explicit empty state message
                               <div className="col-span-full flex items-center justify-center h-20 border-2 border-dashed border-gray-200 rounded-xl">
                                 <p className="text-sm text-gray-400">
                                   No rooms available.
@@ -667,25 +572,13 @@ export default function BookingPage() {
                               Check-in
                             </label>
                             <DatePicker
-                              selected={
-                                formData.checkInDate
-                                  ? new Date(formData.checkInDate + "T00:00:00")
-                                  : null
-                              }
+                              selected={formData.checkInDate ? new Date(formData.checkInDate + "T00:00:00") : null}
                               onChange={(date) => {
                                 if (date) {
                                   const year = date.getFullYear();
-                                  const month = String(
-                                    date.getMonth() + 1
-                                  ).padStart(2, "0");
-                                  const day = String(date.getDate()).padStart(
-                                    2,
-                                    "0"
-                                  );
-                                  handleChange(
-                                    "checkInDate",
-                                    `${year}-${month}-${day}`
-                                  );
+                                  const month = String(date.getMonth() + 1).padStart(2, "0");
+                                  const day = String(date.getDate()).padStart(2, "0");
+                                  handleChange("checkInDate", `${year}-${month}-${day}`);
                                 } else {
                                   handleChange("checkInDate", "");
                                 }
@@ -701,42 +594,22 @@ export default function BookingPage() {
                               Check-out
                             </label>
                             <DatePicker
-                              selected={
-                                formData.checkOutDate
-                                  ? new Date(
-                                      formData.checkOutDate + "T00:00:00"
-                                    )
-                                  : null
-                              }
+                              selected={formData.checkOutDate ? new Date(formData.checkOutDate + "T00:00:00") : null}
                               onChange={(date) => {
                                 if (date) {
                                   const year = date.getFullYear();
-                                  const month = String(
-                                    date.getMonth() + 1
-                                  ).padStart(2, "0");
-                                  const day = String(date.getDate()).padStart(
-                                    2,
-                                    "0"
-                                  );
+                                  const month = String(date.getMonth() + 1).padStart(2, "0");
+                                  const day = String(date.getDate()).padStart(2, "0");
                                   const selectedDate = `${year}-${month}-${day}`;
 
-                                  // Validate: if same day selected, check times
                                   if (selectedDate === formData.checkInDate) {
-                                    const checkInTime =
-                                      formData.checkInTime || "09:00";
-                                    const checkOutTime =
-                                      formData.checkOutTime || "11:00";
-
+                                    const checkInTime = formData.checkInTime || "09:00";
+                                    const checkOutTime = formData.checkOutTime || "11:00";
                                     if (checkOutTime <= checkInTime) {
-                                      showAlert(
-                                        "Invalid Time Range",
-                                        "Check-out time must be after check-in time on the same day, or select a later date.",
-                                        "warning"
-                                      );
+                                      showAlert("Invalid Time Range", "Check-out time must be after check-in.", "warning");
                                       return;
                                     }
                                   }
-
                                   handleChange("checkOutDate", selectedDate);
                                 } else {
                                   handleChange("checkOutDate", "");
@@ -744,11 +617,7 @@ export default function BookingPage() {
                               }}
                               placeholderText="Select Date"
                               className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#007326] outline-none"
-                              minDate={
-                                formData.checkInDate
-                                  ? new Date(formData.checkInDate + "T00:00:00")
-                                  : new Date()
-                              }
+                              minDate={formData.checkInDate ? new Date(formData.checkInDate + "T00:00:00") : new Date()}
                               filterDate={(date) => !isDateBooked(date)}
                             />
                           </div>
@@ -762,30 +631,12 @@ export default function BookingPage() {
                             </label>
                             <div className="relative">
                               <DatePicker
-                                selected={
-                                  formData.checkInTime
-                                    ? new Date(
-                                        `2000-01-01T${formData.checkInTime}`
-                                      )
-                                    : null
-                                }
-                                onChange={(date) =>
-                                  handleChange(
-                                    "checkInTime",
-                                    date ? date.toTimeString().slice(0, 5) : ""
-                                  )
-                                }
-                                showTimeSelect
-                                showTimeSelectOnly
-                                timeIntervals={15}
-                                timeCaption="Time"
-                                dateFormat="h:mm aa"
+                                selected={formData.checkInTime ? new Date(`2000-01-01T${formData.checkInTime}`) : null}
+                                onChange={(date) => handleChange("checkInTime", date ? date.toTimeString().slice(0, 5) : "")}
+                                showTimeSelect showTimeSelectOnly timeIntervals={15} timeCaption="Time" dateFormat="h:mm aa"
                                 className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#007326] outline-none"
                               />
-                              <Clock
-                                size={16}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-                              />
+                              <Clock size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
                             </div>
                           </div>
                           <div>
@@ -794,155 +645,63 @@ export default function BookingPage() {
                             </label>
                             <div className="relative">
                               <DatePicker
-                                selected={
-                                  formData.checkOutTime
-                                    ? new Date(
-                                        `2000-01-01T${formData.checkOutTime}`
-                                      )
-                                    : null
-                                }
+                                selected={formData.checkOutTime ? new Date(`2000-01-01T${formData.checkOutTime}`) : null}
                                 onChange={(date) => {
                                   if (date) {
-                                    const timeStr = date
-                                      .toTimeString()
-                                      .slice(0, 5);
-
-                                    // Validate: if same day, check-out time must be after check-in time
-                                    if (
-                                      formData.checkInDate ===
-                                      formData.checkOutDate
-                                    ) {
-                                      const checkInTime =
-                                        formData.checkInTime || "09:00";
+                                    const timeStr = date.toTimeString().slice(0, 5);
+                                    if (formData.checkInDate === formData.checkOutDate) {
+                                      const checkInTime = formData.checkInTime || "09:00";
                                       if (timeStr <= checkInTime) {
-                                        showAlert(
-                                          "Invalid Time",
-                                          "Check-out time must be after check-in time on the same day.",
-                                          "warning"
-                                        );
+                                        showAlert("Invalid Time", "Check-out must be after check-in.", "warning");
                                         return;
                                       }
                                     }
-
                                     handleChange("checkOutTime", timeStr);
                                   } else {
                                     handleChange("checkOutTime", "");
                                   }
                                 }}
-                                showTimeSelect
-                                showTimeSelectOnly
-                                timeIntervals={15}
-                                timeCaption="Time"
-                                dateFormat="h:mm aa"
+                                showTimeSelect showTimeSelectOnly timeIntervals={15} timeCaption="Time" dateFormat="h:mm aa"
                                 className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#007326] outline-none"
                               />
-                              <Clock
-                                size={16}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-                              />
+                              <Clock size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
                             </div>
                           </div>
                         </div>
 
                         {/* Add-ons Section */}
                         <div className="pt-4 border-t border-gray-100">
-                          <label className="text-xs font-bold text-gray-500 uppercase mb-3 block">
-                            Extra Services
-                          </label>
-
-                          {/* 1. Meal */}
+                          <label className="text-xs font-bold text-gray-500 uppercase mb-3 block">Extra Services</label>
+                          {/* Meal */}
                           <div className="flex justify-between items-center mb-3 bg-gray-50 p-3 rounded-xl border border-gray-200">
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center">
-                                <Utensils size={16} />
-                              </div>
-                              <span className="font-semibold text-gray-700 text-sm">
-                                Meals?
-                              </span>
+                              <div className="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center"><Utensils size={16} /></div>
+                              <span className="font-semibold text-gray-700 text-sm">Meals?</span>
                             </div>
-                            <input
-                              type="checkbox"
-                              className="w-5 h-5 text-green-600 rounded focus:ring-green-500 cursor-pointer"
-                              checked={formData.meal}
-                              onChange={(e) =>
-                                handleChange("meal", e.target.checked)
-                              }
-                            />
+                            <input type="checkbox" className="w-5 h-5 text-green-600 rounded focus:ring-green-500 cursor-pointer" checked={formData.meal} onChange={(e) => handleChange("meal", e.target.checked)} />
                           </div>
-
-                          {/* 2. Guide */}
+                          {/* Guide */}
                           <div className="flex justify-between items-center mb-3 bg-gray-50 p-3 rounded-xl border border-gray-200">
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
-                                <Map size={16} />
-                              </div>
-                              <span className="font-semibold text-gray-700 text-sm">
-                                Need a Guide?
-                              </span>
+                              <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center"><Map size={16} /></div>
+                              <span className="font-semibold text-gray-700 text-sm">Need a Guide?</span>
                             </div>
-                            <input
-                              type="checkbox"
-                              className="w-5 h-5 text-green-600 rounded focus:ring-green-500 cursor-pointer"
-                              checked={formData.guide}
-                              onChange={(e) =>
-                                handleChange("guide", e.target.checked)
-                              }
-                            />
+                            <input type="checkbox" className="w-5 h-5 text-green-600 rounded focus:ring-green-500 cursor-pointer" checked={formData.guide} onChange={(e) => handleChange("guide", e.target.checked)} />
                           </div>
-
-                          {/* 3. Vehicle */}
+                          {/* Vehicle */}
                           <div className="bg-gray-50 p-3 rounded-xl border border-gray-200">
                             <div className="flex justify-between items-center mb-3">
                               <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center">
-                                  <Car size={16} />
-                                </div>
-                                <span className="font-semibold text-gray-700 text-sm">
-                                  Vehicle Rental?
-                                </span>
+                                <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center"><Car size={16} /></div>
+                                <span className="font-semibold text-gray-700 text-sm">Vehicle Rental?</span>
                               </div>
-                              <input
-                                type="checkbox"
-                                className="w-5 h-5 text-green-600 rounded focus:ring-green-500 cursor-pointer"
-                                checked={formData.vehicleNeeded}
-                                onChange={(e) =>
-                                  handleChange(
-                                    "vehicleNeeded",
-                                    e.target.checked
-                                  )
-                                }
-                              />
+                              <input type="checkbox" className="w-5 h-5 text-green-600 rounded focus:ring-green-500 cursor-pointer" checked={formData.vehicleNeeded} onChange={(e) => handleChange("vehicleNeeded", e.target.checked)} />
                             </div>
-
-                            {/* Vehicle Options (Only if checked) */}
-                            {/* {formData.vehicleNeeded && (
-                                <div className="mt-3 space-y-3 pl-2 border-l-2 border-gray-200 ml-4">
-                                   <div>
-                                      <label className="text-xs font-bold text-gray-500 block mb-1">Vehicle Type</label>
-                                      <select value={formData.vehicleType} onChange={(e) => handleChange("vehicleType", e.target.value)} className="w-full p-2 text-sm border rounded-lg outline-none focus:border-green-500">
-                                         {vehicleOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-                                      </select>
-                                   </div>
-                                   <div className="flex justify-between items-center">
-                                      <span className="text-sm text-gray-600">Need a Driver?</span>
-                                      <div className="flex items-center gap-2">
-                                        <span className="text-xs font-bold text-gray-400">{formData.driver ? "Yes" : "No"}</span>
-                                        <input type="checkbox" className="w-4 h-4" checked={formData.driver} onChange={(e) => handleChange("driver", e.target.checked)} />
-                                      </div>
-                                   </div>
-                                </div>
-                             )} */}
                           </div>
                         </div>
 
                         <div className="flex gap-3 mt-6">
-                          <button
-                            onClick={() => setActiveTab("contact")}
-                            className="w-full py-4 bg-gray-100 text-gray-600 font-bold hover:bg-gray-200 rounded-xl transition cursor-pointer"
-                          >
-                            Back
-                          </button>
-                          {/* Confirm Button removed from here and moved to Summary */}
+                          <button onClick={() => setActiveTab("contact")} className="w-full py-4 bg-gray-100 text-gray-600 font-bold hover:bg-gray-200 rounded-xl transition cursor-pointer">Back</button>
                         </div>
                       </motion.div>
                     )}
@@ -954,58 +713,31 @@ export default function BookingPage() {
             {/* RIGHT SIDE: Sticky Summary */}
             <div className="w-full lg:flex-1 bg-[#003b14] text-white p-6 md:p-8 overflow-hidden relative lg:h-full h-auto flex-shrink-0 order-last">
               <div className="h-full flex flex-col">
-                <h2 className="text-xl md:text-2xl font-serif font-bold border-b border-green-800 pb-4 mb-4">
-                  Your Stay
-                </h2>
-
-                {/* Fixed: Removed overflow-y-auto to stop scrolling */}
+                <h2 className="text-xl md:text-2xl font-serif font-bold border-b border-green-800 pb-4 mb-4">Your Stay</h2>
                 <div className="flex-1 flex flex-col gap-3">
                   {selectedRoom ? (
                     <div className="flex flex-col gap-3 h-full">
-                      {/* Fixed: Reduced image height to h-32 (128px) */}
                       <div className="w-full h-32 bg-green-800 rounded-xl overflow-hidden relative shadow-lg shrink-0">
-                        <img
-                          src={
-                            selectedRoom.image ||
-                            selectedRoom.img1 ||
-                            "/placeholder.png"
-                          }
-                          alt="Room"
-                          className="object-cover w-full h-full"
-                        />
+                        {/* ✅ Use prop data for image */}
+                        <img src={selectedRoom.img1 || "/placeholder.png"} alt="Room" className="object-cover w-full h-full" />
                       </div>
 
-                      {/* Room Title & Capacity */}
                       <div className="shrink-0">
-                        <p className="font-bold text-xl font-serif leading-tight">
-                          {selectedRoom.name}
-                        </p>
-                        <p className="text-xs text-green-300 mt-1">
-                          {selectedRoom.capacity} Guests • {selectedRoom.beds}
-                        </p>
+                        <p className="font-bold text-xl font-serif leading-tight">{selectedRoom.name}</p>
+                        <p className="text-xs text-green-300 mt-1">{selectedRoom.capacity} Guests • {selectedRoom.size}m²</p>
                       </div>
 
-                      {/* Check-In/Out Box - Fixed: Compacted padding (p-3) */}
                       <div className="bg-[#004d1a] rounded-xl p-3 flex justify-between items-center text-sm border border-green-800/50 shadow-inner shrink-0">
                         <div>
-                          <p className="text-green-300 text-[10px] uppercase font-bold tracking-wider">
-                            Check-In
-                          </p>
-                          <p className="font-medium text-base mt-0.5">
-                            {formData.checkInDate || "--"}
-                          </p>
+                          <p className="text-green-300 text-[10px] uppercase font-bold tracking-wider">Check-In</p>
+                          <p className="font-medium text-base mt-0.5">{formData.checkInDate || "--"}</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-green-300 text-[10px] uppercase font-bold tracking-wider">
-                            Check-Out
-                          </p>
-                          <p className="font-medium text-base mt-0.5">
-                            {formData.checkOutDate || "--"}
-                          </p>
+                          <p className="text-green-300 text-[10px] uppercase font-bold tracking-wider">Check-Out</p>
+                          <p className="font-medium text-base mt-0.5">{formData.checkOutDate || "--"}</p>
                         </div>
                       </div>
 
-                      {/* Price Breakdown - Fixed: Compacted spacing */}
                       <div className="space-y-2 pt-2 border-t border-green-800 text-sm mt-auto">
                         <div className="flex justify-between text-green-100/80">
                           <span>Room ({days} nights)</span>
@@ -1021,85 +753,39 @@ export default function BookingPage() {
                           <span>Service Charge (5%)</span>
                           <span>${serviceCharge.toFixed(2)}</span>
                         </div>
-
                         <div className="flex justify-between text-xl font-bold text-white pt-2 border-t border-green-800 mt-1">
                           <span>Total</span>
                           <span>${grandTotal.toFixed(2)}</span>
                         </div>
-
-                        {/* Confirm Button */}
-                        <button
-                          onClick={handleSubmit}
-                          disabled={
-                            isSubmitting ||
-                            !isContactComplete ||
-                            !isBookingComplete
-                          }
-                          className={`w-full mt-4 py-4 font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                            isContactComplete &&
-                            isBookingComplete &&
-                            !isSubmitting
-                              ? "bg-white text-[#003b14] hover:bg-green-50 active:scale-95 cursor-pointer"
-                              : "bg-green-900/50 text-green-200/50 cursor-not-allowed"
-                          }`}
-                        >
-                          {isSubmitting ? "Processing..." : "Confirm Booking"}
-                          <CheckCircle size={18} />
+                        <button onClick={handleSubmit} disabled={isSubmitting || !isContactComplete || !isBookingComplete} className={`w-full mt-4 py-4 font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer ${isContactComplete && isBookingComplete && !isSubmitting ? "bg-white text-[#003b14] hover:bg-green-50 active:scale-95 cursor-pointer" : "bg-green-900/50 text-green-200/50 cursor-not-allowed"}`}>
+                          {isSubmitting ? "Processing..." : "Confirm Booking"} <CheckCircle size={18} />
                         </button>
-
-                        {/* Validation Message */}
                         {(!isContactComplete || !isBookingComplete) && (
-                          <p className="text-center text-[10px] text-red-300 mt-1 font-medium bg-red-900/20 py-1 rounded-lg">
-                            * Please complete all fields.
-                          </p>
+                          <p className="text-center text-[10px] text-red-300 mt-1 font-medium bg-red-900/20 py-1 rounded-lg">* Please complete all fields.</p>
                         )}
                       </div>
                     </div>
                   ) : (
-                    // Empty State
                     <div className="flex flex-col gap-4 animate-fadeIn h-full">
-                      {/* Fixed: Reduced image height to h-40 */}
                       <div className="w-full h-40 bg-green-800 rounded-xl overflow-hidden relative shadow-lg shrink-0">
-                        <img
-                          src={hotelInfo.image}
-                          alt="Cottage"
-                          className="object-cover w-full h-full opacity-90 hover:scale-105 transition-transform duration-700"
-                        />
+                        <img src={hotelInfo.image} alt="Cottage" className="object-cover w-full h-full opacity-90 hover:scale-105 transition-transform duration-700" />
                       </div>
                       <div className="space-y-1">
-                        <h3 className="text-xl font-serif font-bold text-white">
-                          {hotelInfo.name}
-                        </h3>
-                        <div className="flex items-center gap-2 text-green-300 text-xs">
-                          <MapPin size={14} />
-                          <p>{hotelInfo.address}</p>
-                        </div>
-                        <div className="flex items-center gap-2 text-green-300 text-xs">
-                          <Phone size={14} />
-                          <p>{hotelInfo.contact}</p>
-                        </div>
+                        <h3 className="text-xl font-serif font-bold text-white">{hotelInfo.name}</h3>
+                        <div className="flex items-center gap-2 text-green-300 text-xs"><MapPin size={14} /><p>{hotelInfo.address}</p></div>
+                        <div className="flex items-center gap-2 text-green-300 text-xs"><Phone size={14} /><p>{hotelInfo.contact}</p></div>
                       </div>
                       <div className="bg-[#004d1a] p-4 rounded-xl border-l-4 border-green-500">
-                        <p className="text-white/90 italic leading-relaxed text-sm">
-                          "{hotelInfo.promoText}"
-                        </p>
+                        <p className="text-white/90 italic leading-relaxed text-sm">"{hotelInfo.promoText}"</p>
                       </div>
                       <div className="flex items-center justify-center gap-2 text-green-400/60 mt-auto pb-4">
-                        <Info size={16} />
-                        <span className="text-xs uppercase tracking-widest">
-                          Select a room to begin
-                        </span>
+                        <Info size={16} /><span className="text-xs uppercase tracking-widest">Select a room to begin</span>
                       </div>
                     </div>
                   )}
                 </div>
-
-                {/* Footer Notes */}
                 <div className="mt-auto pt-4 border-t border-green-800 flex flex-col gap-1 text-[10px] text-green-300/60">
-                  <div className="flex items-center gap-2">
-                    <CreditCard size={12} />
-                    <p>No payment required today, Pay at property.</p>
-                  </div>
+                  <div className="flex items-center gap-2"><CreditCard size={12} /><p>No payment required today, Pay at property.</p></div>
                   <p>Extra charges will be charged for Extra services.</p>
                 </div>
               </div>
@@ -1108,14 +794,7 @@ export default function BookingPage() {
         </motion.div>
       )}
 
-      <CustomAlert
-        key="custom-alert"
-        isOpen={alert.isOpen}
-        onClose={closeAlert}
-        title={alert.title}
-        message={alert.message}
-        type={alert.type}
-      />
+      <CustomAlert key="custom-alert" isOpen={alert.isOpen} onClose={closeAlert} title={alert.title} message={alert.message} type={alert.type} />
     </AnimatePresence>
   );
 }
