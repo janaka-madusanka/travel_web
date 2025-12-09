@@ -1,86 +1,37 @@
-// app/rooms/page.tsx
-import React from "react";
-import Image from "next/image";
-import RoomList from "@/components/Rooms/RoomList";
-import NewsletterSignup from "@/components/Home/NewsletterSignup/NewsletterSignup";
-import { getRoomsForUI } from "@/lib/getRooms";
+import React from 'react';
+import Image from 'next/image';
+import RoomList from '@/components/Rooms/RoomList';
+//import ResponsiveNav from '@/components/Helper/Navbar/ResponsiveNav'; 
+import NewsletterSignup from '@/components/Home/NewsletterSignup/NewsletterSignup';
 
-// ✅ SEO Metadata for Rooms Page
-export const metadata = {
-  metadataBase: new URL("https://www.sceniccottage.com"), // <- added base URL
-  title: "Best Rooms in Sigiriya | Affordable & Luxury Hotel Rooms | Scenic Cottage",
-  description:
-    "Book the best hotel rooms in Sigiriya & Dambulla. Low budget rooms, luxury rooms, family rooms, AC/non-AC. Close to Sigiriya Rock, Pidurangala & Dambulla Temple.",
-  keywords: [
-    "best rooms in sigiriya",
-    "hotel sigiriya",
-    "hotel dambulla",
-    "cheap hotel sigiriya",
-    "low budget rooms sigiriya",
-    "luxury hotel sigiriya",
-    "best hotel sri lanka",
-    "lowbudget hotel sri lanka",
-    "luxury rooms sri lanka",
-    "sigiriya accommodation",
-    "dambulla accommodation",
-    "family hotel sri lanka",
-    "budget hotel near sigiriya rock",
-    "rooms near sigiriya rock",
-    "pidurangala hotel",
-    "booking affordable hotel sri lanka",
-    "cheap rooms sri lanka",
-    "best resorts sri lanka",
-    "room booking sigiriya",
-    "hotel near sigiriya lion rock",
-    "shangrilla",
-    "cinnamon grand",
-    "booking.com hotel sigiriya",
-    "agoda sigiriya hotels",
-    "sigiriya resort",
-    "best stay sigiriya",
-    "top hotels sri lanka",
-    "hotel deals sri lanka",
-    "rooms for honeymoon sri lanka"
-  ],
-  alternates: {
-    canonical: "/rooms", // <- relative URL works with metadataBase
-  },
-  openGraph: {
-    title: "Best Rooms in Sigiriya | Scenic Cottage",
-    description:
-      "Find top-rated rooms in Sigiriya & Dambulla. Affordable & luxury options available. Book directly for best rates.",
-    url: "/rooms", // <- relative URL
-    images: [
-      {
-        url: "/images/Rooms/IMG_0004.JPG", // <- relative image URL
-        width: 1200,
-        height: 630,
-        alt: "Scenic Cottage Rooms Sigiriya",
-      },
-    ],
-  },
-};
-
-// =================== PAGE COMPONENT ===================
-const RoomsPage = async () => {
-  const rooms = await getRoomsForUI();
-
+const RoomsPage = () => {
   return (
     <div className="overflow-hidden">
-      {/* HERO SECTION */}
+      
+      {/* Navigation */}
+      {/* <ResponsiveNav /> */}
+
+    {/* ============ HERO SECTION ============ */}
+      {/* ✅ FIXED: Changed height to 'h-screen' to take up 100% of the viewport */}
       <div className="relative h-screen flex items-center justify-center">
+        
+        {/* Background Image */}
         <div className="absolute inset-0 -z-10">
           <Image
             src="/images/Rooms/IMG_0004.JPG"
             alt="Rooms Hero Sanctuary"
             fill
-            priority
+            priority // ⚡ Loads immediately
             className="object-cover object-center"
             quality={90}
           />
+          {/* Dark Overlay */}
           <div className="absolute inset-0 bg-black/60"></div>
         </div>
 
+        {/* Hero Text */}
+        {/* Optional: You can remove 'pt-[10vh]' if you want the text perfectly centered in the screen. 
+            I kept it here to ensure it doesn't clash with your top Navbar. */}
         <div className="relative z-10 text-center px-4 max-w-4xl mx-auto pt-[10vh]">
           <p className="text-white/90 text-sm sm:text-base font-bold uppercase tracking-[0.3em] mb-6">
             The Ultimate Escape
@@ -91,7 +42,9 @@ const RoomsPage = async () => {
         </div>
       </div>
 
-      <RoomList initialRooms={rooms} />
+      {/* ============ ROOM LIST SECTION ============ */}
+      <RoomList />
+
       <NewsletterSignup />
     </div>
   );
