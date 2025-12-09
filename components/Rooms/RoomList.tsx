@@ -1,6 +1,6 @@
 // components/Rooms/RoomList.tsx
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import React from "react";
 import RoomCard from "./RoomCard";
 import { BackendRoom } from "@/types/BackendRoom";
@@ -53,7 +53,7 @@ export default function RoomList({ initialRooms }: Props) {
     return true; // Room is available
   };
 
-  const handleCheckAvailability = async () => {
+  const handleCheckAvailability = useCallback(async () => {
     if (!checkIn || !checkOut) {
       setFilteredRooms(initialRooms); // Show all rooms if no dates
       return;
@@ -102,7 +102,8 @@ export default function RoomList({ initialRooms }: Props) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [checkIn, checkOut, initialRooms]);
+
   const showAlert = (
     title: string,
     message: string,
@@ -120,6 +121,75 @@ export default function RoomList({ initialRooms }: Props) {
       setFilteredRooms(initialRooms);
     }
   }, [checkIn, checkOut, initialRooms]);
+
+  // Auto-fill dates from URL params
+useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  const checkInParam = params.get("checkIn");
+  const checkOutParam = params.get("checkOut");
+
+  if (checkInParam && checkOutParam) {
+    // Set both dates first
+    setCheckIn(checkInParam);
+    setCheckOut(checkOutParam);
+
+    // Then trigger search with the URL params directly
+    const searchWithParams = async () => {
+      setIsLoading(true);
+
+      try {
+        const response = await fetch(`/api/bookings/all?from=${checkInParam}`);
+        const data = await response.json();
+
+        if (response.ok) {
+          const { bookingsByRoom } = data;
+
+          const selectedCheckIn = new Date(checkInParam);
+          const selectedCheckOut = new Date(checkOutParam);
+
+          // Filter rooms based on availability
+          const availableRooms = initialRooms.filter((room) => {
+            const roomBookings = bookingsByRoom[room.id] || [];
+
+            // Check availability
+            for (const booking of roomBookings) {
+              const bookedCheckIn = new Date(booking.checkIn);
+              const bookedCheckOut = new Date(booking.checkOut);
+
+              if (
+                selectedCheckIn <= bookedCheckOut &&
+                selectedCheckOut >= bookedCheckIn
+              ) {
+                return false; // Room is not available
+              }
+            }
+            return true; // Room is available
+          });
+
+          setFilteredRooms(availableRooms);
+        } else {
+          console.error("Error fetching bookings:", data.error);
+          showAlert(
+            "Error",
+            "Failed to check availability. Please try again.",
+            "error"
+          );
+        }
+      } catch (error) {
+        console.error("Error checking availability:", error);
+        showAlert(
+          "Error",
+          "Failed to check availability. Please try again.",
+          "error"
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    searchWithParams();
+  }
+}, []);
 
   if (!initialRooms || initialRooms.length === 0) {
     return (
@@ -210,6 +280,8 @@ export default function RoomList({ initialRooms }: Props) {
                 key={room.id}
                 room={room as unknown as BackendRoom}
                 index={index}
+                checkIn={checkIn}
+  checkOut={checkOut}
               />
             ))
           ) : (
