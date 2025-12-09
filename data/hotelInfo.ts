@@ -17,8 +17,8 @@ export interface HotelInfo {
 export const HotelDetails: HotelInfo = {
   name: "The Grand Resort",
   location: "Colombo, Sri Lanka",
-  contact: "+94 768402570",
-  email: "info@grandresort.lk",
+  contact: "+94 740558858",
+  email: "sceniccottagesigiriya@gmail.com",
   image: "/images/Rooms/R5.png",
 
   description:
