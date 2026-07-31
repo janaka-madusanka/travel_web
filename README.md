@@ -25,6 +25,7 @@ docker exec -it travel_nextjs sh
 docker exec -it travel_mysql mysql -u root -p
 
 cd /var/www/test
+sudo nano /etc/nginx/sites-enabled/sceniccottage.com.conf
 
 docker pull mhartvishwajith448/travel-nextjs:latest
 
