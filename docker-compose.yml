@@ -2,8 +2,7 @@ version: "3.9"
 
 services:
   nextjs:
-    image: node:20-bullseye
-    # mhartvishwajith448/travel-nextjs:latest
+    image: mhartvishwajith448/travel-nextjs:latest
     container_name: travel_nextjs
     working_dir: /app
     volumes:
